@@ -5,15 +5,39 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <style>
+      body {
+        margin: 50px;
+        overflow-x: hidden;
+      }
+      #pointer {
+        position: absolute;
+        display: inline-block;
+        width: 0.5px;
+        height: 16px;
+        background: transparent;
+        /* background: red; */
+        border: none;
+      }
+      #pointer:focus {
+        outline: none;
+      }
+    </style>
   </head>
   <body>
-    <div id="range-div" contenteditable>
-      我是添加了contenteditable属性的文本节点文字,咿呀咿呀呦,咿呀咿呀呦,咿呀咿呀呦,咿呀咿呀呦,咿呀咿呀,咿呀咿呀呦
-      <div>2222222222</div>
+    <div id="editor-body">
+      <span
+        >我是添加了contenteditable属性的文本节点文字,咿呀咿呀呦,咿呀咿呀呦,咿呀咿呀呦,咿呀咿呀呦,咿呀咿呀,咿呀咿呀呦</span
+      >
+      <div>DIV</div>
     </div>
     <div>
       <input id="insert-input" type="text" />
     </div>
-    <div onclick="insertText()" class="btn">插入内容</div>
+    <div onclick="insertText(event)" class="btn">
+      <div>插入内容1</div>
+      <span>插入内容2</span>
+      <div>插入内容3</div>
+    </div>
   </body>
 </html>

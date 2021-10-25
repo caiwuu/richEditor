@@ -1,15 +1,13 @@
-import getCursorXY from './getPointPosition'
 // 最后一次的range对象
 var lastRange = null
 // 编辑框dom
-var rangeDivDom = document.querySelector('#editor-body')
+var rangeDivDom = document.querySelector('#range-div')
 // 编辑框点击事件
 rangeDivDom.onclick = function (e) {
   var selection = document.getSelection()
   console.log('selection', selection)
   // 保存最后的range对象
   lastRange = selection.getRangeAt(0)
-  getCursorXY('editor-body', lastRange.endOffset, e)
   console.log('selection', lastRange)
 }
 // 编辑框键盘按键松开事件
@@ -21,7 +19,7 @@ rangeDivDom.onkeyup = function (e) {
   console.log('selection', selection)
 }
 // 插入内容
-window.insertText = function (e) {
+window.insertText = function () {
   var selection = document.getSelection()
   selection.removeAllRanges()
   selection.addRange(lastRange)
@@ -33,6 +31,4 @@ window.insertText = function (e) {
   textNode.insertData(startOffset, insertValue)
   range.setStart(textNode, startOffset + insertValue.length)
   selection.addRange(range)
-
-  getCursorXY('editor-body', 2, e)
 }

@@ -1,13 +1,14 @@
-'use strict';
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack');
-const { merge } = require('webpack-merge');
-const baseConfig = require('./webpack.config.base');
-const path = require('path');
+'use strict'
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const webpack = require('webpack')
+const { merge } = require('webpack-merge')
+const baseConfig = require('./webpack.config.base')
+const path = require('path')
 
 const devConfig = merge(baseConfig, {
   mode: 'development',
   stats: 'none',
+  devtool: 'source-map',
   devServer: {
     static: {
       directory: path.join(__dirname, '../dist'),
@@ -27,5 +28,5 @@ const devConfig = merge(baseConfig, {
       inject: true,
     }),
   ],
-});
-module.exports = devConfig;
+})
+module.exports = devConfig
