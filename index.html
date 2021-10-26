@@ -10,15 +10,6 @@
         margin: 50px;
         overflow-x: hidden;
       }
-      #pointer {
-        position: absolute;
-        display: inline-block;
-        width: 0.5px;
-        height: 16px;
-        background: transparent;
-        /* background: red; */
-        border: none;
-      }
       #pointer:focus {
         outline: none;
       }
@@ -26,18 +17,10 @@
   </head>
   <body>
     <div id="editor-body">
-      <span
-        >我是添加了contenteditable属性的文本节点文字,咿呀咿呀呦,咿呀咿呀呦,咿呀咿呀呦,咿呀咿呀呦,咿呀咿呀,咿呀咿呀呦</span
+      <span uuid="000001"
+        >我是一个DIV元素,<span style="color: blueviolet">我是没有添加contenteditable属性的文本</span>但是我是可编辑的</span
       >
       <div>DIV</div>
-    </div>
-    <div>
-      <input id="insert-input" type="text" />
-    </div>
-    <div onclick="insertText(event)" class="btn">
-      <div>插入内容1</div>
-      <span>插入内容2</span>
-      <div>插入内容3</div>
     </div>
   </body>
 </html>

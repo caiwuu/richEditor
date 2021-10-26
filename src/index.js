@@ -1,38 +1,21 @@
-import getCursorXY from './getPointPosition'
+// 实验性代码，方案验证
+import getCursorXY from './getPointPosition';
+import Pointer from './pointer';
+// 获取输入区域dom 暂时写死一个
+const input = document.querySelector('#editor-body');
+// 创建一个光标pointer
+const pointer = new Pointer();
 // 最后一次的range对象
-var lastRange = null
-// 编辑框dom
-var rangeDivDom = document.querySelector('#editor-body')
-// 编辑框点击事件
-rangeDivDom.onclick = function (e) {
-  var selection = document.getSelection()
-  console.log('selection', selection)
+let lastRange = null;
+// 编辑框点击事件 获取lastRange 再通过shadow input 获取pointer坐标 （px）
+input.onclick = function (e) {
+  var selection = document.getSelection();
+  console.log('selection', selection);
   // 保存最后的range对象
-  lastRange = selection.getRangeAt(0)
-  getCursorXY('editor-body', lastRange.endOffset, e)
-  console.log('selection', lastRange)
-}
-// 编辑框键盘按键松开事件
-rangeDivDom.onkeyup = function (e) {
-  var selection = document.getSelection()
-  console.log('selection', selection)
-  // 保存最后的range对象
-  lastRange = selection.getRangeAt(0)
-  console.log('selection', selection)
-}
-// 插入内容
-window.insertText = function (e) {
-  var selection = document.getSelection()
-  selection.removeAllRanges()
-  selection.addRange(lastRange)
-  var range = selection.getRangeAt(0)
-  console.log(range)
-  var textNode = range.startContainer
-  var startOffset = range.startOffset
-  var insertValue = document.querySelector('#insert-input').value
-  textNode.insertData(startOffset, insertValue)
-  range.setStart(textNode, startOffset + insertValue.length)
-  selection.addRange(range)
+  lastRange = selection.getRangeAt(0);
+  console.log(lastRange);
 
-  getCursorXY('editor-body', 2, e)
-}
+  const { x, y } = getCursorXY(lastRange.endOffset, e);
+  pointer.setPosition(x, y);
+  pointer.focus();
+};
