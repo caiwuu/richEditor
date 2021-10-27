@@ -1,5 +1,5 @@
-const path = require('path'); //调用node.js中的路径
-const WebpackBar = require('webpackbar');
+const path = require('path') //调用node.js中的路径
+const WebpackBar = require('webpackbar')
 module.exports = {
   entry: {
     index: './src/index.js', //需要打包的文件
@@ -9,4 +9,4 @@ module.exports = {
     path: path.resolve(__dirname, '../dist'), //指定生成的文件目录
   },
   plugins: [new WebpackBar()],
-};
+}
