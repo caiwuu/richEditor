@@ -20,7 +20,7 @@ input.onclick = function (e) {
 
 document.onkeydown = grabEvent;
 function grabEvent(event) {
-  var keycode = event.which || event.keyCode;
+  const keycode = event.which || event.keyCode;
   switch (keycode) {
     case 37:
     case 38:
@@ -38,11 +38,18 @@ function grabEvent(event) {
   }
 }
 document.onkeyup = function (event) {
-  pointer.setPosition(historyPointer);
-  const metaPointer = getCursorXY(event);
-  console.log('x', metaPointer.x);
-  pointer.setPosition(metaPointer);
-  historyPointer = metaPointer;
-  // 这里改变了文档的选区
-  pointer.focus();
+  const keycode = event.which || event.keyCode;
+  switch (keycode) {
+    case 37:
+    case 38:
+    case 39:
+    case 40:
+      pointer.setPosition(historyPointer);
+      const metaPointer = getCursorXY(event);
+      console.log('x', metaPointer.x);
+      pointer.setPosition(metaPointer);
+      historyPointer = metaPointer;
+      // 这里改变了文档的选区
+      pointer.focus();
+  }
 };
