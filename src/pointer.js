@@ -8,7 +8,6 @@ export default class Pointer {
     pointer.style.left = 0;
     pointer.style.position = 'absolute';
     pointer.style.width = '0.5px';
-    // pointer.style.height = '16px'
     pointer.style.background = 'transparent';
     // pointer.style.background = 'red';
     pointer.style.border = 'none';
@@ -17,11 +16,12 @@ export default class Pointer {
     this.pointer = pointer;
   }
   setPosition(metaPointer) {
+    const copyStyle = getComputedStyle(metaPointer.container);
     this.pointer.style.top = metaPointer.y + 'px';
     this.pointer.style.left = metaPointer.x + 'px';
-    this.pointer.style.lineHeight = metaPointer.container.offsetHeight + 'px';
-    this.pointer.style.fontSize = metaPointer.container.style.fontSize;
-    this.pointer.style.color = metaPointer.container.style.color;
+    this.pointer.style.lineHeight = computeLineHeightByFs(copyStyle.fontSize);
+    this.pointer.style.fontSize = copyStyle.fontSize;
+    this.pointer.style.color = copyStyle.color;
   }
   focus() {
     this.pointer.focus();
@@ -31,4 +31,9 @@ export default class Pointer {
   //   toDown() {}
   //   toLeft() {}
   //   toRight() {}
+}
+function computeLineHeightByFs(fontSize) {
+  return fontSize.replace(/(.*)(px)+/, function ($0, $1) {
+    return $1 * 1.3 + 'px';
+  });
 }
