@@ -10,14 +10,19 @@
         margin: 50px;
         overflow-x: hidden;
       }
+      #editor-body:focus,
       #pointer:focus {
         outline: none;
       }
     </style>
   </head>
   <body>
-    <div id="editor-body">
-      <span uuid="000001">我是&nbsp;&nbsp;&nbsp;&nbsp;一个DIV元素,<span style="color: blueviolet; font-size: 36px">我是没有添加contenteditable属性的文本</span>但是我是可编辑的</span>
+    <div id="editor-body" contenteditable="true">
+      <span uuid="000001"
+        >我是&nbsp;&nbsp;&nbsp;&nbsp;一个DIV元素,<span style="color: blueviolet; font-size: 36px"
+          >我是没有添加contenteditable属性的文本</span
+        >但是我是可编辑的</span
+      >
       <td>
         <ul>
           <li>111</li>
