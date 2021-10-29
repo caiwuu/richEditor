@@ -4,6 +4,11 @@ import Selection from '../selection';
 export default class Cursor {
   cursor = null;
   selection = null;
+  inputState = {
+    value: '',
+    expect: '',
+    done: true,
+  };
   meta = {
     x: 0,
     y: 0,
@@ -14,8 +19,9 @@ export default class Cursor {
     text: null,
   };
   constructor() {
-    const cursor = document.createElement('input');
-    cursor.id = 'custom-cursor';
+    this.cursor = document.createElement('input');
+    this.initEvent();
+    this.cursor.id = 'custom-cursor';
     const styleObj = {
       top: '-100px',
       left: 0,
@@ -25,24 +31,56 @@ export default class Cursor {
       border: 'none',
       padding: 0,
     };
-    styleSet(cursor, styleObj);
-    document.body.appendChild(cursor);
-    this.cursor = cursor;
+    styleSet(this.cursor, styleObj);
+    document.body.appendChild(this.cursor);
     this.selection = new Selection();
+  }
+  initEvent() {
+    this.cursor.addEventListener('compositionstart', this.handleEvent.bind(this));
+    // this.cursor.addEventListener('compositionupdate', this.handleEvent.bind(this));
+    // this.cursor.addEventListener('compositionend', this.handleEvent.bind(this));
+    this.cursor.addEventListener('input', this.handleEvent.bind(this));
+  }
+  handleEvent(event) {
+    console.log(`--->${event.type}: ${event.data}\n`);
+    if (event.type === this.inputState.expect) {
+      if (event.type === 'input') {
+      }
+    } else {
+    }
+    // 键盘字符输入
+    if (event.type === 'input') {
+      if (this.inputState.done) {
+        this.meta.text.data =
+          this.meta.text.data.slice(0, this.meta.offset) + event.target.value + this.meta.text.data.slice(this.meta.offset);
+        this.setCret(event.target.value.length);
+        this.followSysCret();
+        this.focus();
+      } else {
+        this.inputState.done = false;
+        this.inputState.expect = 'compositionstart';
+        this.inputState.value = event.data;
+      }
+    }
+    if (event.type === 'compositionstart') {
+      this.inputState.done = false;
+      this.inputState.expect = 'input';
+    }
+
+    console.log('value', event.target.value);
+    event.target.value = '';
   }
 
   /**
-   * @param {*} meta {x,y,container}
+   * @param {*} meta
    * @memberof Cursor
    */
-  setPosition(meta) {
-    this.getMeta();
-    let metaPointer = meta || this.meta;
-    const copyStyle = getComputedStyle(metaPointer.container);
+  setPosition(x, y, container) {
+    const copyStyle = getComputedStyle(container);
     const lineHeight = multiplication(copyStyle.fontSize, 1.3);
     const styleObj = {
-      top: metaPointer.y + 'px',
-      left: metaPointer.x + 'px',
+      top: y + 'px',
+      left: x + 'px',
       lineHeight,
       fontSize: copyStyle.fontSize,
       color: copyStyle.color,
@@ -52,14 +90,24 @@ export default class Cursor {
   focus() {
     this.cursor.focus();
   }
+  followSysCret() {
+    this.getMeta();
+    const { x, y, container } = this.meta;
+    this.setPosition(x, y, container);
+  }
+  setCret(relativeOffset) {
+    const { selection, range, text, offset } = this.meta;
+    range.setStart(text, offset + relativeOffset);
+    range.setEnd(text, offset + relativeOffset);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
   getMeta() {
-    console.log(this.selection.selection.rangeCount);
     if (this.selection.selection.rangeCount === 0) {
       return this.meta;
     }
     const range = this.selection.getRange();
     const text = range.endContainer;
-    console.log(range.endContainer.nodeName);
     if (text.nodeName !== '#text') {
       return this.meta;
     }

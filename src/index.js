@@ -4,16 +4,16 @@ import Cursor from './cursor';
 const input = document.querySelector('#editor-body');
 input.setAttribute('contenteditable', true);
 const cursor = new Cursor();
-input.onmouseup = function () {
-  cursor.setPosition();
+input.onclick = function () {
+  cursor.followSysCret();
   cursor.focus();
 };
 document.onkeydown = grabEvent;
 function grabEvent(event) {
   const key = event.key;
   switch (key) {
-    case 'ArrowLeft':
     case 'ArrowUp':
+    case 'ArrowLeft':
     case 'ArrowRight':
     case 'ArrowDown':
     case 'Backspace':
@@ -30,13 +30,13 @@ function grabEvent(event) {
 document.onkeyup = function (event) {
   const key = event.key;
   switch (key) {
-    case 'ArrowLeft':
     case 'ArrowUp':
+    case 'ArrowLeft':
     case 'ArrowRight':
     case 'ArrowDown':
     case 'Backspace':
       // 焦点恢复到 自定义光标上（input）
-      cursor.setPosition();
+      cursor.followSysCret();
       cursor.focus();
   }
 };
