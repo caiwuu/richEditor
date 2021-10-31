@@ -10,17 +10,54 @@
         margin: 50px;
         overflow-x: hidden;
       }
+      #editor-body {
+        caret-color: transparent;
+      }
       #editor-body:focus,
-      #custom-cursor:focus {
+      #custom-input:focus {
         outline: none;
+      }
+      #custom-caret,
+      #custom-input {
+        top: -100px;
+        left: 0;
+        position: absolute;
+        width: 0.5px;
+        background: transparent;
+        border: none;
+        padding: 0;
+      }
+      #custom-measure {
+        display: inline-block;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+      }
+      #custom-input {
+        opacity: 1;
+        caret-color: transparent;
+      }
+      #custom-caret {
+        display: block;
+        animation: caret 1s infinite steps(1, start);
+      }
+      @keyframes caret {
+        0% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
       }
     </style>
   </head>
   <body>
     <div id="editor-body">
       <span uuid="000001"
-        >我是&nbsp;&nbsp;&nbsp;&nbsp;一个DIV元素,<span style="color: blueviolet; font-size: 36px"
-          >我是没有添加contenteditable属性的文本</span
+        >我是&nbsp;&nbsp;&nbsp;&nbsp;一个DIV元素,<span style="color: blueviolet; font-size: 36px">我是没有添加contenteditable而我认为we人微软sdfsdf 士大夫s的是否士大夫saf 手动属性的文本 </span
         >但是我是可编辑的</span
       >
       <p>这是一个段落</p>
@@ -33,5 +70,6 @@
       <p><img src="https://gitee.com/caiwu123/pic/raw/master/image-20211007025134178.png" alt="image-20211007025134178" /></p>
       <div>DIV</div>
     </div>
+    <span style="display: inline-block">1111111</span>
   </body>
 </html>
