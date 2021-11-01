@@ -1,12 +1,13 @@
 import { styleSet } from '../utils/styleOp';
 import { multiplication } from '../utils/pixelsCalc';
 import Selection from '../selection';
-import state from '../state/';
+// import state from '../state/';
 export default class Cursor {
-  input = null;
-  caret = null;
-  measure = null;
+  input = null; // 虚拟输入框
+  caret = null; // 虚拟光标
+  measure = null; // 输入预文本测量器
   selection = null;
+  caretMarker = null; // 系统光标标记
   inputState = {
     value: '',
     isComposing: false,
@@ -24,6 +25,7 @@ export default class Cursor {
     this.input = document.createElement('input');
     this.caret = document.createElement('span');
     this.measure = document.createElement('span');
+    this.caretMarker = document.createElement('span');
     this.initEvent();
     this.input.id = 'custom-input';
     this.caret.id = 'custom-caret';
@@ -40,11 +42,14 @@ export default class Cursor {
     this.input.addEventListener('blur', this.handleEvent.bind(this));
   }
   handleEvent(event) {
-    // console.log(`--->${event.type}: ${event.data}--${event.isComposing}--${event.target.value}\n`);
+    console.log(`--->${event.type}: ${event.data}--${event.isComposing}--${event.target.value}\n`); // &nbsp
+    console.log([this.meta.text]);
     if (event.type === 'input') {
       if (!this.inputState.isComposing && event.data) {
-        this.meta.text.data = this.meta.text.data.slice(0, this.meta.offset) + event.data + this.meta.text.data.slice(this.meta.offset);
-        this.setSysCaret(1);
+        const inputData = event.data === ' ' ? '\u00A0' : event.data;
+        this.meta.text.data = this.meta.text.data.slice(0, this.meta.offset) + inputData + this.meta.text.data.slice(this.meta.offset);
+        console.log(event.data.length);
+        this.setSysCaret(event.data.length);
         this.followSysCaret();
         this.focus();
       } else {
@@ -78,34 +83,34 @@ export default class Cursor {
   setPosition(x, y, container) {
     const copyStyle = getComputedStyle(container);
     const lineHeight = multiplication(copyStyle.fontSize, 1.3);
-    const styleObj = {
+    const inputStyle = {
       top: y + 'px',
       left: x + 'px',
       lineHeight,
       fontSize: copyStyle.fontSize,
     };
-    const styleObj2 = {
+    const caretStyle = {
       top: y + 'px',
       left: x + 'px',
       height: lineHeight,
       fontSize: copyStyle.fontSize,
       background: copyStyle.color,
     };
-    styleSet(this.input, styleObj);
-    styleSet(this.caret, styleObj2);
+    styleSet(this.input, inputStyle);
+    styleSet(this.caret, caretStyle);
   }
   // 设置自定义光标位置
   setCaret(x, y, container) {
     const copyStyle = getComputedStyle(container);
     const lineHeight = multiplication(copyStyle.fontSize, 1.3);
-    const styleObj = {
+    const caretStyle = {
       top: y + 'px',
       left: x + 'px',
       height: lineHeight,
       fontSize: copyStyle.fontSize,
       background: copyStyle.color,
     };
-    styleSet(this.caret, styleObj);
+    styleSet(this.caret, caretStyle);
   }
   //测量中文输入
   setCustomMeasureSty() {
@@ -145,21 +150,21 @@ export default class Cursor {
     if (text.nodeName !== '#text') {
       return this.meta;
     }
-    // 相对于 focusTaget 的偏移量
+
     const offset = range.endOffset;
     this.meta.range = range;
     this.meta.text = text;
     this.meta.offset = offset;
     this.meta.selection = this.selection;
     this.meta.container = range.endContainer.parentNode;
-    const virtualCursor = document.createElement('span');
+    // 测量光标绝对坐标
     const endNode = text.splitText(offset);
     text.parentNode.insertBefore(endNode, text.nextSibling);
-    text.parentNode.insertBefore(virtualCursor, endNode);
-    const { offsetLeft: x, offsetTop: y } = virtualCursor;
+    text.parentNode.insertBefore(this.caretMarker, endNode);
+    const { offsetLeft: x, offsetTop: y } = this.caretMarker;
     this.meta.x = x;
     this.meta.y = y;
-    text.parentNode.removeChild(virtualCursor);
+    text.parentNode.removeChild(this.caretMarker);
     // 修复行首选区丢失的bug
     offset && text.parentNode.normalize();
     return this.meta;
