@@ -22,34 +22,44 @@
         top: -100px;
         left: 0;
         position: absolute;
-        width: 0.5px;
+        width: 2px;
         background: transparent;
         border: none;
         padding: 0;
       }
       #custom-measure {
         display: inline-block;
-        position: absolute;
+        position: fixed;
         left: 0;
-        bottom: 0;
+        bottom: -100px;
+        color: transparent;
       }
       #custom-input {
         opacity: 1;
         caret-color: transparent;
+        color: transparent;
       }
       #custom-caret {
         display: block;
         animation: caret 1s infinite steps(1, start);
       }
-      @keyframes caret {
+      @keyframes static-caret {
         0% {
-          opacity: 0;
-        }
-        50% {
           opacity: 1;
         }
         100% {
+          opacity: 1;
+        }
+      }
+      @keyframes caret {
+        0% {
+          opacity: 1;
+        }
+        50% {
           opacity: 0;
+        }
+        100% {
+          opacity: 1;
         }
       }
     </style>
@@ -57,7 +67,7 @@
   <body>
     <div id="editor-body">
       <span uuid="000001"
-        >我是&nbsp;&nbsp;&nbsp;&nbsp;一个DIV元素,<span style="color: blueviolet; font-size: 36px">我是没有添加contenteditable而我认为we人微软sdfsdf 士大夫s的是否士大夫saf 手动属性的文本 </span
+        >我是&nbsp;&nbsp;&nbsp;&nbsp;一个DIV元素,<span style="color: blueviolet; font-size: 36px">123abc测试文本*!@#$%^&*()_+-</span
         >但是我是可编辑的</span
       >
       <p>这是一个段落</p>
@@ -70,6 +80,6 @@
       <p><img src="https://gitee.com/caiwu123/pic/raw/master/image-20211007025134178.png" alt="image-20211007025134178" /></p>
       <div>DIV</div>
     </div>
-    <span style="display: inline-block">1111111</span>
+    <input type="text" name="" id="" />
   </body>
 </html>
