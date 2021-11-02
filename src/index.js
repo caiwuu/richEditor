@@ -6,20 +6,45 @@ let timmer = null;
 const input = document.querySelector('#editor-body');
 input.setAttribute('contenteditable', true);
 const cursor = new Cursor();
-input.onclick = function () {
+input.onmousedown = function () {
+  state.mouseState = 'down';
+  state.selectState = 'release';
   if (timmer) {
     clearTimeout(timmer);
   }
-  cursor.caret.style.animationName = 'caret-static';
-  cursor.followSysCaret();
-  cursor.focus();
   timmer = setTimeout(() => {
     cursor.caret.style.animationName = 'caret';
   }, 1000);
+  setTimeout(() => {
+    cursor.caret.style.animationName = 'caret-static';
+    cursor.followSysCaret();
+  });
+};
+input.onmousemove = function () {
+  if (state.mouseState === 'down') {
+    state.selectState = 'selecting';
+  }
+};
+input.onmouseup = function () {
+  state.mouseState = 'up';
+  if (state.selectState === 'selecting') {
+    state.selectState = 'selected';
+  }
+  setTimeout(() => {
+    cursor.caret.style.animationName = 'caret-static';
+    cursor.followSysCaret();
+    if (state.selectState !== 'selected') {
+      input.setAttribute('contenteditable', true);
+      cursor.focus();
+    } else {
+      input.setAttribute('contenteditable', false);
+    }
+  });
 };
 document.onkeydown = grabEvent;
 function grabEvent(event) {
-  state.keyboard = event.key;
+  input.setAttribute('contenteditable', true);
+  cursor.focus();
   const key = event.key;
   cursor.caret.style.animationName = 'caret-static';
   switch (key) {

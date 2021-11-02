@@ -1,6 +1,7 @@
 import { styleSet } from '../utils/styleOp';
 import { multiplication } from '../utils/pixelsCalc';
 import Selection from '../selection';
+const Document = window.iframe.contentDocument;
 // import state from '../state/';
 export default class Cursor {
   isShow = true;
@@ -40,10 +41,9 @@ export default class Cursor {
     this.input.addEventListener('compositionstart', this.handleEvent.bind(this));
     this.input.addEventListener('compositionend', this.handleEvent.bind(this));
     this.input.addEventListener('input', this.handleEvent.bind(this));
-    // this.input.addEventListener('blur', this.handleEvent.bind(this));
+    this.input.addEventListener('blur', this.handleEvent.bind(this));
   }
   handleEvent(event) {
-    console.log(this.meta.range.startOffset, this.meta.range.endOffset);
     console.log(`--->${event.type}: ${event.data}--${event.isComposing}--${event.target.value}\n`); // &nbsp
     // console.log([this.meta.text]);
     if (event.type === 'input') {
