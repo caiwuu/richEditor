@@ -2,17 +2,21 @@ import { styleSet } from '../utils/styleOp';
 import { multiplication } from '../utils/pixelsCalc';
 import Selection from '../selection';
 // import state from '../state/';
+const editorContainer = document.getElementById('editor-container');
 export default class Cursor {
-  isShow = true;
+  root = null;
+  isShow = true; // 显示状态
   input = null; // 虚拟输入框
   caret = null; // 虚拟光标
   measure = null; // 输入预文本测量器
-  selection = null;
+  selection = null; // 光标所处选区
   caretMarker = null; // 系统光标标记
   inputState = {
+    // 输入框状态
     value: '',
     isComposing: false,
   };
+  // 光标元信息
   meta = {
     x: 0,
     y: 0,
@@ -22,7 +26,9 @@ export default class Cursor {
     container: null,
     text: null,
   };
-  constructor() {
+  constructor(state, root) {
+    this.root = root;
+    this.state = state;
     this.input = document.createElement('input');
     this.caret = document.createElement('span');
     this.measure = document.createElement('span');
@@ -31,9 +37,9 @@ export default class Cursor {
     this.input.id = 'custom-input';
     this.caret.id = 'custom-caret';
     this.measure.id = 'custom-measure';
-    document.body.appendChild(this.input);
-    document.body.appendChild(this.caret);
-    document.body.appendChild(this.measure);
+    this.root.appendChild(this.input);
+    this.root.appendChild(this.caret);
+    this.root.appendChild(this.measure);
     this.selection = new Selection();
   }
   initEvent() {
@@ -43,17 +49,25 @@ export default class Cursor {
     // this.input.addEventListener('blur', this.handleEvent.bind(this));
   }
   handleEvent(event) {
-    console.log(this.meta.range.startOffset, this.meta.range.endOffset);
     console.log(`--->${event.type}: ${event.data}--${event.isComposing}--${event.target.value}\n`); // &nbsp
+    // selected时释放掉一次输入，因为不能调起中文输入法 折中做法 暂时没有好的解决办法
+    if (this.state.selectState === 'selected') {
+      console.log(this.meta.range.startOffset, this.meta.range.endOffset);
+      this.state.selectState = 'release';
+      return;
+    }
     // console.log([this.meta.text]);
     if (event.type === 'input') {
+      // 键盘字符输入
       if (!this.inputState.isComposing && event.data) {
         const inputData = event.data === ' ' ? '\u00A0' : event.data;
         this.meta.text.data = this.meta.text.data.slice(0, this.meta.offset) + inputData + this.meta.text.data.slice(this.meta.offset);
         this.setSysCaret(event.data.length);
         this.followSysCaret();
+        console.log(this.meta.range.startOffset, this.meta.range.endOffset);
         this.focus();
       } else {
+        // 聚合输入， 非键盘输入，如中文输入
         const preValLen = this.inputState.value.length;
         this.inputState.value = event.data || '';
         this.measure.innerText = this.inputState.value;
@@ -63,13 +77,16 @@ export default class Cursor {
           this.meta.text.data.slice(0, this.meta.offset) + this.inputState.value + this.meta.text.data.slice(this.meta.offset + preValLen);
       }
     } else if (event.type === 'compositionstart') {
+      // 开始聚合输入
       this.inputState.isComposing = true;
     } else if (event.type === 'compositionend') {
+      // 结束聚合输入
       this.inputState.isComposing = false;
       // 等待dom更新
       setTimeout(() => {
         this.setSysCaret(this.inputState.value.length);
         this.followSysCaret();
+        console.log(this.meta.range.startOffset, this.meta.range.endOffset);
         this.focus();
         event.target.value = '';
         this.inputState.value = '';
@@ -82,6 +99,7 @@ export default class Cursor {
    * @memberof Cursor
    */
   setPosition(x, y, container) {
+    console.log(container);
     const copyStyle = getComputedStyle(container);
     const lineHeight = multiplication(copyStyle.fontSize, 1.3);
     const inputStyle = {
@@ -133,6 +151,7 @@ export default class Cursor {
   followSysCaret() {
     this.getMeta();
     const { x, y, container } = this.meta;
+    console.log(x, y, container);
     this.setPosition(x, y, container);
   }
   // 设置系统光标，设置系统光标位置会使模拟输入框失焦
@@ -143,14 +162,16 @@ export default class Cursor {
     selection.removeAllRanges();
     selection.addRange(range);
   }
-  getMeta() {
+  getMeta(parentNode = null) {
     if (this.selection.selection.rangeCount === 0) {
       return this.meta;
     }
     const range = this.selection.getRange();
     // console.log(range);
     const text = range.endContainer;
-    if (text.nodeName !== '#text') {
+    console.log(text.nodeName);
+    if (text.nodeName !== '#text' && text.nodeName !== 'P') {
+      console.log('isreturn');
       return this.meta;
     }
 
@@ -160,14 +181,32 @@ export default class Cursor {
     this.meta.offset = offset;
     this.meta.selection = this.selection;
     this.meta.container = range.endContainer.parentNode;
-    // 测量光标绝对坐标
-    const endNode = text.splitText(offset);
-    text.parentNode.insertBefore(endNode, text.nextSibling);
-    text.parentNode.insertBefore(this.caretMarker, endNode);
+    // 测量光标绝对坐标 TODO P
+    if (text.nodeName === 'P' || text.nodeName === 'DIV') {
+      const textNode = document.createTextNode('');
+      text.insertBefore(this.caretMarker, text.childNodes[0]);
+      text.insertBefore(textNode, this.caretMarker);
+      const { selection, range } = this.meta;
+      range.setStart(textNode, 0);
+      range.setEnd(textNode, 0);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      this.getMeta(parentNode);
+    } else {
+      const endNode = text.splitText(offset);
+      text.parentNode.insertBefore(endNode, text.nextSibling);
+      text.parentNode.insertBefore(this.caretMarker, endNode);
+    }
+
     const { offsetLeft: x, offsetTop: y } = this.caretMarker;
     this.meta.x = x;
     this.meta.y = y;
-    text.parentNode.removeChild(this.caretMarker);
+    console.log([this.caretMarker]);
+    if (parentNode) {
+      parentNode.removeChild(this.caretMarker);
+    } else {
+      text.parentNode.removeChild(this.caretMarker);
+    }
     // 修复行首选区丢失的bug
     offset && text.parentNode.normalize();
     return this.meta;
