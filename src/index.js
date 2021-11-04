@@ -1,31 +1,36 @@
-// 实验性代码，方案验证
 import Cursor from './cursor';
-// import state from './state/';
-// const editorContainer = document.getElementById('editor-container');
-// let timmer = null;
-// // 获取输入区域
-// // const input = document.querySelector('#editor-body');
-// // 创建dom
-
+import VNode from './vnode';
+import action from './actions';
 class Editor {
+  vnode = null;
   cursor = null;
   state = { mouseState: 'up', selecting: false, selectState: 'release' };
   timmer = null;
   root = null;
   editorBody = null;
   constructor(id) {
+    this.vnode = new VNode();
     this.root = document.getElementById(id);
-    this.cursor = new Cursor(this.state, this.root);
+    this.cursor = new Cursor(this);
     this.initEditorBody();
     this.addListeners();
   }
   initEditorBody() {
-    this.editorBody = document.createElement('div');
-    this.editorBody.setAttribute('contenteditable', true);
-    const p = document.createElement('p');
-    p.appendChild(document.createElement('br'));
-    this.editorBody.appendChild(p);
-    this.editorBody.id = 'editor-body';
+    this.editorBody = this.vnode.init({
+      tag: 'div',
+      childrens: [
+        {
+          tag: 'p',
+          childrens: [
+            {
+              tag: 'br',
+            },
+          ],
+          style: { color: 'red' },
+        },
+      ],
+      attr: { id: 'editor-body', contenteditable: true },
+    });
     this.root.appendChild(this.editorBody);
   }
   addListeners() {
@@ -36,6 +41,15 @@ class Editor {
     this.editorBody.addEventListener('mouseup', this.handMouseup.bind(this));
     document.addEventListener('keydown', this.handGolobalKeydown.bind(this));
     document.addEventListener('keyup', this.handGolobalKeyup.bind(this));
+  }
+  destroy() {
+    window.removeEventListener('mousedown', this.handGolobalMouseDown.bind(this));
+    window.removeEventListener('blur', this.handGolobalBlur.bind(this));
+    this.editorBody.removeEventListener('mousedown', this.handMousedown.bind(this));
+    this.editorBody.removeEventListener('mousemove', this.handMousemove.bind(this));
+    this.editorBody.removeEventListener('mouseup', this.handMouseup.bind(this));
+    document.removeEventListener('keydown', this.handGolobalKeydown.bind(this));
+    document.removeEventListener('keyup', this.handGolobalKeyup.bind(this));
   }
   handGolobalMouseDown() {
     setTimeout(() => {
@@ -93,7 +107,6 @@ class Editor {
     }, 1000);
     setTimeout(() => {
       this.cursor.caret.style.animationName = 'caret-static';
-      console.log(111111);
       this.cursor.followSysCaret();
     });
   }
@@ -118,101 +131,8 @@ class Editor {
         this.editorBody.setAttribute('contenteditable', false);
       }
     });
+    // action 测试
+    action.emit('test');
   }
 }
-
-// const input = document.createElement('div');
-// const p = document.createElement('p');
-// p.appendChild(document.createElement('br'));
-// input.appendChild(p);
-// input.id = 'editor-body';
-// editorContainer.appendChild(input);
-// // 事件监听
-// window.onmousedown = (e) => {
-//   setTimeout(() => {
-//     if (!editorContainer.contains(document.activeElement)) {
-//       cursor.hidden();
-//     }
-//   });
-// };
-// window.onblur = () => {
-//   cursor.hidden();
-// };
-// input.setAttribute('contenteditable', true);
-// const cursor = new Cursor();
-// input.onmousedown = function () {
-//   cursor.show();
-//   state.mouseState = 'down';
-//   state.selectState = 'release';
-//   if (timmer) {
-//     clearTimeout(timmer);
-//   }
-//   timmer = setTimeout(() => {
-//     cursor.caret.style.animationName = 'caret';
-//   }, 1000);
-//   setTimeout(() => {
-//     cursor.caret.style.animationName = 'caret-static';
-//     cursor.followSysCaret();
-//   });
-// };
-// input.onmousemove = function () {
-//   if (state.mouseState === 'down') {
-//     state.selectState = 'selecting';
-//     cursor.hidden();
-//   }
-// };
-// input.onmouseup = function () {
-//   state.mouseState = 'up';
-//   if (state.selectState === 'selecting') {
-//     state.selectState = 'selected';
-//   }
-//   setTimeout(() => {
-//     cursor.caret.style.animationName = 'caret-static';
-//     cursor.followSysCaret();
-//     if (state.selectState !== 'selected') {
-//       input.setAttribute('contenteditable', true);
-//       cursor.focus();
-//     } else {
-//       input.setAttribute('contenteditable', false);
-//     }
-//   });
-// };
-// document.onkeydown = grabEvent;
-// function grabEvent(event) {
-//   if (state.selectState === 'selected') {
-//     input.setAttribute('contenteditable', true);
-//     cursor.focus();
-//   }
-//   const key = event.key;
-//   cursor.caret.style.animationName = 'caret-static';
-//   switch (key) {
-//     case 'ArrowUp':
-//     case 'ArrowLeft':
-//     case 'ArrowRight':
-//     case 'ArrowDown':
-//       // case 'Backspace':
-//       if (document.activeElement.id === 'custom-input') {
-//         // 焦点恢复到内容区域以便于使用光标系统
-//         const { selection, range, text, offset } = cursor.meta;
-//         range.setStart(text, offset);
-//         range.setEnd(text, offset);
-//         selection.removeAllRanges();
-//         selection.addRange(range);
-//         setTimeout(() => {
-//           cursor.followSysCaret();
-//           cursor.focus();
-//         });
-//       }
-//   }
-// }
-// document.onkeyup = function (event) {
-//   // const key = event.key;
-//   if (timmer) {
-//     clearTimeout(timmer);
-//   }
-//   timmer = setTimeout(() => {
-//     cursor.caret.style.animationName = 'caret';
-//   }, 1000);
-// };
-
 new Editor('editor-container');
