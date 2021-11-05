@@ -2,9 +2,9 @@ import Cursor from './cursor';
 import VNode from './vnode';
 import action from './actions';
 class Editor {
+  mouseStats = 'up';
   vnode = null;
   cursor = null;
-  state = { mouseState: 'up', selecting: false, selectState: 'release' };
   timmer = null;
   root = null;
   editorBody = null;
@@ -22,11 +22,14 @@ class Editor {
         {
           tag: 'p',
           childrens: [
+            { tag: 'text', context: '普通文字' },
             {
-              tag: 'br',
+              tag: 'span',
+              childrens: [{ tag: 'text', context: '加了样式的文字' }],
+              style: { color: 'red', fontSize: '36px' },
             },
           ],
-          style: { color: 'red' },
+          style: { color: '#888' },
         },
       ],
       attr: { id: 'editor-body', contenteditable: true },
@@ -54,21 +57,27 @@ class Editor {
   handGolobalMouseDown() {
     setTimeout(() => {
       if (!this.root.contains(document.activeElement)) {
+        console.log('handGolobalMouseDown');
         this.cursor.hidden();
       }
     });
   }
   handGolobalBlur() {
+    console.log('handGolobalBlur');
     this.cursor.hidden();
   }
   handGolobalKeydown(event) {
-    if (this.state.selectState === 'selected') {
+    if (!this.cursor.meta.range.collapsed) {
       this.editorBody.setAttribute('contenteditable', true);
       this.cursor.focus();
     }
     const key = event.key;
     this.cursor.caret.style.animationName = 'caret-static';
+    console.log(key);
     switch (key) {
+      case 'Backspace':
+      case 'Enter':
+        event.preventDefault();
       case 'ArrowUp':
       case 'ArrowLeft':
       case 'ArrowRight':
@@ -96,9 +105,9 @@ class Editor {
     }, 1000);
   }
   handMousedown() {
+    this.mouseStats = 'down';
+    this.cursor.removeAllRanges();
     this.cursor.show();
-    this.state.mouseState = 'down';
-    this.state.selectState = 'release';
     if (this.timmer) {
       clearTimeout(this.timmer);
     }
@@ -108,26 +117,25 @@ class Editor {
     setTimeout(() => {
       this.cursor.caret.style.animationName = 'caret-static';
       this.cursor.followSysCaret();
+      console.log(1);
     });
   }
   handMousemove() {
-    if (this.state.mouseState === 'down') {
-      this.state.selectState = 'selecting';
+    if (this.mouseStats === 'down') {
       this.cursor.hidden();
     }
   }
   handMouseup() {
-    this.state.mouseState = 'up';
-    if (this.state.selectState === 'selecting') {
-      this.state.selectState = 'selected';
-    }
+    this.mouseStats = 'up';
     setTimeout(() => {
       this.cursor.caret.style.animationName = 'caret-static';
       this.cursor.followSysCaret();
-      if (this.state.selectState !== 'selected') {
+      console.log(this.cursor.meta.range.collapsed);
+      if (this.cursor.meta.range.collapsed) {
         this.editorBody.setAttribute('contenteditable', true);
         this.cursor.focus();
       } else {
+        this.cursor.hidden();
         this.editorBody.setAttribute('contenteditable', false);
       }
     });

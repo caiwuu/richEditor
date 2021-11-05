@@ -44,14 +44,13 @@ export default class Cursor {
     this.input.addEventListener('compositionstart', this.handleEvent.bind(this));
     this.input.addEventListener('compositionend', this.handleEvent.bind(this));
     this.input.addEventListener('input', this.handleEvent.bind(this));
-    // this.input.addEventListener('blur', this.handleEvent.bind(this));
   }
   handleEvent(event) {
     console.log(`--->${event.type}: ${event.data}--${event.isComposing}--${event.target.value}\n`);
+    console.log(this.meta.range);
     // selected时释放掉一次输入，因为不能调起中文输入法 折中做法 暂时没有好的解决办法
-    if (this.vm.state.selectState === 'selected') {
+    if (!this.meta.range.collapsed) {
       console.log(this.meta.range.startOffset, this.meta.range.endOffset);
-      this.vm.state.selectState = 'release';
       return;
     }
     if (event.type === 'input') {
@@ -63,6 +62,7 @@ export default class Cursor {
         this.followSysCaret();
         console.log(this.meta.range.startOffset, this.meta.range.endOffset);
         this.focus();
+        console.log(this.meta.range);
       } else {
         // 聚合输入， 非键盘输入，如中文输入
         const preValLen = this.inputState.value.length;
@@ -202,5 +202,8 @@ export default class Cursor {
   hidden() {
     this.caret.style.display = 'none';
     this.isShow = false;
+  }
+  removeAllRanges() {
+    this.selection && this.selection.removeAllRanges();
   }
 }
