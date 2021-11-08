@@ -1,5 +1,5 @@
 import { styleSet, attrSet } from '../utils/domOp';
-function createVnode(vnode, parent = null) {
+function createVnode(vnode, parent) {
   if (!vnode.tag) throw 'arguments vnode.tag is required';
   let dom = null;
   vnode.parent = parent;
@@ -7,10 +7,9 @@ function createVnode(vnode, parent = null) {
     dom = document.createElement(vnode.tag);
     dom.model = vnode;
     vnode.dom = dom;
-    vnode.childrens &&
-      vnode.childrens.forEach((element) => {
-        dom.appendChild(createVnode(element, vnode));
-      });
+    vnode.childrens.forEach((element) => {
+      dom.appendChild(createVnode(element, vnode));
+    });
   } else {
     dom = vnode.tag === 'text' ? document.createTextNode(vnode.context) : document.createElement(vnode.tag);
     dom.model = vnode;
@@ -21,7 +20,6 @@ function createVnode(vnode, parent = null) {
   return dom;
 }
 
-export { createVnode };
 export default class VNode {
   VNodeTree;
   init(vnode) {

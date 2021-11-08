@@ -31,10 +31,6 @@ class Editor {
           ],
           style: { color: '#888' },
         },
-        {
-          tag: 'ul',
-          childrens: [{ tag: 'li', childrens: [{ tag: 'text', context: '123' }] }],
-        },
       ],
       attr: { id: 'editor-body', contenteditable: true },
     });
@@ -77,21 +73,20 @@ class Editor {
     }
     const key = event.key;
     this.cursor.caret.style.animationName = 'caret-static';
-    // console.log(key);
+    console.log(key);
     switch (key) {
       case 'Backspace':
       case 'Enter':
         event.preventDefault();
-        action.emit('del', this);
       case 'ArrowUp':
       case 'ArrowLeft':
       case 'ArrowRight':
       case 'ArrowDown':
         if (document.activeElement.id === 'custom-input') {
           // 焦点恢复到内容区域以便于使用光标系统
-          const { selection, range, end } = this.cursor.meta;
-          range.setStart(range.endContainer, end);
-          range.setEnd(range.endContainer, end);
+          const { selection, range, text, offset } = this.cursor.meta;
+          range.setStart(text, offset);
+          range.setEnd(text, offset);
           selection.removeAllRanges();
           selection.addRange(range);
           setTimeout(() => {

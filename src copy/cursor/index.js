@@ -19,9 +19,11 @@ export default class Cursor {
   meta = {
     x: 0,
     y: 0,
-    start: 0,
-    end: 0,
+    offset: 0,
     range: null,
+    selection: null,
+    container: null,
+    text: null,
   };
   constructor(vm) {
     this.vm = vm;
@@ -50,15 +52,14 @@ export default class Cursor {
     if (!this.meta.range.collapsed) {
       console.log(this.meta.range.startOffset, this.meta.range.endOffset);
       this.meta.range.collapse(true);
-      this.followSysCaret();
+      this.getMeta();
       console.log(this.meta.range.endOffset);
     } else if (event.type === 'input') {
       console.log(this.inputState.isComposing);
       // 键盘字符输入
       if (!this.inputState.isComposing && event.data) {
         const inputData = event.data === ' ' ? '\u00A0' : event.data;
-        this.meta.range.endContainer.data =
-          this.meta.range.endContainer.data.slice(0, this.meta.end) + inputData + this.meta.range.endContainer.data.slice(this.meta.end);
+        this.meta.text.data = this.meta.text.data.slice(0, this.meta.offset) + inputData + this.meta.text.data.slice(this.meta.offset);
         this.setSysCaret(event.data.length);
         this.followSysCaret();
         console.log(this.meta.range.startOffset, this.meta.range.endOffset);
@@ -70,12 +71,10 @@ export default class Cursor {
         this.inputState.value = event.data || '';
         this.measure.innerText = this.inputState.value;
         this.setCustomMeasureSty();
-        this.setCaret(this.meta.x + this.measure.offsetWidth, this.meta.y, this.meta.range.endContainer.parentNode);
+        this.setCaret(this.meta.x + this.measure.offsetWidth, this.meta.y, this.meta.container);
         console.log('===========');
-        this.meta.range.endContainer.data =
-          this.meta.range.endContainer.data.slice(0, this.meta.end) +
-          this.inputState.value +
-          this.meta.range.endContainer.data.slice(this.meta.end + preValLen);
+        this.meta.text.data =
+          this.meta.text.data.slice(0, this.meta.offset) + this.inputState.value + this.meta.text.data.slice(this.meta.offset + preValLen);
       }
     } else if (event.type === 'compositionstart') {
       // 开始聚合输入
@@ -94,9 +93,9 @@ export default class Cursor {
       });
     }
   }
-  setPosition(x, y, parentNode) {
-    if (!parentNode) return;
-    const copyStyle = getComputedStyle(parentNode);
+  setPosition(x, y, container) {
+    if (!container) return;
+    const copyStyle = getComputedStyle(container);
     const lineHeight = multiplication(copyStyle.fontSize, 1.3);
     const inputStyle = {
       top: y + 'px',
@@ -115,8 +114,8 @@ export default class Cursor {
     styleSet(this.caret, caretStyle);
   }
   // 设置自定义光标位置
-  setCaret(x, y, parentNode) {
-    const copyStyle = getComputedStyle(parentNode);
+  setCaret(x, y, container) {
+    const copyStyle = getComputedStyle(container);
     const lineHeight = multiplication(copyStyle.fontSize, 1.3);
     const caretStyle = {
       top: y + 'px',
@@ -129,8 +128,8 @@ export default class Cursor {
   }
   //测量中文输入
   setCustomMeasureSty() {
-    const parentNode = this.meta.range.endContainer.parentNode;
-    const copyStyle = getComputedStyle(parentNode);
+    const { container } = this.meta;
+    const copyStyle = getComputedStyle(container);
     const lineHeight = multiplication(copyStyle.fontSize, 1.3);
     const styleObj = {
       height: lineHeight,
@@ -146,14 +145,14 @@ export default class Cursor {
   // 自定义光标跟随系统光标
   followSysCaret() {
     this.getMeta();
-    const { x, y, range } = this.meta;
-    this.setPosition(x, y, range.endContainer.parentNode);
+    const { x, y, container } = this.meta;
+    this.setPosition(x, y, container);
   }
   // 设置系统光标，设置系统光标位置会使模拟输入框失焦
   setSysCaret(relativeOffset) {
-    const { selection, range, end } = this.meta;
-    range.setStart(range.endContainer, end + relativeOffset);
-    range.setEnd(range.endContainer, end + relativeOffset);
+    const { selection, range, text, offset } = this.meta;
+    range.setStart(text, offset + relativeOffset);
+    range.setEnd(text, offset + relativeOffset);
     selection.removeAllRanges();
     selection.addRange(range);
   }
@@ -162,51 +161,42 @@ export default class Cursor {
       return this.meta;
     }
     const range = this.selection.getRange();
-    const endContainer = range.endContainer;
-    // if (endContainer.nodeName !== '#text' && endContainer.nodeName !== 'P' && endContainer.nodeName !== 'DIV') {
-    if (endContainer.nodeName !== '#text' && endContainer.nodeName !== 'P') {
+    const text = range.endContainer;
+    // if (text.nodeName !== '#text' && text.nodeName !== 'P' && text.nodeName !== 'DIV') {
+    if (text.nodeName === 'IMAGE') {
       return this.meta;
     }
-
-    const end = range.endOffset;
+    console.log(range);
+    const offset = range.endOffset;
     this.meta.range = range;
-    this.meta.end = end;
-    this.meta.start = range.startOffset;
+    this.meta.text = text;
+    this.meta.offset = offset;
     this.meta.selection = this.selection;
+    this.meta.container = range.endContainer.parentNode;
     // 测量光标绝对坐标
-    // if (endContainer.nodeName === 'P' || endContainer.nodeName === 'DIV') {
-    // if (endContainer.nodeName === 'P' || endContainer.nodeName === 'DIV') {
-    //   const textNode = document.createTextNode('');
-    //   endContainer.insertBefore(this.caretMarker, endContainer.childNodes[0]);
-    //   endContainer.insertBefore(textNode, this.caretMarker);
-    //   const { selection, range } = this.meta;
-    //   range.setStart(textNode, 0);
-    //   range.setEnd(textNode, 0);
-    //   selection.removeAllRanges();
-    //   selection.addRange(range);
-    //   this.getMeta();
-    //   return;
-    if (endContainer.nodeName !== '#text') {
-      if (endContainer.hasChildNodes()) {
-        range.setStart(endContainer.childNodes[0], 0);
-        range.setEnd(endContainer.childNodes[0], 0);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        this.getMeta();
-        return;
-      }
+    // if (text.nodeName === 'P' || text.nodeName === 'DIV') {
+    if (text.nodeName === 'P' || text.nodeName === 'DIV') {
+      const textNode = document.createTextNode('');
+      text.insertBefore(this.caretMarker, text.childNodes[0]);
+      text.insertBefore(textNode, this.caretMarker);
+      const { selection, range } = this.meta;
+      range.setStart(textNode, 0);
+      range.setEnd(textNode, 0);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      this.getMeta();
+      return;
     } else {
-      const endNode = endContainer.splitText(end);
-      endContainer.parentNode.insertBefore(endNode, endContainer.nextSibling);
-      endContainer.parentNode.insertBefore(this.caretMarker, endNode);
+      const endNode = text.splitText(offset);
+      text.parentNode.insertBefore(endNode, text.nextSibling);
+      text.parentNode.insertBefore(this.caretMarker, endNode);
     }
     const { offsetLeft: x, offsetTop: y } = this.caretMarker;
     this.meta.x = x;
     this.meta.y = y;
-    endContainer.parentNode.removeChild(this.caretMarker);
+    text.parentNode.removeChild(this.caretMarker);
     // 修复行首选区丢失的bug
-    end && endContainer.parentNode.normalize();
-    console.log(this.meta);
+    offset && text.parentNode.normalize();
   }
   show() {
     this.caret.style.display = 'inline-block';
