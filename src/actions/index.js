@@ -12,7 +12,8 @@ const actions = {
     // MVC
     console.log(range.endContainer.parentNode);
     let orgText = range.endContainer.model.context;
-    orgText = orgText.slice(0, end - 1) + orgText.slice(end);
+    // orgText = orgText.slice(0, end - 1) + orgText.slice(end);
+    orgText = orgText.slice(0, end - 1);
     range.endContainer.model.context = orgText;
     const dom = createVnode(range.endContainer.model);
     range.endContainer.parentNode.replaceChild(dom, range.endContainer);

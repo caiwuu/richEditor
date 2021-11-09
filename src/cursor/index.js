@@ -59,7 +59,7 @@ export default class Cursor {
         const inputData = event.data === ' ' ? '\u00A0' : event.data;
         this.meta.range.endContainer.data =
           this.meta.range.endContainer.data.slice(0, this.meta.end) + inputData + this.meta.range.endContainer.data.slice(this.meta.end);
-        this.setSysCaret(event.data.length);
+        this.setSysCaretByOffset(event.data.length);
         this.followSysCaret();
         console.log(this.meta.range.startOffset, this.meta.range.endOffset);
         this.focus();
@@ -85,7 +85,7 @@ export default class Cursor {
       this.inputState.isComposing = false;
       // 等待dom更新
       setTimeout(() => {
-        this.setSysCaret(this.inputState.value.length);
+        this.setSysCaretByOffset(this.inputState.value.length);
         this.followSysCaret();
         console.log(this.meta.range.startOffset, this.meta.range.endOffset);
         this.focus();
@@ -150,7 +150,7 @@ export default class Cursor {
     this.setPosition(x, y, range.endContainer.parentNode);
   }
   // 设置系统光标，设置系统光标位置会使模拟输入框失焦
-  setSysCaret(relativeOffset) {
+  setSysCaretByOffset(relativeOffset) {
     const { selection, range, end } = this.meta;
     range.setStart(range.endContainer, end + relativeOffset);
     range.setEnd(range.endContainer, end + relativeOffset);
@@ -203,7 +203,7 @@ export default class Cursor {
     const { offsetLeft: x, offsetTop: y } = this.caretMarker;
     this.meta.x = x;
     this.meta.y = y;
-    endContainer.parentNode.removeChild(this.caretMarker);
+    // endContainer.parentNode.removeChild(this.caretMarker);
     // 修复行首选区丢失的bug
     end && endContainer.parentNode.normalize();
     console.log(this.meta);
