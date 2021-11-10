@@ -2,6 +2,7 @@ import mitt from 'mitt';
 import { createVnode } from '../vnode';
 const actions = {
   test: (e) => console.log('foo', e),
+  // 删除操作
   del: (vm) => {
     const { range, end, selection } = vm.cursor.meta;
     // 直接操作
@@ -12,17 +13,32 @@ const actions = {
     // MVC
     console.log(range.endContainer.parentNode);
     let orgText = range.endContainer.model.context;
-    // orgText = orgText.slice(0, end - 1) + orgText.slice(end);
-    orgText = orgText.slice(0, end - 1);
+    orgText = orgText.slice(0, end - 1) + orgText.slice(end);
     range.endContainer.model.context = orgText;
     const dom = createVnode(range.endContainer.model);
     range.endContainer.parentNode.replaceChild(dom, range.endContainer);
-
     range.setStart(dom, end - 1);
     range.setEnd(dom, end - 1);
     selection.removeAllRanges();
     selection.addRange(range);
 
+    vm.cursor.followSysCaret();
+    vm.cursor.focus();
+  },
+  // 输入
+  input: ({ vm, inputData }) => {
+    console.log(typeof inputData);
+    const { range, end, selection } = vm.cursor.meta;
+    console.log(range.endContainer.model.position);
+    let orgText = range.endContainer.model.context;
+    orgText = orgText.slice(0, end) + inputData + orgText.slice(end);
+    range.endContainer.model.context = orgText;
+    const dom = createVnode(range.endContainer.model);
+    range.endContainer.parentNode.replaceChild(dom, range.endContainer);
+    range.setStart(dom, end + inputData.length);
+    range.setEnd(dom, end + inputData.length);
+    selection.removeAllRanges();
+    selection.addRange(range);
     vm.cursor.followSysCaret();
     vm.cursor.focus();
   },

@@ -1,29 +1,24 @@
 data = {
-  tag: 'p',
-  dom: null,
-  parent: null,
+  tag: 'div',
   childrens: [
     {
-      tag: 'text',
-      context: 'hello',
-      dom: null,
-      parent: null,
-    },
-    {
-      tag: 'span',
+      tag: 'p',
       childrens: [
+        { tag: 'text', context: '普通文字' },
         {
-          tag: 'text',
-          context: 'word',
-          dom: null,
-          parent: null,
+          tag: 'span',
+          childrens: [{ tag: 'text', context: '加了样式的文字' }],
+          style: { color: 'red', fontSize: '36px' },
         },
       ],
-      dom: null,
-      parent: null,
-      style: 'color:red',
+      style: { color: '#888' },
+    },
+    {
+      tag: 'ul',
+      childrens: [{ tag: 'li', childrens: [{ tag: 'text', context: '123' }] }],
     },
   ],
+  attr: { id: 'editor-body', contenteditable: true },
 };
 
 function createDom(data, parent) {

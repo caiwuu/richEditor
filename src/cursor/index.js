@@ -1,6 +1,7 @@
 import { styleSet } from '../utils/domOp';
 import { multiplication } from '../utils/pixelsCalc';
 import Selection from '../selection';
+import action from '../actions';
 export default class Cursor {
   vm = null;
   root = null;
@@ -57,13 +58,8 @@ export default class Cursor {
       // 键盘字符输入
       if (!this.inputState.isComposing && event.data) {
         const inputData = event.data === ' ' ? '\u00A0' : event.data;
-        this.meta.range.endContainer.data =
-          this.meta.range.endContainer.data.slice(0, this.meta.end) + inputData + this.meta.range.endContainer.data.slice(this.meta.end);
-        this.setSysCaretByOffset(event.data.length);
-        this.followSysCaret();
-        console.log(this.meta.range.startOffset, this.meta.range.endOffset);
-        this.focus();
-        console.log(this.meta.range);
+        // mvc
+        action.emit('input', { vm: this.vm, inputData });
       } else {
         // 聚合输入， 非键盘输入，如中文输入
         const preValLen = this.inputState.value.length;
@@ -85,7 +81,7 @@ export default class Cursor {
       this.inputState.isComposing = false;
       // 等待dom更新
       setTimeout(() => {
-        this.setSysCaretByOffset(this.inputState.value.length);
+        this.setSysCaret(this.inputState.value.length);
         this.followSysCaret();
         console.log(this.meta.range.startOffset, this.meta.range.endOffset);
         this.focus();
@@ -150,10 +146,11 @@ export default class Cursor {
     this.setPosition(x, y, range.endContainer.parentNode);
   }
   // 设置系统光标，设置系统光标位置会使模拟输入框失焦
-  setSysCaretByOffset(relativeOffset) {
+  setSysCaret(offset, relative = true) {
     const { selection, range, end } = this.meta;
-    range.setStart(range.endContainer, end + relativeOffset);
-    range.setEnd(range.endContainer, end + relativeOffset);
+    const newOffset = relative ? end + offset : offset;
+    range.setStart(range.endContainer, newOffset);
+    range.setEnd(range.endContainer, newOffset);
     selection.removeAllRanges();
     selection.addRange(range);
   }
@@ -203,7 +200,7 @@ export default class Cursor {
     const { offsetLeft: x, offsetTop: y } = this.caretMarker;
     this.meta.x = x;
     this.meta.y = y;
-    // endContainer.parentNode.removeChild(this.caretMarker);
+    endContainer.parentNode.removeChild(this.caretMarker);
     // 修复行首选区丢失的bug
     end && endContainer.parentNode.normalize();
     console.log(this.meta);

@@ -1,15 +1,16 @@
 import { styleSet, attrSet } from '../utils/domOp';
-function createVnode(vnode, parent = null) {
+function createVnode(vnode, parent = null, position = 0) {
   if (!vnode.tag) throw 'arguments vnode.tag is required';
   let dom = null;
   vnode.parent = parent;
+  vnode.position = parent ? parent.position + '-' + position : position;
   if (vnode.tag !== 'text' && vnode.tag !== 'br') {
     dom = document.createElement(vnode.tag);
     dom.model = vnode;
     vnode.dom = dom;
     vnode.childrens &&
-      vnode.childrens.forEach((element) => {
-        dom.appendChild(createVnode(element, vnode));
+      vnode.childrens.forEach((element, index) => {
+        dom.appendChild(createVnode(element, vnode, index));
       });
   } else {
     dom = vnode.tag === 'text' ? document.createTextNode(vnode.context) : document.createElement(vnode.tag);
