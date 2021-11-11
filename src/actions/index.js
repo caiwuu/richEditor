@@ -31,6 +31,7 @@ const actions = {
     const { range, end, selection } = vm.cursor.meta;
     console.log(range.endContainer.model.position);
     let orgText = range.endContainer.model.context;
+    console.log(orgText);
     orgText = orgText.slice(0, end) + inputData + orgText.slice(end);
     range.endContainer.model.context = orgText;
     const dom = createVnode(range.endContainer.model);
