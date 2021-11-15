@@ -13,6 +13,7 @@ const actions = {
     // MVC
     console.log(range.endContainer.parentNode);
     let orgText = range.endContainer.model.context;
+    console.log(orgText, end);
     orgText = orgText.slice(0, end - 1) + orgText.slice(end);
     range.endContainer.model.context = orgText;
     const dom = createVnode(range.endContainer.model);

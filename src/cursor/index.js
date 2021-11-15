@@ -64,10 +64,12 @@ export default class Cursor {
         // 聚合输入， 非键盘输入，如中文输入
         const preValLen = this.inputState.value.length;
         this.inputState.value = event.data || '';
-        this.measure.innerText = this.inputState.value;
+        // this.measure.innerText = this.inputState.value;
+        console.log(this.meta.range.endContainer.data);
         this.meta.range.endContainer.data = this.meta.range.endContainer.data.slice(0, this.meta.end) + this.inputState.value;
         const { offsetLeft: x, offsetTop: y } = this.caretMarker;
         this.setCaret(x, y, this.meta.range.endContainer.parentNode);
+        console.log(this.meta.range.endContainer.data);
       }
     } else if (event.type === 'compositionstart') {
       // 开始聚合输入
@@ -80,6 +82,8 @@ export default class Cursor {
       // 结束聚合输入
       this.inputState.isComposing = false;
       this.caretMarker.remove();
+      this.meta.end && this.meta.range.endContainer.parentNode.normalize();
+      action.emit('input', { vm: this.vm, inputData: event.data });
       // 修复行首选区丢失的bug
       // end && endContainer.parentNode.normalize();
       // 等待dom更新
