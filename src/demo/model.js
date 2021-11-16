@@ -19,26 +19,26 @@ data = {
     },
   ],
   attr: { id: 'editor-body', contenteditable: true },
-};
-
-function createDom(data, parent) {
-  let dom = null;
-  data.parent = parent;
-  if (data.tag !== 'text') {
-    dom = document.createElement(data.tag);
-    dom.model = data;
-    data.dom = dom;
-    data.childrens.forEach((element) => {
-      dom.appendChild(createDom(element, data));
-    });
-  } else {
-    dom = document.createTextNode(data.context);
-    dom.model = data;
-    data.dom = dom;
-  }
-  return dom;
 }
 
-let d = createDom(data);
-d.childNodes[0].model.context = 'ggggg';
-console.log(data);
+function createDom(data, parent) {
+  let dom = null
+  data.parent = parent
+  if (data.tag !== 'text') {
+    dom = document.createElement(data.tag)
+    dom.vnode = data
+    data.dom = dom
+    data.childrens.forEach((element) => {
+      dom.appendChild(createDom(element, data))
+    })
+  } else {
+    dom = document.createTextNode(data.context)
+    dom.vnode = data
+    data.dom = dom
+  }
+  return dom
+}
+
+let d = createDom(data)
+d.childNodes[0].vnode.context = 'ggggg'
+console.log(data)
