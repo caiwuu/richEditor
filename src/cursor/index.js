@@ -8,7 +8,6 @@ export default class Cursor {
   isShow = true; // 显示状态
   input = null; // 虚拟输入框
   caret = null; // 虚拟光标
-  measure = null; // 输入预文本测量器
   selection = null; // 光标所处选区
   caretMarker = null; // 系统光标标记
   inputState = {
@@ -28,15 +27,12 @@ export default class Cursor {
     this.vm = vm;
     this.input = document.createElement('input');
     this.caret = document.createElement('span');
-    this.measure = document.createElement('span');
     this.caretMarker = document.createElement('span');
     this.initEvent();
     this.input.id = 'custom-input';
     this.caret.id = 'custom-caret';
-    this.measure.id = 'custom-measure';
     this.vm.root.appendChild(this.input);
     this.vm.root.appendChild(this.caret);
-    this.vm.root.appendChild(this.measure);
     this.selection = new Selection();
   }
   initEvent() {
@@ -54,45 +50,33 @@ export default class Cursor {
       this.followSysCaret();
       console.log(this.meta.range.endOffset);
     } else if (event.type === 'input') {
-      console.log(this.inputState.isComposing);
       // 键盘字符输入
       if (!this.inputState.isComposing && event.data) {
         const inputData = event.data === ' ' ? '\u00A0' : event.data;
         // mvc
         action.emit('input', { vm: this.vm, inputData });
       } else {
-        // 聚合输入， 非键盘输入，如中文输入
-        const preValLen = this.inputState.value.length;
+        // 聚合输入， 非键盘输入，如中文输入，ui变化但不会同步model
         this.inputState.value = event.data || '';
-        // this.measure.innerText = this.inputState.value;
-        console.log(this.meta.range.endContainer.data);
         this.meta.range.endContainer.data = this.meta.range.endContainer.data.slice(0, this.meta.end) + this.inputState.value;
         const { offsetLeft: x, offsetTop: y } = this.caretMarker;
         this.setCaret(x, y, this.meta.range.endContainer.parentNode);
-        console.log(this.meta.range.endContainer.data);
       }
     } else if (event.type === 'compositionstart') {
-      // 开始聚合输入
+      // 开始聚合输入 插入光标标记dom
       this.inputState.isComposing = true;
       const endContainer = this.meta.range.endContainer;
       const endNode = endContainer.splitText(this.meta.end);
       endContainer.parentNode.insertBefore(endNode, endContainer.nextSibling);
       endContainer.parentNode.insertBefore(this.caretMarker, endNode);
     } else if (event.type === 'compositionend') {
-      // 结束聚合输入
+      // 结束聚合输入 删除光标标记dom，执行输入同步model
       this.inputState.isComposing = false;
       this.caretMarker.remove();
       this.meta.end && this.meta.range.endContainer.parentNode.normalize();
       action.emit('input', { vm: this.vm, inputData: event.data });
-      // 修复行首选区丢失的bug
-      // end && endContainer.parentNode.normalize();
       // 等待dom更新
       setTimeout(() => {
-        // action.emit('input', { vm: this.vm, inputData: this.inputState.value });
-        // this.setSysCaret(this.inputState.value.length);
-        // this.followSysCaret();
-        // console.log(this.meta.range.startOffset, this.meta.range.endOffset);
-        // this.focus();
         event.target.value = '';
         this.inputState.value = '';
       });
@@ -130,17 +114,6 @@ export default class Cursor {
       background: copyStyle.color,
     };
     styleSet(this.caret, caretStyle);
-  }
-  //测量中文输入
-  setCustomMeasureSty() {
-    const parentNode = this.meta.range.endContainer.parentNode;
-    const copyStyle = getComputedStyle(parentNode);
-    const lineHeight = multiplication(copyStyle.fontSize, 1.3);
-    const styleObj = {
-      height: lineHeight,
-      fontSize: copyStyle.fontSize,
-    };
-    styleSet(this.measure, styleObj);
   }
   // 聚焦到模拟输入
   focus() {
@@ -211,7 +184,6 @@ export default class Cursor {
     endContainer.parentNode.removeChild(this.caretMarker);
     // 修复行首选区丢失的bug
     end && endContainer.parentNode.normalize();
-    console.log(this.meta);
   }
   show() {
     this.caret.style.display = 'inline-block';
