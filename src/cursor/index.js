@@ -1,5 +1,5 @@
-import { styleSet } from '../utils/domOp'
-import { multiplication } from '../utils/pixelsCalc'
+import { styleSet } from '../utils/index'
+import { multiplication } from '../utils/index'
 import Selection from '../selection'
 import action from '../actions'
 export default class Cursor {
@@ -42,7 +42,7 @@ export default class Cursor {
   }
   handleEvent(event) {
     console.log(`--->${event.type}: ${event.data}--${event.isComposing}--${event.target.value}\n`)
-    console.log(this.meta.range)
+    // console.log(this.meta.range);
     // selected时释放掉一次输入，因为不能调起中文输入法 折中做法 暂时没有好的解决办法
     if (!this.meta.range.collapsed) {
       console.log(this.meta.range.startOffset, this.meta.range.endOffset)
@@ -151,19 +151,6 @@ export default class Cursor {
     this.meta.end = end
     this.meta.start = range.startOffset
     this.meta.selection = this.selection
-    // 测量光标绝对坐标
-    // if (endContainer.nodeName === 'P' || endContainer.nodeName === 'DIV') {
-    // if (endContainer.nodeName === 'P' || endContainer.nodeName === 'DIV') {
-    //   const textNode = document.createTextNode('');
-    //   endContainer.insertBefore(this.caretMarker, endContainer.childNodes[0]);
-    //   endContainer.insertBefore(textNode, this.caretMarker);
-    //   const { selection, range } = this.meta;
-    //   range.setStart(textNode, 0);
-    //   range.setEnd(textNode, 0);
-    //   selection.removeAllRanges();
-    //   selection.addRange(range);
-    //   this.getMeta();
-    //   return;
     if (endContainer.nodeName !== '#text') {
       if (endContainer.hasChildNodes()) {
         range.setStart(endContainer.childNodes[0], 0)
