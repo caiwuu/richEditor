@@ -37,7 +37,8 @@ export default class VNode {
   }
   update(vnode) {
     this.VNodeTree = vnode
-    this.dom = createVnode(vnode, null)
+    const dom = createVnode(vnode, null)
     this.mount(this.rootId)
+    document.getElementById(this.rootId).replaceChild(dom, this.dom)
   }
 }

@@ -1,9 +1,7 @@
 import { createVnode } from '../vnode'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function'
-    ? item instanceof HTMLElement
-    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 export function compare(l, r) {
@@ -88,6 +86,7 @@ export function multiplication(pxVal, times) {
 export function updateNode(vnode) {
   const oldDom = vnode.dom
   const dom = renderDom(vnode)
+  console.log(dom.vnode)
   vnode.parent.dom.replaceChild(dom, oldDom)
 }
 // 重新设置选区
@@ -99,6 +98,7 @@ export function setRange(vm, startcontainer, start, endcontainer, end) {
   range.setEnd(endcontainer, end)
   selection.removeAllRanges()
   selection.addRange(range)
+  console.log('setRange')
   vm.cursor.followSysCaret()
   vm.cursor.focus()
 }
@@ -114,7 +114,7 @@ export function preLeafNode(vnode) {
 // 获取右叶子
 function getLeafR(vnode) {
   if (vnode.childrens && vnode.childrens.length !== 0) {
-    return getLeaf(vnode.childrens[vnode.childrens.length - 1])
+    return getLeafR(vnode.childrens[vnode.childrens.length - 1])
   } else {
     return vnode
   }

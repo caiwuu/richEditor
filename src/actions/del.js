@@ -1,32 +1,39 @@
 import { renderDom, delVnode, updateNode, setRange, preLeafNode } from '../utils/index'
 export default function del(vm) {
   const { range, end, start } = vm.cursor.meta
+  console.log([range.endContainer])
   let orgText = range.endContainer.vnode.context
   // 非选区删除
   if (range.collapsed) {
     orgText = orgText.slice(0, end - 1) + orgText.slice(end)
     if (end === 0) {
+      console.log('eeeeeeee')
       // 当前节点被全删除
+      const prevVnode = preLeafNode(range.endContainer.vnode)
       if (orgText === '') {
         const shouldUpdateNode = delVnode(range.endContainer.vnode)
-        updateNode(shouldUpdateNode)
-      } else {
-        const prevVnode = preLeafNode(range.endContainer.vnode)
-        console.log(prevVnode)
-        // 去上一个节点中删除
+        console.log(shouldUpdateNode)
+        if (shouldUpdateNode.parent) {
+          updateNode(shouldUpdateNode)
+        } else {
+          vm.vnode.update(shouldUpdateNode)
+        }
       }
+      setRange(vm, prevVnode.dom, prevVnode.dom.wholeText.length)
+      console.log(prevVnode.dom)
+      // del(vm)
     } else {
       range.endContainer.vnode.context = orgText
       const dom = renderDom(range.endContainer.vnode)
-      range.endContainer.parentNode.replaceChild(dom, range.endContainer)
-      setRange(vm, dom, end - 1)
+      // range.endContainer.parentNode.replaceChild(dom, range.endContainer)
+      setRange(vm, range.endContainer, end - 1)
+      console.log([range.endContainer.parentNode])
     }
   } else {
     orgText = orgText.slice(0, start) + orgText.slice(end)
     range.endContainer.vnode.context = orgText
     const dom = renderDom(range.endContainer.vnode)
     range.endContainer.parentNode.replaceChild(dom, range.endContainer)
-    console.log(start, end)
     setRange(vm, dom, start)
   }
 }

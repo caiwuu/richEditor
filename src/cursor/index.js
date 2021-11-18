@@ -122,6 +122,7 @@ export default class Cursor {
   }
   // 自定义光标跟随系统光标
   followSysCaret() {
+    // console.trace()
     this.getMeta()
     const { x, y, range } = this.meta
     this.setPosition(x, y, range.endContainer.parentNode)
@@ -162,14 +163,18 @@ export default class Cursor {
       }
     } else {
       const endNode = endContainer.splitText(end)
+      console.log(endNode, endContainer, endContainer.nextSibling)
+      console.log(endContainer.parentNode.childNodes)
       endContainer.parentNode.insertBefore(endNode, endContainer.nextSibling)
       endContainer.parentNode.insertBefore(this.caretMarker, endNode)
     }
     const { offsetLeft: x, offsetTop: y } = this.caretMarker
     this.meta.x = x
     this.meta.y = y
-    endContainer.parentNode.removeChild(this.caretMarker)
+    // endContainer.parentNode.removeChild(this.caretMarker)
+    this.caretMarker.remove()
     // 修复行首选区丢失的bug
+    console.log('normalize', end)
     end && endContainer.parentNode.normalize()
   }
   show() {
