@@ -1,5 +1,5 @@
 import { styleSet, attrSet } from '../utils/index'
-function createVnode(vnode, parent = null, position = 0) {
+function createVnode(vnode, parent = null, position = '0') {
   if (!vnode.tag) throw 'arguments vnode.tag is required'
   let dom = null
   vnode.parent = parent

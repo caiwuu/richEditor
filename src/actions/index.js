@@ -1,5 +1,5 @@
 import mitt from 'mitt'
-import { createVnode } from '../vnode'
+import { updateNode, setRange } from '../utils'
 import del from './del'
 const actions = {
   test: (e) => console.log('foo', e),
@@ -7,18 +7,12 @@ const actions = {
   del: del,
   // 输入
   input: ({ vm, inputData }) => {
-    const { range, end, selection } = vm.cursor.meta
+    const { range, end } = vm.cursor.meta
     let orgText = range.endContainer.vnode.context
     orgText = orgText.slice(0, end) + inputData + orgText.slice(end)
     range.endContainer.vnode.context = orgText
-    const dom = createVnode(range.endContainer.vnode)
-    range.endContainer.parentNode.replaceChild(dom, range.endContainer)
-    range.setStart(dom, end + inputData.length)
-    range.setEnd(dom, end + inputData.length)
-    selection.removeAllRanges()
-    selection.addRange(range)
-    vm.cursor.followSysCaret()
-    vm.cursor.focus()
+    const dom = updateNode(range.endContainer.vnode)
+    setRange(vm, dom, end + inputData.length)
   },
 }
 

@@ -51,6 +51,7 @@ export default class Cursor {
       console.log(this.meta.range.endOffset)
     } else if (event.type === 'input') {
       // 键盘字符输入
+      console.log('键盘字符输入')
       if (!this.inputState.isComposing && event.data) {
         const inputData = event.data === ' ' ? '\u00A0' : event.data
         // mvc
@@ -73,7 +74,13 @@ export default class Cursor {
       // 结束聚合输入 删除光标标记dom，执行输入同步vnode
       this.inputState.isComposing = false
       this.caretMarker.remove()
-      this.meta.end && this.meta.range.endContainer.parentNode.normalize()
+      if (!this.meta.range.end) {
+        this.meta.range.endContainer.data = this.meta.range.endContainer.nextSibling.data
+        this.meta.range.endContainer.nextSibling.data = ''
+      } else {
+        this.meta.range.endContainer.parentNode.normalize()
+      }
+
       action.emit('input', { vm: this.vm, inputData: event.data })
       // 等待dom更新
       setTimeout(() => {
@@ -163,19 +170,23 @@ export default class Cursor {
       }
     } else {
       const endNode = endContainer.splitText(end)
-      console.log(endNode, endContainer, endContainer.nextSibling)
-      console.log(endContainer.parentNode.childNodes)
-      endContainer.parentNode.insertBefore(endNode, endContainer.nextSibling)
       endContainer.parentNode.insertBefore(this.caretMarker, endNode)
     }
     const { offsetLeft: x, offsetTop: y } = this.caretMarker
     this.meta.x = x
     this.meta.y = y
-    // endContainer.parentNode.removeChild(this.caretMarker)
     this.caretMarker.remove()
-    // 修复行首选区丢失的bug
-    console.log('normalize', end)
-    end && endContainer.parentNode.normalize()
+    // normalize 非空合并内容到首节点，而空节点会直接删除，我们需要始终保持首节点的引用，故end为0时交互数据
+    // 在首节点内容为空时，首位都是空节点，用normalize会全删，故只需手动删除首节点后一个节点即可
+    if (!end) {
+      range.endContainer.data = range.endContainer.nextSibling.data
+      range.endContainer.nextSibling.data = ''
+    }
+    if (!this.meta.range.endContainer.vnode.context) {
+      range.endContainer.nextSibling.remove()
+    } else {
+      endContainer.parentNode.normalize()
+    }
   }
   show() {
     this.caret.style.display = 'inline-block'

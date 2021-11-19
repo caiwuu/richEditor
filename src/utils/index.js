@@ -1,7 +1,9 @@
 import { createVnode } from '../vnode'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function'
+    ? item instanceof HTMLElement
+    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 export function compare(l, r) {
@@ -86,8 +88,8 @@ export function multiplication(pxVal, times) {
 export function updateNode(vnode) {
   const oldDom = vnode.dom
   const dom = renderDom(vnode)
-  console.log(dom.vnode)
   vnode.parent.dom.replaceChild(dom, oldDom)
+  return dom
 }
 // 重新设置选区
 export function setRange(vm, startcontainer, start, endcontainer, end) {
@@ -104,6 +106,7 @@ export function setRange(vm, startcontainer, start, endcontainer, end) {
 }
 // 获取前一个叶子节点
 export function preLeafNode(vnode) {
+  console.log(vnode)
   const index = vnode.position.charAt(vnode.position.length - 1)
   if (vnode.parent.childrens.length !== 1 && index !== 0) {
     return getLeafR(vnode.dom.previousSibling.vnode)
