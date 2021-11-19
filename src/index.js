@@ -75,7 +75,10 @@ class Editor {
     switch (key) {
       case 'Backspace':
         event.preventDefault()
-        action.emit('del', this)
+        if (!this.cursor.inputState.isComposing) {
+          console.log('caiwu')
+          action.emit('del', this)
+        }
         break
       case 'Enter':
         event.preventDefault()
