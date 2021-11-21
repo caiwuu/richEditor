@@ -39,18 +39,18 @@ class Editor {
   addListeners() {
     window.addEventListener('mousedown', this.handGolobalMouseDown.bind(this))
     window.addEventListener('blur', this.handGolobalBlur.bind(this))
-    this.editorBody.addEventListener('mousedown', this.handMousedown.bind(this))
-    this.editorBody.addEventListener('mousemove', this.handMousemove.bind(this))
-    this.editorBody.addEventListener('mouseup', this.handMouseup.bind(this))
+    this.root.addEventListener('mousedown', this.handMousedown.bind(this))
+    this.root.addEventListener('mousemove', this.handMousemove.bind(this))
+    this.root.addEventListener('mouseup', this.handMouseup.bind(this))
     document.addEventListener('keydown', this.handGolobalKeydown.bind(this))
     document.addEventListener('keyup', this.handGolobalKeyup.bind(this))
   }
   destroy() {
     window.removeEventListener('mousedown', this.handGolobalMouseDown.bind(this))
     window.removeEventListener('blur', this.handGolobalBlur.bind(this))
-    this.editorBody.removeEventListener('mousedown', this.handMousedown.bind(this))
-    this.editorBody.removeEventListener('mousemove', this.handMousemove.bind(this))
-    this.editorBody.removeEventListener('mouseup', this.handMouseup.bind(this))
+    this.root.removeEventListener('mousedown', this.handMousedown.bind(this))
+    this.root.removeEventListener('mousemove', this.handMousemove.bind(this))
+    this.root.removeEventListener('mouseup', this.handMouseup.bind(this))
     document.removeEventListener('keydown', this.handGolobalKeydown.bind(this))
     document.removeEventListener('keyup', this.handGolobalKeyup.bind(this))
   }

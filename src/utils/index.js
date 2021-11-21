@@ -1,9 +1,8 @@
 import { createVnode } from '../vnode'
+import { inlineTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function'
-    ? item instanceof HTMLElement
-    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 export function compare(l, r) {
@@ -64,7 +63,7 @@ export function delVnode(vnode) {
     return parent
   }
 }
-// 重拍vnode 更新position
+// 重排vnode 更新position
 export function reArrangement(parent) {
   if (parent.childrens) {
     parent.childrens.forEach((item, index) => {
@@ -105,20 +104,22 @@ export function setRange(vm, startcontainer, start, endcontainer, end) {
   vm.cursor.focus()
 }
 // 获取前一个叶子节点
-export function preLeafNode(vnode) {
-  console.log(vnode)
+export function preLeafNode(vnode, layer) {
+  if (!layer || !blockTag.includes(layer.tag)) {
+    layer = vnode
+  }
   const index = vnode.position.charAt(vnode.position.length - 1)
   if (vnode.parent.childrens.length !== 1 && index !== 0) {
-    return getLeafR(vnode.dom.previousSibling.vnode)
+    return getLeafR(vnode.dom.previousSibling.vnode, layer)
   } else {
-    return preLeafNode(vnode.parent)
+    return preLeafNode(vnode.parent, layer)
   }
 }
 // 获取右叶子
-function getLeafR(vnode) {
+function getLeafR(vnode, layer) {
   if (vnode.childrens && vnode.childrens.length !== 0) {
-    return getLeafR(vnode.childrens[vnode.childrens.length - 1])
+    return getLeafR(vnode.childrens[vnode.childrens.length - 1], layer)
   } else {
-    return vnode
+    return { vnode, layer }
   }
 }

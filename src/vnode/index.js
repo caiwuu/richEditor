@@ -24,21 +24,24 @@ function createVnode(vnode, parent = null, position = '0') {
 
 export { createVnode }
 export default class VNode {
-  VNodeTree
+  vnode
   dom
   rootId
   constructor(vnode) {
-    this.VNodeTree = vnode
+    this.vnode = vnode
     this.dom = createVnode(vnode, null)
   }
   mount(id) {
     this.rootId = id
-    return document.getElementById(id).appendChild(this.dom)
+    const parent = document.getElementById(id)
+    this.vnode.parent = { dom: parent }
+    return parent.appendChild(this.dom)
   }
   update(vnode) {
-    this.VNodeTree = vnode
+    this.vnode = vnode
     const dom = createVnode(vnode, null)
-    this.mount(this.rootId)
+    const parent = document.getElementById(this.rootId)
+    this.vnode.parent = { dom: parent }
     document.getElementById(this.rootId).replaceChild(dom, this.dom)
   }
 }
