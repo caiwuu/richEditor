@@ -149,4 +149,4 @@ class Editor {
     action.emit('test')
   }
 }
-new Editor('editor-container')
+window.editor = new Editor('editor-container')

@@ -3,7 +3,7 @@ function createVnode(vnode, parent = null, position = '0') {
   if (!vnode.tag) throw 'arguments vnode.tag is required'
   let dom = null
   vnode.parent = parent
-  vnode.position = parent ? parent.position + '-' + position : position
+  vnode.position = parent ? (parent.position ? parent.position + '-' + position : position) : position
   if (vnode.tag !== 'text' && vnode.tag !== 'br') {
     dom = document.createElement(vnode.tag)
     dom.vnode = vnode

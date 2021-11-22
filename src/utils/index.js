@@ -69,7 +69,10 @@ export function clonePureVnode(vnode) {
 }
 // 删除vnode
 export function delVnode(vnode) {
-  const parent = vnode.parent
+  console.log(vnode)
+  // TODO
+  const parent = vnode.parent || vnode
+  console.log(parent)
   // 如果父级只有一个子集，则递归删除父级
   if (parent.childrens.length === 1) {
     return delVnode(parent)
@@ -77,6 +80,7 @@ export function delVnode(vnode) {
     const index = vnode.position.charAt(vnode.position.length - 1)
     parent.childrens.splice(index, 1)
     // reArrangement(parent)
+    // TODO 内容删空后立马初始化内容
     if (parent.childrens.length === 1 && parent.childrens[0]['tag'] === 'br') {
       return delVnode(parent)
     } else {
@@ -106,6 +110,7 @@ export function multiplication(pxVal, times) {
 }
 // 节点更新
 export function updateNode(vnode) {
+  console.log(vnode)
   const oldDom = vnode.dom
   const dom = renderDom(vnode)
   vnode.parent.dom.replaceChild(dom, oldDom)
@@ -141,6 +146,7 @@ export function preLeafNode(vnode, layer) {
     } else {
       const leaf = { tag: 'text', context: '' }
       vnode.childrens = [leaf, { tag: 'br' }]
+      updateNode(vnode)
       return { vnode: leaf, layer: vnode }
     }
   } else if (vnode.parent.childrens.length !== 1 && index !== '0') {

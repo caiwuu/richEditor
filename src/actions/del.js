@@ -7,6 +7,7 @@ export default function del(vm) {
   if (range.collapsed) {
     orgText = orgText.slice(0, end - 1) + orgText.slice(end)
     if (end === 0) {
+      console.log(range.endContainer.vnode)
       const { vnode: prevVnode, layer } = preLeafNode(range.endContainer.vnode)
       // 当前节点内容被清空，则删除当前节点
       if (orgText === '') {
@@ -19,6 +20,7 @@ export default function del(vm) {
         const newLayer = getLayer(prevVnode)
         newLayer.childrens = [...newLayer.childrens, ...layer.childrens]
         const shouldUpdate = delVnode(range.endContainer.vnode)
+        // 如果newLayer和shouldUpdate不是在同一树分支则两个都需要更新
         updateNode(shouldUpdate)
         if (!newLayer.position.includes(shouldUpdate.position)) {
           updateNode(newLayer)
