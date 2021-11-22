@@ -2,30 +2,49 @@ import { createVnode } from '../vnode'
 import { inlineTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function'
+    ? item instanceof HTMLElement
+    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
+// r<l -1,r=l 0,r>l 1
 export function compare(l, r) {
-  arrL = l.split('-')
-  arrR = r.split('-')
-  let flag = false
-  minLen = Math.min(arrL.length, arrR.length)
+  const arrL = l.split('-'),
+    arrR = r.split('-'),
+    minLen = Math.min(arrL.length, arrR.length)
+  let flag = 0
   for (let index = 0; index < minLen; index++) {
-    if (arrL[index] !== arrR[index]) {
-      flag = arrL[index] < arrR[index]
+    if (arrL[index] === arrR[index]) {
+      flag = 0
+    } else {
+      flag = arrL[index] < arrR[index] ? 1 : -1
       break
     }
   }
   return flag
 }
+export function rangeDel(commonAncestorContainer, startContainer, endContainer) {
+  commonAncestorContainer.childrens.forEach((item) => {
+    const conpareRes = compare(item.position, startContainer.position)
+    if (conpareRes === 0 && item.position !== startContainer.position) {
+      rangeDel(item, startContainer)
+    } else if (conpareRes == -1) {
+      if (endContainer) {
+        if (compare(item.position, endContainer.position) == 1) delVnode(item)
+      } else {
+        delVnode(item)
+      }
+    }
+  })
+}
 // 通过position获取vnode
-export function getVnode(rootTree, position) {
+export function getVnode(vm, position) {
   const recursionTree = {
-    childrens: [rootTree],
+    childrens: [vm.vnode.vnode],
   }
   return position.split('-').reduce((pre, cur) => {
     return pre.childrens[cur]
-  }, recursionTree)
+  }, recursionTree)['dom']
 }
 // 设置dom样式
 export function styleSet(dom, style) {
@@ -39,15 +58,15 @@ export function attrSet(dom, attr) {
     dom.setAttribute(key, attr[key])
   }
 }
-// 纯洁vnode克隆
-export function clonePlainVnode(vnode) {
+// 纯净vnode克隆
+export function clonePureVnode(vnode) {
   const cloneVnode = {}
   cloneVnode.tag = vnode.tag
   cloneVnode.position = vnode.position
   vnode.context && (cloneVnode.context = vnode.context)
   vnode.style && (cloneVnode.style = { ...vnode.style })
   vnode.attr && (cloneVnode.attr = { ...vnode.attr })
-  vnode.childrens && (cloneVnode.childrens = vnode.childrens.map((i) => clonePlainVnode(i)))
+  vnode.childrens && (cloneVnode.childrens = vnode.childrens.map((i) => clonePureVnode(i)))
   return cloneVnode
 }
 // 删除vnode
@@ -59,7 +78,7 @@ export function delVnode(vnode) {
   } else {
     const index = vnode.position.charAt(vnode.position.length - 1)
     parent.childrens.splice(index, 1)
-    reArrangement(parent)
+    // reArrangement(parent)
     return parent
   }
 }
@@ -121,5 +140,13 @@ function getLeafR(vnode, layer) {
     return getLeafR(vnode.childrens[vnode.childrens.length - 1], layer)
   } else {
     return { vnode, layer }
+  }
+}
+// 获取内容属于的第一层块级元素
+export function getLayer(vnode) {
+  if (blockTag.includes(vnode.parent.tag)) {
+    return vnode.parent
+  } else {
+    return getLayer(vnode.parent)
   }
 }

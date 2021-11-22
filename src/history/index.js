@@ -1,4 +1,4 @@
-import { clonePlainVnode } from '../utils/index'
+import { clonePureVnode } from '../utils/index'
 export default class History {
   size = 10
   queue = []
@@ -13,7 +13,7 @@ export default class History {
     if (this.queue.length === this.size) {
       this.queue.shift()
     }
-    this.queue.push({ vnode: clonePlainVnode(vnode), range })
+    this.queue.push({ vnode: clonePureVnode(vnode), range })
     this.current = this.queue.length - 1
   }
   forward() {

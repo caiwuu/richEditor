@@ -71,12 +71,10 @@ class Editor {
     }
     const key = event.key
     this.cursor.caret.style.animationName = 'caret-static'
-    // console.log(key);
     switch (key) {
       case 'Backspace':
         event.preventDefault()
         if (!this.cursor.inputState.isComposing) {
-          console.log('caiwu')
           action.emit('del', this)
         }
         break
