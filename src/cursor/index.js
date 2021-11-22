@@ -1,4 +1,4 @@
-import { styleSet } from '../utils/index'
+import { styleSet, setRange } from '../utils/index'
 import { multiplication } from '../utils/index'
 import Selection from '../selection'
 import action from '../actions'
@@ -134,37 +134,82 @@ export default class Cursor {
     const { x, y, range } = this.meta
     this.setPosition(x, y, range.endContainer.parentNode)
   }
-  // 设置系统光标，设置系统光标位置会使模拟输入框失焦
-  setSysCaret(offset, relative = true) {
-    const { selection, range, end } = this.meta
-    const newOffset = relative ? end + offset : offset
-    range.setStart(range.endContainer, newOffset)
-    range.setEnd(range.endContainer, newOffset)
-    selection.removeAllRanges()
-    selection.addRange(range)
+
+  getEndContainer(vnode) {
+    if (vnode.tag === 'text') {
+      return { containerVnode: vnode }
+    } else if (vnode.childrens) {
+      let offset = 0,
+        containerVnode = null
+      for (let index = 0; index < vnode.childrens.length; index++) {
+        containerVnode = vnode.childrens[index]
+        offset = index
+        if (containerVnode.tag === 'text') {
+          break
+        } else {
+          return this.getEndContainer(containerVnode)
+        }
+      }
+      return { containerVnode, offset }
+    }
   }
   getMeta() {
     if (this.selection.selection.rangeCount === 0) {
       return this.meta
     }
     const range = this.selection.getRange()
-    const endContainer = range.endContainer
-    // if (endContainer.nodeName !== '#text' && endContainer.nodeName !== 'P' && endContainer.nodeName !== 'DIV') {
-    if (endContainer.nodeName !== '#text' && endContainer.nodeName !== 'P') {
+    const { vnode: endVnode } = range.endContainer
+    const { vnode: startVnode } = range.startContainer
+    const { containerVnode: endContainerVnode, offset: endOffset } = this.getEndContainer(endVnode)
+    const { containerVnode: startContainerVnode, offset: startOffset } = this.getEndContainer(startVnode)
+    const end = endOffset === undefined ? range.endOffset : endOffset
+    const start = startOffset === undefined ? range.startOffset : startOffset
+    range.setStart(startContainerVnode.dom, start)
+    range.setEnd(endContainerVnode.dom, end)
+    this.selection.selection.removeAllRanges()
+    this.selection.selection.addRange(range)
+
+    this.meta.range = range
+    this.meta.end = end
+    this.meta.start = start
+    this.meta.selection = this.selection
+    const endNode = endContainerVnode.dom.splitText(end)
+    endContainerVnode.dom.parentNode.insertBefore(this.caretMarker, endNode)
+
+    const { offsetLeft: x, offsetTop: y } = this.caretMarker
+    this.meta.x = x
+    this.meta.y = y
+    this.caretMarker.remove()
+    // normalize 非空合并内容到首节点，而空节点会直接删除，我们需要始终保持首节点的引用，故end为0时交互数据
+    // 在首节点内容为空时，首位都是空节点，用normalize会全删，故只需手动删除首节点后一个节点即可
+    if (!end && range.endContainer.nextSibling) {
+      range.endContainer.data = range.endContainer.nextSibling.data
+      range.endContainer.nextSibling.data = ''
+    }
+    if (!this.meta.range.endContainer.vnode.context && range.endContainer.nextSibling) {
+      range.endContainer.nextSibling.remove()
+    } else {
+      endContainerVnode.dom.parentNode.normalize()
+    }
+  }
+  getMeta2() {
+    if (this.selection.selection.rangeCount === 0) {
       return this.meta
     }
-
+    const range = this.selection.getRange()
+    const endContainer = range.endContainer
     const end = range.endOffset
     this.meta.range = range
     this.meta.end = end
     this.meta.start = range.startOffset
     this.meta.selection = this.selection
-    if (endContainer.nodeName !== '#text') {
+    if (endContainer.nodeName !== '#text' && endContainer.nodeName !== 'P') {
       if (endContainer.hasChildNodes()) {
+        console.log('ds')
         range.setStart(endContainer.childNodes[0], 0)
         range.setEnd(endContainer.childNodes[0], 0)
-        selection.removeAllRanges()
-        selection.addRange(range)
+        this.selection.selection.removeAllRanges()
+        this.selection.selection.addRange(range)
         this.getMeta()
         return
       }
@@ -178,11 +223,11 @@ export default class Cursor {
     this.caretMarker.remove()
     // normalize 非空合并内容到首节点，而空节点会直接删除，我们需要始终保持首节点的引用，故end为0时交互数据
     // 在首节点内容为空时，首位都是空节点，用normalize会全删，故只需手动删除首节点后一个节点即可
-    if (!end) {
+    if (!end && range.endContainer.nextSibling) {
       range.endContainer.data = range.endContainer.nextSibling.data
       range.endContainer.nextSibling.data = ''
     }
-    if (!this.meta.range.endContainer.vnode.context) {
+    if (!this.meta.range.endContainer.vnode.context && range.endContainer.nextSibling) {
       range.endContainer.nextSibling.remove()
     } else {
       endContainer.parentNode.normalize()

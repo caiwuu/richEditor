@@ -28,6 +28,10 @@ class Editor {
           tag: 'ul',
           childrens: [{ tag: 'li', childrens: [{ tag: 'text', context: '123' }] }],
         },
+        {
+          tag: 'p',
+          childrens: [{ tag: 'text', context: '' }, { tag: 'br' }],
+        },
       ],
       attr: { id: 'editor-body', contenteditable: true },
     })

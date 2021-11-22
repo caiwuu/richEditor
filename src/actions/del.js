@@ -10,7 +10,9 @@ export default function del(vm) {
       const { vnode: prevVnode, layer } = preLeafNode(range.endContainer.vnode)
       // 当前节点内容被清空，则删除当前节点
       if (orgText === '') {
-        updateNode(delVnode(range.endContainer.vnode))
+        const shouldUpdate = delVnode(range.endContainer.vnode)
+        console.log(shouldUpdate)
+        updateNode(shouldUpdate)
         setRange(vm, prevVnode.dom, prevVnode.dom.data.length)
       } else if (blockTag.includes(layer.tag)) {
         // 跨块级，将改块级子元素移动到prevVnode之后，并删除该节点

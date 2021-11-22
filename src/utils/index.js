@@ -2,9 +2,7 @@ import { createVnode } from '../vnode'
 import { inlineTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function'
-    ? item instanceof HTMLElement
-    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 // r<l -1,r=l 0,r>l 1
@@ -79,7 +77,11 @@ export function delVnode(vnode) {
     const index = vnode.position.charAt(vnode.position.length - 1)
     parent.childrens.splice(index, 1)
     // reArrangement(parent)
-    return parent
+    if (parent.childrens.length === 1 && parent.childrens[0]['tag'] === 'br') {
+      return delVnode(parent)
+    } else {
+      return parent
+    }
   }
 }
 // 重排vnode 更新position
@@ -110,7 +112,7 @@ export function updateNode(vnode) {
   return dom
 }
 // 重新设置选区
-export function setRange(vm, startcontainer, start, endcontainer, end) {
+export function setRange(vm, startcontainer, start, notFocus = false, endcontainer, end) {
   const { range, selection } = vm.cursor.meta
   endcontainer = endcontainer === undefined ? startcontainer : endcontainer
   end = end === undefined ? start : end
@@ -119,17 +121,30 @@ export function setRange(vm, startcontainer, start, endcontainer, end) {
   selection.removeAllRanges()
   selection.addRange(range)
   console.log('setRange')
-  vm.cursor.followSysCaret()
-  vm.cursor.focus()
+  // TODO
+  if (!notFocus) {
+    vm.cursor.followSysCaret()
+    vm.cursor.focus()
+  }
 }
 // 获取前一个叶子节点
 export function preLeafNode(vnode, layer) {
+  console.log(vnode)
   if (!layer || !blockTag.includes(layer.tag)) {
     layer = vnode
   }
   const index = vnode.position.charAt(vnode.position.length - 1)
-  if (vnode.parent.childrens.length !== 1 && index !== 0) {
-    return getLeafR(vnode.dom.previousSibling.vnode, layer)
+  console.log(index)
+  if (vnode.position === '0') {
+    if (vnode.childrens[1]) {
+      return getLeafR(vnode.childrens[1], layer)
+    } else {
+      const leaf = { tag: 'text', context: '' }
+      vnode.childrens = [leaf, { tag: 'br' }]
+      return { vnode: leaf, layer: vnode }
+    }
+  } else if (vnode.parent.childrens.length !== 1 && index !== '0') {
+    return getLeafR(vnode.parent.childrens[index - 1], layer)
   } else {
     return preLeafNode(vnode.parent, layer)
   }
