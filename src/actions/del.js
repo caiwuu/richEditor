@@ -12,9 +12,10 @@ export default function del(vm) {
       // 当前节点内容被清空，则删除当前节点
       if (orgText === '') {
         const shouldUpdate = delVnode(range.endContainer.vnode)
-        console.log(shouldUpdate)
+        console.log(shouldUpdate, prevVnode)
+        // !shouldUpdate.parent.isRoot && updateNode(shouldUpdate)
         updateNode(shouldUpdate)
-        setRange(vm, prevVnode.dom, prevVnode.dom.data.length)
+        setRange(vm, prevVnode.dom, prevVnode.dom.data ? prevVnode.dom.data.length : 0)
       } else if (blockTag.includes(layer.tag)) {
         // 跨块级，将改块级子元素移动到prevVnode之后，并删除该节点
         const newLayer = getLayer(prevVnode)

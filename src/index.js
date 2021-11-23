@@ -34,6 +34,7 @@ class Editor {
         },
       ],
       attr: { id: 'editor-body', contenteditable: true },
+      style: { minHeight: '200px' },
     })
     this.editorBody = this.vnode.mount(id)
     this.root = document.getElementById(id)

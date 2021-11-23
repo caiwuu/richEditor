@@ -74,12 +74,14 @@ export function delVnode(vnode) {
   const parent = vnode.parent || vnode
   console.log(parent)
   // 如果父级只有一个子集，则递归删除父级
-  if (parent.childrens.length === 1) {
+  if (parent.isRoot) {
+    return vnode
+  } else if (parent.childrens.length === 1) {
     return delVnode(parent)
   } else {
     const index = vnode.position.charAt(vnode.position.length - 1)
     parent.childrens.splice(index, 1)
-    // reArrangement(parent)
+    reArrangement(parent)
     // TODO 内容删空后立马初始化内容
     if (parent.childrens.length === 1 && parent.childrens[0]['tag'] === 'br') {
       return delVnode(parent)
@@ -133,32 +135,35 @@ export function setRange(vm, startcontainer, start, notFocus = false, endcontain
   }
 }
 // 获取前一个叶子节点
-export function preLeafNode(vnode, layer) {
+export function preLeafNode(vnode, layer, direction = 'R') {
   console.log(vnode)
   if (!layer || !blockTag.includes(layer.tag)) {
     layer = vnode
   }
   const index = vnode.position.charAt(vnode.position.length - 1)
   console.log(index)
-  if (vnode.position === '0') {
-    if (vnode.childrens[1]) {
-      return getLeafR(vnode.childrens[1], layer)
-    } else {
-      const leaf = { tag: 'text', context: '' }
-      vnode.childrens = [leaf, { tag: 'br' }]
-      updateNode(vnode)
-      return { vnode: leaf, layer: vnode }
-    }
-  } else if (vnode.parent.childrens.length !== 1 && index !== '0') {
-    return getLeafR(vnode.parent.childrens[index - 1], layer)
+  if (vnode.parent.isRoot) {
+    console.log('isRoot')
+    return direction === 'R' ? getLeafR(vnode.childrens[index], layer) : getLeafL(vnode.childrens[index], layer)
+  }
+  if (vnode.parent.childrens.length !== 1 && index !== '0') {
+    return direction === 'R' ? getLeafR(vnode.parent.childrens[index - 1], layer) : getLeafL(vnode.parent.childrens[index - 1], layer)
   } else {
-    return preLeafNode(vnode.parent, layer)
+    return preLeafNode(vnode.parent, layer, direction)
   }
 }
 // 获取右叶子
 function getLeafR(vnode, layer) {
   if (vnode.childrens && vnode.childrens.length !== 0) {
     return getLeafR(vnode.childrens[vnode.childrens.length - 1], layer)
+  } else {
+    return { vnode, layer }
+  }
+}
+// 获取左叶子
+function getLeafL(vnode, layer) {
+  if (vnode.childrens && vnode.childrens.length !== 0) {
+    return getLeafL(vnode.childrens[0], layer)
   } else {
     return { vnode, layer }
   }

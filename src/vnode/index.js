@@ -34,14 +34,14 @@ export default class VNode {
   mount(id) {
     this.rootId = id
     const parent = document.getElementById(id)
-    this.vnode.parent = { dom: parent }
+    this.vnode.parent = { dom: parent, isRoot: true }
     return parent.appendChild(this.dom)
   }
   update(vnode) {
     this.vnode = vnode
     const dom = createVnode(vnode, null)
     const parent = document.getElementById(this.rootId)
-    this.vnode.parent = { dom: parent }
+    this.vnode.parent = { dom: parent, isRoot: true }
     document.getElementById(this.rootId).replaceChild(dom, this.dom)
   }
 }
