@@ -2,12 +2,10 @@ import { createVnode } from '../vnode'
 import { inlineTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function'
-    ? item instanceof HTMLElement
-    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
-// r<l -1,r=l 0,r>l 1
+// l>r -1,r=l 0,l<r 1
 export function compare(l, r) {
   const arrL = l.split('-'),
     arrR = r.split('-'),
@@ -23,14 +21,53 @@ export function compare(l, r) {
   }
   return flag
 }
+function compareStart(vnode, start, end, samebranch = false) {
+  const compareRes = compare(vnode.position, start.position)
+  if (compareRes === 0 && vnode.position !== start.position) {
+    vnode.childrens.forEach((item) => {
+      compareStart(item, start, end, true)
+    })
+  } else if (compareRes == -1) {
+    if (samebranch) {
+      delVnode(vnode)
+    } else {
+      compareEnd(vnode, end, false)
+    }
+  }
+}
+function compareEnd(vnode, end) {
+  const compareRes = compare(vnode.position, end.position)
+  if (compareRes === 0 && vnode.position !== end.position) {
+    vnode.childrens.forEach((item) => {
+      compareEnd(item, end)
+    })
+  } else if (compareRes == 1) {
+    delVnode(vnode)
+  }
+}
 export function rangeDel(commonAncestorContainer, startContainer, endContainer) {
   commonAncestorContainer.childrens.forEach((item) => {
-    const conpareRes = compare(item.position, startContainer.position)
-    if (conpareRes === 0 && item.position !== startContainer.position) {
+    compareStart(item, startContainer, endContainer)
+  })
+}
+export function rangeDel2(commonAncestorContainer, startContainer, endContainer) {
+  commonAncestorContainer.childrens.forEach((item) => {
+    const compareRes = compare(item.position, startContainer.position)
+    console.log(compareRes)
+    // item 和 start 同分支，则比较 item的子节点和start
+    if (compareRes === 0 && item.position !== startContainer.position) {
       rangeDel(item, startContainer)
-    } else if (conpareRes == -1) {
+    } else if (compareRes == -1) {
+      // item 在 start 下面
+      // 且有end参数
       if (endContainer) {
-        if (compare(item.position, endContainer.position) == 1) delVnode(item)
+        // item 在 end 的 上方
+        const cp = compare(item.position, endContainer.position)
+        if (cp === 1) {
+          delVnode(item)
+        } else if (cp === 0 && item.position !== endContainer.position) {
+          // item 和 end 同分支
+        }
       } else {
         delVnode(item)
       }
@@ -69,15 +106,17 @@ export function clonePureVnode(vnode) {
   vnode.childrens && (cloneVnode.childrens = vnode.childrens.map((i) => clonePureVnode(i)))
   return cloneVnode
 }
-// 删除vnode
+// 节点删除
 export function delVnode(vnode) {
   console.log(vnode)
   const parent = vnode.parent || vnode
   console.log(parent)
   // 如果父级只有一个子集，则递归删除父级
-  if (parent.isRoot) {
-    return null
-  } else if (parent.childrens.length === 1) {
+  if (parent.childrens.length === 1) {
+    if (parent.isRoot) {
+      vnode.childrens = [{ tag: 'text', context: '' }, { tag: 'br' }]
+      return vnode
+    }
     return delVnode(parent)
   } else {
     const index = vnode.position.charAt(vnode.position.length - 1)

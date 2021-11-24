@@ -21,16 +21,20 @@ class Editor {
               childrens: [{ tag: 'text', context: '加了样式的文字' }],
               style: { color: '#bbb', fontSize: '36px' },
             },
+            // { tag: 'br' },
           ],
           style: { color: '#888' },
         },
         {
           tag: 'ul',
-          childrens: [{ tag: 'li', childrens: [{ tag: 'text', context: '123' }] }],
+          childrens: [
+            { tag: 'li', childrens: [{ tag: 'text', context: '123' }] },
+            { tag: 'li', childrens: [{ tag: 'text', context: '456' }] },
+          ],
         },
         {
           tag: 'p',
-          childrens: [{ tag: 'text', context: '' }, { tag: 'br' }],
+          childrens: [{ tag: 'text', context: 'wewewewe' }],
         },
       ],
       attr: { id: 'editor-body', contenteditable: true },

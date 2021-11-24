@@ -6,20 +6,24 @@ export default function del(vm) {
   // 非选区删除
   if (range.collapsed) {
     orgText = orgText.slice(0, end - 1) + orgText.slice(end)
+    // 删除线在节点开头
     if (end === 0) {
       console.log(range.endContainer.vnode)
       const { vnode: prevVnode, layer } = preLeafNode(range.endContainer.vnode)
       // 当前节点内容被清空，则删除当前节点
       console.log(prevVnode)
-      if (!prevVnode) {
-      } else if (orgText === '') {
+      if (orgText === '') {
+        // 删空:清除本节点且光标定位到上一个叶子末尾
         const shouldUpdate = delVnode(range.endContainer.vnode)
-        console.log(shouldUpdate, prevVnode)
-        // !shouldUpdate.parent.isRoot && updateNode(shouldUpdate)
         updateNode(shouldUpdate)
-        setRange(vm, prevVnode.dom, prevVnode.dom.data ? prevVnode.dom.data.length : 0)
-      } else if (blockTag.includes(layer.tag)) {
+        if (!prevVnode) {
+          setRange(vm, shouldUpdate.childrens[0].dom, 0)
+        } else {
+          setRange(vm, prevVnode.dom, prevVnode.context ? prevVnode.context.length : 0)
+        }
+      } else if (prevVnode && blockTag.includes(layer.tag)) {
         // 跨块级，将改块级子元素移动到prevVnode之后，并删除该节点
+        // 未清空，但是光标即将离开块元素,将该块元素的子元素移动到上一个叶子块元素的末尾
         const newLayer = getLayer(prevVnode)
         newLayer.childrens = [...newLayer.childrens, ...layer.childrens]
         const shouldUpdate = delVnode(range.endContainer.vnode)
@@ -28,14 +32,16 @@ export default function del(vm) {
         if (!newLayer.position.includes(shouldUpdate.position)) {
           updateNode(newLayer)
         }
+        // 光标移动到该块元素第一个子元素的0位
         setRange(vm, layer.childrens[0].dom, 0)
       }
       // 跨行内dom删除
       if (prevVnode && !blockTag.includes(layer.tag)) {
-        setRange(vm, prevVnode.dom, prevVnode.dom.data.length)
+        setRange(vm, prevVnode.dom, prevVnode.context.length)
         del(vm)
       }
     } else {
+      // 删除线在节点之间或者末尾
       range.endContainer.vnode.context = orgText
       setRange(vm, updateNode(range.endContainer.vnode), end - 1)
     }

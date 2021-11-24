@@ -43,5 +43,6 @@ export default class VNode {
     const parent = document.getElementById(this.rootId)
     this.vnode.parent = { dom: parent, isRoot: true }
     document.getElementById(this.rootId).replaceChild(dom, this.dom)
+    this.dom = dom
   }
 }
