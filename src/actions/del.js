@@ -10,7 +10,9 @@ export default function del(vm) {
       console.log(range.endContainer.vnode)
       const { vnode: prevVnode, layer } = preLeafNode(range.endContainer.vnode)
       // 当前节点内容被清空，则删除当前节点
-      if (orgText === '') {
+      console.log(prevVnode)
+      if (!prevVnode) {
+      } else if (orgText === '') {
         const shouldUpdate = delVnode(range.endContainer.vnode)
         console.log(shouldUpdate, prevVnode)
         // !shouldUpdate.parent.isRoot && updateNode(shouldUpdate)
@@ -29,7 +31,7 @@ export default function del(vm) {
         setRange(vm, layer.childrens[0].dom, 0)
       }
       // 跨行内dom删除
-      if (!blockTag.includes(layer.tag)) {
+      if (prevVnode && !blockTag.includes(layer.tag)) {
         setRange(vm, prevVnode.dom, prevVnode.dom.data.length)
         del(vm)
       }

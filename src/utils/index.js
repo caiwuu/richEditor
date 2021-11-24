@@ -2,7 +2,9 @@ import { createVnode } from '../vnode'
 import { inlineTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function'
+    ? item instanceof HTMLElement
+    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 // r<l -1,r=l 0,r>l 1
@@ -70,12 +72,11 @@ export function clonePureVnode(vnode) {
 // 删除vnode
 export function delVnode(vnode) {
   console.log(vnode)
-  // TODO
   const parent = vnode.parent || vnode
   console.log(parent)
   // 如果父级只有一个子集，则递归删除父级
   if (parent.isRoot) {
-    return vnode
+    return null
   } else if (parent.childrens.length === 1) {
     return delVnode(parent)
   } else {
@@ -83,11 +84,7 @@ export function delVnode(vnode) {
     parent.childrens.splice(index, 1)
     reArrangement(parent)
     // TODO 内容删空后立马初始化内容
-    if (parent.childrens.length === 1 && parent.childrens[0]['tag'] === 'br') {
-      return delVnode(parent)
-    } else {
-      return parent
-    }
+    return parent
   }
 }
 // 重排vnode 更新position
@@ -144,7 +141,7 @@ export function preLeafNode(vnode, layer, direction = 'R') {
   console.log(index)
   if (vnode.parent.isRoot) {
     console.log('isRoot')
-    return direction === 'R' ? getLeafR(vnode.childrens[index], layer) : getLeafL(vnode.childrens[index], layer)
+    return { vnode: null, layer: null }
   }
   if (vnode.parent.childrens.length !== 1 && index !== '0') {
     return direction === 'R' ? getLeafR(vnode.parent.childrens[index - 1], layer) : getLeafL(vnode.parent.childrens[index - 1], layer)
