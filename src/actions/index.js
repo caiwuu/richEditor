@@ -2,7 +2,6 @@ import mitt from 'mitt'
 import { updateNode, setRange } from '../utils'
 import del from './del'
 const actions = {
-  test: (e) => console.log('foo', e),
   // 删除操作
   del: del,
   // 输入

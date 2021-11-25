@@ -2,9 +2,7 @@ import { createVnode } from '../vnode'
 import { inlineTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function'
-    ? item instanceof HTMLElement
-    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
@@ -24,11 +22,13 @@ export function compare(l, r) {
   return flag
 }
 function compareStart(vnode, start, end, samebranch = false) {
+  console.log(vnode, start, end)
   const compareRes = compare(vnode.position, start.position)
   if (compareRes === 0 && vnode.position !== start.position) {
-    vnode.childrens.forEach((item) => {
-      compareStart(item, start, end, true)
-    })
+    for (let index = vnode.childrens.length - 1; index >= 0; index--) {
+      const element = vnode.childrens[index]
+      compareStart(element, start, end, true)
+    }
   } else if (compareRes == -1) {
     if (samebranch) {
       delVnode(vnode)
@@ -38,19 +38,22 @@ function compareStart(vnode, start, end, samebranch = false) {
   }
 }
 function compareEnd(vnode, end) {
+  console.log(vnode.tag, (vnode.childrens || []).length)
   const compareRes = compare(vnode.position, end.position)
   if (compareRes === 0 && vnode.position !== end.position) {
-    vnode.childrens.forEach((item) => {
-      compareEnd(item, end)
-    })
+    for (let index = vnode.childrens.length - 1; index >= 0; index--) {
+      const element = vnode.childrens[index]
+      compareEnd(element, end)
+    }
   } else if (compareRes == 1) {
     delVnode(vnode)
   }
 }
 export function rangeDel(commonAncestorContainer, startContainer, endContainer) {
-  commonAncestorContainer.childrens.forEach((item) => {
-    compareStart(item, startContainer, endContainer)
-  })
+  for (let index = commonAncestorContainer.childrens.length - 1; index >= 0; index--) {
+    const element = commonAncestorContainer.childrens[index]
+    compareStart(element, startContainer, endContainer)
+  }
 }
 // 通过position获取vnode
 export function getNode(vm, position) {
@@ -162,7 +165,7 @@ export function preLeafNode(vnode, layer, direction = 'R') {
   }
 }
 // 获取右叶子
-function getLeafR(vnode, layer) {
+export function getLeafR(vnode, layer) {
   if (vnode.childrens && vnode.childrens.length !== 0) {
     return getLeafR(vnode.childrens[vnode.childrens.length - 1], layer)
   } else {
@@ -170,7 +173,7 @@ function getLeafR(vnode, layer) {
   }
 }
 // 获取左叶子
-function getLeafL(vnode, layer) {
+export function getLeafL(vnode, layer) {
   if (vnode.childrens && vnode.childrens.length !== 0) {
     return getLeafL(vnode.childrens[0], layer)
   } else {

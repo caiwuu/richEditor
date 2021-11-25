@@ -30,6 +30,15 @@ class Editor {
           childrens: [
             { tag: 'li', childrens: [{ tag: 'text', context: '123' }] },
             { tag: 'li', childrens: [{ tag: 'text', context: '456' }] },
+            {
+              tag: 'li',
+              childrens: [
+                {
+                  tag: 'span',
+                  childrens: [{ tag: 'text', context: '这是一个pan' }],
+                },
+              ],
+            },
           ],
         },
         {
@@ -74,11 +83,12 @@ class Editor {
     this.cursor.hidden()
   }
   handGolobalKeydown(event) {
-    if (!this.cursor.meta.range.collapsed) {
+    if (this.cursor.meta.range && !this.cursor.meta.range.collapsed) {
       this.editorBody.setAttribute('contenteditable', true)
       this.cursor.focus()
     }
     const key = event.key
+    console.log(key)
     this.cursor.caret.style.animationName = 'caret-static'
     switch (key) {
       case 'Backspace':
@@ -150,8 +160,6 @@ class Editor {
         this.editorBody.setAttribute('contenteditable', false)
       }
     })
-    // action 测试
-    action.emit('test')
   }
 }
 window.editor = new Editor('editor-container')
