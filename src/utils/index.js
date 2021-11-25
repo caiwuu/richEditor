@@ -2,7 +2,9 @@ import { createVnode } from '../vnode'
 import { inlineTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function'
+    ? item instanceof HTMLElement
+    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
@@ -50,32 +52,8 @@ export function rangeDel(commonAncestorContainer, startContainer, endContainer) 
     compareStart(item, startContainer, endContainer)
   })
 }
-export function rangeDel2(commonAncestorContainer, startContainer, endContainer) {
-  commonAncestorContainer.childrens.forEach((item) => {
-    const compareRes = compare(item.position, startContainer.position)
-    console.log(compareRes)
-    // item 和 start 同分支，则比较 item的子节点和start
-    if (compareRes === 0 && item.position !== startContainer.position) {
-      rangeDel(item, startContainer)
-    } else if (compareRes == -1) {
-      // item 在 start 下面
-      // 且有end参数
-      if (endContainer) {
-        // item 在 end 的 上方
-        const cp = compare(item.position, endContainer.position)
-        if (cp === 1) {
-          delVnode(item)
-        } else if (cp === 0 && item.position !== endContainer.position) {
-          // item 和 end 同分支
-        }
-      } else {
-        delVnode(item)
-      }
-    }
-  })
-}
 // 通过position获取vnode
-export function getVnode(vm, position) {
+export function getNode(vm, position) {
   const recursionTree = {
     childrens: [vm.vnode.vnode],
   }
@@ -108,9 +86,7 @@ export function clonePureVnode(vnode) {
 }
 // 节点删除
 export function delVnode(vnode) {
-  console.log(vnode)
   const parent = vnode.parent || vnode
-  console.log(parent)
   // 如果父级只有一个子集，则递归删除父级
   if (parent.childrens.length === 1) {
     if (parent.isRoot) {
@@ -148,7 +124,6 @@ export function multiplication(pxVal, times) {
 }
 // 节点更新
 export function updateNode(vnode) {
-  console.log(vnode)
   const oldDom = vnode.dom
   const dom = renderDom(vnode)
   vnode.parent.dom.replaceChild(dom, oldDom)
@@ -163,7 +138,6 @@ export function setRange(vm, startcontainer, start, notFocus = false, endcontain
   range.setEnd(endcontainer, end)
   selection.removeAllRanges()
   selection.addRange(range)
-  console.log('setRange')
   // TODO
   if (!notFocus) {
     vm.cursor.followSysCaret()
@@ -172,12 +146,11 @@ export function setRange(vm, startcontainer, start, notFocus = false, endcontain
 }
 // 获取前一个叶子节点
 export function preLeafNode(vnode, layer, direction = 'R') {
-  console.log(vnode)
   if (!layer || !blockTag.includes(layer.tag)) {
     layer = vnode
   }
   const index = vnode.position.charAt(vnode.position.length - 1)
-  console.log(index)
+  console.log(vnode, index)
   if (vnode.parent.isRoot) {
     console.log('isRoot')
     return { vnode: null, layer: null }

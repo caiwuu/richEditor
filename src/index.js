@@ -34,7 +34,7 @@ class Editor {
         },
         {
           tag: 'p',
-          childrens: [{ tag: 'text', context: 'wewewewe' }],
+          childrens: [{ tag: 'span', childrens: [{ tag: 'br' }] }],
         },
       ],
       attr: { id: 'editor-body', contenteditable: true },

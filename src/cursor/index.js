@@ -160,12 +160,12 @@ export default class Cursor {
       return this.meta
     }
     const range = this.selection.getRange()
-    const { vnode: endVnode } = range.endContainer
-    const { vnode: startVnode } = range.startContainer
-    const { containerVnode: endContainerVnode, offset: endOffset } = this.getContainer(endVnode)
-    const { containerVnode: startContainerVnode, offset: startOffset } = this.getContainer(startVnode)
+    console.log(range.endContainer.vnode.tag, range.endOffset)
+    const { containerVnode: endContainerVnode, offset: endOffset } = this.getContainer(range.endContainer.vnode)
+    const { containerVnode: startContainerVnode, offset: startOffset } = this.getContainer(range.startContainer.vnode)
     const end = endOffset === undefined ? range.endOffset : endOffset
     const start = startOffset === undefined ? range.startOffset : startOffset
+    // 可不要
     range.setStart(startContainerVnode.dom, start)
     range.setEnd(endContainerVnode.dom, end)
     this.selection.selection.removeAllRanges()
