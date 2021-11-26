@@ -4,7 +4,9 @@ export default function del(vm) {
   const { range, end, start } = vm.cursor.meta
   let orgText = range.endContainer.vnode.context
   console.log([range.endContainer])
-  // 非选区删除
+  /*
+    删除分为 选区删除和非选区删除
+  */
   if (range.collapsed) {
     orgText = orgText.slice(0, end - 1) + orgText.slice(end)
     // 删除线在节点开头
@@ -12,6 +14,10 @@ export default function del(vm) {
     if (end === 0) {
       console.log(range.endContainer.vnode)
       const { vnode: prevVnode, layer } = preLeafNode(range.endContainer.vnode)
+      const preLayer = getLayer(range.endContainer.vnode)
+      if (preLayer === layer) {
+        // 同一块内
+      }
       // 当前节点内容被清空，则删除当前节点
       console.log(prevVnode)
 
