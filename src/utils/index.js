@@ -2,7 +2,9 @@ import { createVnode } from '../vnode'
 import { inlineTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function'
+    ? item instanceof HTMLElement
+    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
@@ -100,6 +102,7 @@ export function delVnode(vnode) {
   } else {
     const index = vnode.position.charAt(vnode.position.length - 1)
     parent.childrens.splice(index, 1)
+    normalize(parent)
     reArrangement(parent)
     // TODO 内容删空后立马初始化内容
     return parent
@@ -109,6 +112,7 @@ export function delVnode(vnode) {
 export function reArrangement(parent) {
   if (parent.childrens) {
     parent.childrens.forEach((item, index) => {
+      item.parent = parent
       item.position = parent.position + '-' + index
       reArrangement(item)
     })
@@ -186,5 +190,19 @@ export function getLayer(vnode) {
     return vnode.parent
   } else {
     return getLayer(vnode.parent)
+  }
+}
+// 合并相邻的text节点
+export function normalize(vnode) {
+  if (vnode.childrens.length <= 1) return
+  for (let index = vnode.childrens.length - 1; index >= 1; index--) {
+    const curr = vnode.childrens[index]
+    const next = vnode.childrens[index - 1]
+    if (curr.tag !== 'text' || next.tag !== 'text') {
+      continue
+    } else {
+      next.context += curr.context
+      delVnode(curr)
+    }
   }
 }

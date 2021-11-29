@@ -186,10 +186,11 @@ export default class Cursor {
     // normalize 非空合并内容到首节点，而空节点会直接删除，我们需要始终保持首节点的引用，故end为0时交互数据
     // 在首节点内容为空时，首位都是空节点，用normalize会全删，故只需手动删除首节点后一个节点即可
     if (!range.endOffset && range.endContainer.nextSibling) {
+      console.log('交换数据')
       range.endContainer.data = range.endContainer.nextSibling.data
       range.endContainer.nextSibling.data = ''
     }
-
+    // range.endContainer.data = range.endContainer.vnode.context
     console.log('开始normalize')
     if (!this.meta.range.endContainer.vnode.context && range.endContainer.nextSibling) {
       range.endContainer.nextSibling.remove()

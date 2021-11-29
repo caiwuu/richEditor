@@ -28,7 +28,7 @@ class Editor {
         {
           tag: 'ul',
           childrens: [
-            { tag: 'li', childrens: [{ tag: 'text', context: '123' }] },
+            { tag: 'li', childrens: [{ tag: 'text', context: '12333333' }] },
             { tag: 'li', childrens: [{ tag: 'text', context: '456' }] },
             {
               tag: 'li',
@@ -149,17 +149,18 @@ class Editor {
   }
   handMouseup() {
     this.mouseStats = 'up'
-    setTimeout(() => {
-      this.cursor.caret.style.animationName = 'caret-static'
+    // setTimeout(() => {
+    this.cursor.caret.style.animationName = 'caret-static'
+    const range = this.cursor.selection.getRange()
+    if (range.collapsed) {
+      this.editorBody.setAttribute('contenteditable', true)
+      this.cursor.focus()
+    } else {
       this.cursor.followSysCaret()
-      if (this.cursor.meta.range.collapsed) {
-        this.editorBody.setAttribute('contenteditable', true)
-        this.cursor.focus()
-      } else {
-        this.cursor.hidden()
-        this.editorBody.setAttribute('contenteditable', false)
-      }
-    })
+      this.cursor.hidden()
+      this.editorBody.setAttribute('contenteditable', false)
+    }
+    // })
   }
 }
 window.editor = new Editor('editor-container')

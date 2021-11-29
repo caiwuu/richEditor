@@ -1,4 +1,15 @@
-import { getNode, delVnode, updateNode, setRange, preLeafNode, getLayer, rangeDel, reArrangement, getLeafR } from '../utils/index'
+import {
+  getNode,
+  delVnode,
+  updateNode,
+  setRange,
+  preLeafNode,
+  getLayer,
+  rangeDel,
+  reArrangement,
+  normalize,
+  clonePureVnode,
+} from '../utils/index'
 import { blockTag } from '../type'
 export default function del(vm) {
   const { range, end, start } = vm.cursor.meta
@@ -14,16 +25,13 @@ export default function del(vm) {
     if (end === 0) {
       console.log(range.endContainer.vnode)
       const { vnode: prevVnode, layer } = preLeafNode(range.endContainer.vnode)
+      const prevVnodeLen = prevVnode.context.length
       const preLayer = getLayer(range.endContainer.vnode)
       if (preLayer === layer) {
         // 同一块内
       }
       // 当前节点内容被清空，则删除当前节点
-      console.log(prevVnode)
-
-      // bug orgText === '' 不代表节点被清空
-      if (orgText === '') {
-        console.log("orgText === ''")
+      if (orgText === '' && range.endContainer.vnode.parent.childrens.length === 1) {
         // 删空:清除本节点且光标定位到上一个叶子末尾
         console.log('--------------------------------------------1')
         const shouldUpdate = delVnode(range.endContainer.vnode)
@@ -38,6 +46,7 @@ export default function del(vm) {
         const newLayer = getLayer(prevVnode)
         newLayer.childrens = [...newLayer.childrens, ...layer.childrens]
         reArrangement(newLayer)
+        normalize(newLayer)
         console.log('--------------------------------------------2')
         const shouldUpdate = delVnode(layer)
         // 如果newLayer和shouldUpdate不是在同一树分支则两个都需要更新
@@ -49,7 +58,7 @@ export default function del(vm) {
         }
       }
       if (prevVnode) {
-        setRange(vm, prevVnode.dom, prevVnode.context ? prevVnode.context.length : 0)
+        setRange(vm, prevVnode.dom, prevVnodeLen)
         // 跨行内dom删除
         !blockTag.includes(layer.tag) && del(vm)
       }
@@ -85,11 +94,13 @@ export default function del(vm) {
       if (startBlock !== endBlock && layer === endBlock) {
         // 不同快，且结束节点块还有内容，需要将该块内容移动到开始块
         // console.log('需要将结束块内容移动到开始块')
-        startBlock.childrens = [...startBlock.childrens, ...endBlock.childrens]
-        reArrangement(startBlock)
-        delVnode(endContainer.vnode)
+        startBlock.childrens = [...startBlock.childrens, ...clonePureVnode(endBlock).childrens]
+        reArrangement(commonAncestorContainer)
+        normalize(startBlock)
+        // delVnode(endContainer.vnode)
       }
       updateNode(commonAncestorContainer.vnode)
+      console.log(getNode(vm, position))
       setRange(vm, getNode(vm, position), start)
     }
   }
