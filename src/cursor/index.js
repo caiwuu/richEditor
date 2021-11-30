@@ -1,4 +1,4 @@
-import { styleSet, setRange } from '../utils/index'
+import { styleSet } from '../utils/index'
 import { multiplication } from '../utils/index'
 import Selection from '../selection'
 import action from '../actions'
@@ -42,13 +42,10 @@ export default class Cursor {
   }
   handleEvent(event) {
     console.log(`--->${event.type}: ${event.data}--${event.isComposing}--${event.target.value}\n`)
-    // console.log(this.meta.range);
     // selected时释放掉一次输入，因为不能调起中文输入法 折中做法 暂时没有好的解决办法
     if (!this.meta.range.collapsed) {
-      console.log(this.meta.range.startOffset, this.meta.range.endOffset)
+      action.emit('del', this.vm)
       this.meta.range.collapse(true)
-      this.followSysCaret()
-      console.log(this.meta.range.endOffset)
     } else if (event.type === 'input') {
       // 键盘字符输入
       console.log('键盘字符输入')
@@ -134,51 +131,17 @@ export default class Cursor {
     const { x, y, range } = this.meta
     this.setPosition(x, y, range.endContainer.parentNode)
   }
-  // 获取光标容器；range.endOffset有个特点，如果点击的是text标签则返回第几个文字，如果是dom节点则返回第几个节点
-  getContainer(vnode) {
-    console.log(vnode)
-    if (vnode.tag === 'text') {
-      return { containerVnode: vnode }
-    } else if (vnode.childrens) {
-      let offset = 0,
-        containerVnode = null
-      for (let index = 0; index < vnode.childrens.length; index++) {
-        containerVnode = vnode.childrens[index]
-        offset = index
-        if (containerVnode.tag === 'text') {
-          break
-        } else {
-          return this.getContainer(containerVnode)
-        }
-      }
-      return { containerVnode, offset }
-    }
-    // TODO else(br)
-  }
   updateMeta() {
     if (this.selection.selection.rangeCount === 0) {
       return this.meta
     }
     const range = this.selection.getRange()
-    console.log(range.endContainer.vnode.tag, range.endOffset)
-    // const { containerVnode: endContainerVnode, offset: endOffset } = this.getContainer(range.endContainer.vnode)
-    // const { containerVnode: startContainerVnode, offset: startOffset } = this.getContainer(range.startContainer.vnode)
-    // const end = endOffset === undefined ? range.endOffset : endOffset
-    // const start = startOffset === undefined ? range.startOffset : startOffset
-    // 可不要
-    // range.setStart(startContainerVnode.dom, start)
-    // range.setEnd(endContainerVnode.dom, end)
-    // this.selection.selection.removeAllRanges()
-    // this.selection.selection.addRange(range)
-
     this.meta.range = range
     this.meta.end = range.endOffset
     this.meta.start = range.startOffset
     this.meta.selection = this.selection
-    console.log(range.endContainer.vnode)
     const endNode = range.endContainer.vnode.dom.splitText(range.endOffset)
     range.endContainer.vnode.dom.parentNode.insertBefore(this.caretMarker, endNode)
-
     const { offsetLeft: x, offsetTop: y } = this.caretMarker
     this.meta.x = x
     this.meta.y = y
@@ -186,12 +149,9 @@ export default class Cursor {
     // normalize 非空合并内容到首节点，而空节点会直接删除，我们需要始终保持首节点的引用，故end为0时交互数据
     // 在首节点内容为空时，首位都是空节点，用normalize会全删，故只需手动删除首节点后一个节点即可
     if (!range.endOffset && range.endContainer.nextSibling) {
-      console.log('交换数据')
       range.endContainer.data = range.endContainer.nextSibling.data
       range.endContainer.nextSibling.data = ''
     }
-    // range.endContainer.data = range.endContainer.vnode.context
-    console.log('开始normalize')
     if (!this.meta.range.endContainer.vnode.context && range.endContainer.nextSibling) {
       range.endContainer.nextSibling.remove()
     } else {

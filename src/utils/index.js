@@ -1,5 +1,5 @@
 import { createVnode } from '../vnode'
-import { inlineTag, blockTag } from '../type'
+import { leafTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
   return typeof HTMLElement === 'function'
@@ -24,7 +24,6 @@ export function compare(l, r) {
   return flag
 }
 function compareStart(vnode, start, end, samebranch = false) {
-  console.log(vnode, start, end)
   const compareRes = compare(vnode.position, start.position)
   if (compareRes === 0 && vnode.position !== start.position) {
     for (let index = vnode.childrens.length - 1; index >= 0; index--) {
@@ -40,7 +39,6 @@ function compareStart(vnode, start, end, samebranch = false) {
   }
 }
 function compareEnd(vnode, end) {
-  console.log(vnode.tag, (vnode.childrens || []).length)
   const compareRes = compare(vnode.position, end.position)
   if (compareRes === 0 && vnode.position !== end.position) {
     for (let index = vnode.childrens.length - 1; index >= 0; index--) {
@@ -51,6 +49,7 @@ function compareEnd(vnode, end) {
     delVnode(vnode)
   }
 }
+// 选区删除，删除两个节点之间的节点
 export function rangeDel(commonAncestorContainer, startContainer, endContainer) {
   for (let index = commonAncestorContainer.childrens.length - 1; index >= 0; index--) {
     const element = commonAncestorContainer.childrens[index]
@@ -78,7 +77,7 @@ export function attrSet(dom, attr) {
     dom.setAttribute(key, attr[key])
   }
 }
-// 纯净vnode克隆
+// 纯净克隆(运行时无关，去除了依赖引用关系数据；去除循环引用；需要通过createVnode来创建依赖)
 export function clonePureVnode(vnode) {
   const cloneVnode = {}
   cloneVnode.tag = vnode.tag
@@ -108,7 +107,7 @@ export function delVnode(vnode) {
     return parent
   }
 }
-// 重排vnode 更新position
+// 重排vnode 更新position parent
 export function reArrangement(parent) {
   if (parent.childrens) {
     parent.childrens.forEach((item, index) => {
@@ -120,8 +119,7 @@ export function reArrangement(parent) {
 }
 // 渲染vnode
 export function renderDom(vnode) {
-  const { parent } = vnode
-  return createVnode(vnode, parent)
+  return createVnode(vnode, vnode.parent)
 }
 // 像素单位变量乘法
 export function multiplication(pxVal, times) {
@@ -157,7 +155,6 @@ export function preLeafNode(vnode, layer, direction = 'R') {
     layer = vnode
   }
   const index = vnode.position.charAt(vnode.position.length - 1)
-  console.log(vnode, index)
   if (vnode.parent.isRoot) {
     console.log('isRoot')
     return { vnode: null, layer: null }
@@ -202,7 +199,32 @@ export function normalize(vnode) {
       continue
     } else {
       next.context += curr.context
-      delVnode(curr)
+      vnode.childrens.splice(index, 1)
     }
+  }
+}
+function isEmptyNode(vnode) {
+  if (vnode.childrens && vnode.childrens.length) {
+    return vnode.childrens.some((item) => isEmptyNode(item))
+  } else {
+    if (vnode.tag === 'text' && Text.context === '') {
+      return true
+    } else if (leafTag.includes(vnode.tag)) {
+      return false
+    } else {
+      return true
+    }
+  }
+}
+// 块级检测 检查vnode所属块级是否为空
+export function blockIsEmptyCheck(vnode) {
+  if (vnode.parent.childrens.length === 1) {
+    if (!blockTag.includes(vnode.parent.tag)) {
+      return blockIsEmptyCheck(vnode.parent)
+    } else {
+      return true
+    }
+  } else {
+    return isEmptyNode(vnode.parent)
   }
 }

@@ -28,6 +28,19 @@ class Editor {
         {
           tag: 'ul',
           childrens: [
+            {
+              tag: 'li',
+              childrens: [
+                {
+                  tag: 'span',
+                  childrens: [{ tag: 'text', context: '加了样式的文字' }],
+                },
+                {
+                  tag: 'span',
+                  childrens: [{ tag: 'text', context: '加了样式的文字' }],
+                },
+              ],
+            },
             { tag: 'li', childrens: [{ tag: 'text', context: '12333333' }] },
             { tag: 'li', childrens: [{ tag: 'text', context: '456' }] },
             {
