@@ -1,10 +1,12 @@
 import { styleSet, attrSet } from '../utils/index'
+import { leafTag } from '../type/index'
 function createVnode(vnode, parent = null, position = '0') {
   if (!vnode.tag) throw 'arguments vnode.tag is required'
   let dom = null
   vnode.parent = parent
   if (!vnode.position) vnode.position = parent ? (parent.position ? parent.position + '-' + position : position) : position
-  if (vnode.tag !== 'text' && vnode.tag !== 'br') {
+  // if (vnode.tag !== 'text' && vnode.tag !== 'br') {
+  if (!leafTag.includes(vnode.tag)) {
     dom = document.createElement(vnode.tag)
     dom.vnode = vnode
     vnode.dom = dom
