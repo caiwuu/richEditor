@@ -9,6 +9,9 @@ class Editor {
   root = null
   editorBody = null
   constructor(id) {
+    this.on('test', (value) => {
+      console.log(value)
+    })
     this.vnode = new VNode({
       tag: 'div',
       childrens: [
@@ -69,7 +72,16 @@ class Editor {
         },
         {
           tag: 'p',
-          childrens: [{ tag: 'a', attr: { href: 'https://www.baidu.com', contenteditable: false }, childrens: [{ tag: 'text', context: '百度链接' }] }],
+          childrens: [
+            {
+              tag: 'a',
+              attr: {
+                href: 'https://www.baidu.com',
+                contenteditable: true,
+              },
+              childrens: [{ tag: 'text', context: '百度链接' }],
+            },
+          ],
         },
         {
           tag: 'p',
@@ -77,13 +89,22 @@ class Editor {
           childrens: [{ tag: 'span', childrens: [{ tag: 'br' }] }],
         },
       ],
-      attr: { id: 'editor-body', contenteditable: true },
+      attr: {
+        id: 'editor-body',
+        contenteditable: true,
+      },
       style: { minHeight: '200px' },
     })
     this.editorBody = this.vnode.mount(id)
     this.root = document.getElementById(id)
     this.cursor = new Cursor(this)
     this.addListeners()
+  }
+  on(actionName, cb) {
+    action.emit('addAction', {
+      actionName,
+      cb,
+    })
   }
   addListeners() {
     window.addEventListener('mousedown', this.handGolobalMouseDown.bind(this))

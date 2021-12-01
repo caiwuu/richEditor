@@ -1,6 +1,7 @@
 import mitt from 'mitt'
 import { updateNode, setRange } from '../utils'
 import del from './del'
+const emitter = mitt()
 const actions = {
   // 删除操作
   del: del,
@@ -13,9 +14,11 @@ const actions = {
     const dom = updateNode(range.endContainer.vnode)
     setRange(vm, dom, end + inputData.length)
   },
+  // 动态的添加action
+  addAction: ({ actionName, cb }) => {
+    emitter.on(actionName, cb)
+  },
 }
-
-const emitter = mitt()
 for (const key in actions) {
   emitter.on(key, actions[key])
 }

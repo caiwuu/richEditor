@@ -1,15 +1,21 @@
 import { styleSet, attrSet } from '../utils/index'
 import { leafTag } from '../type/index'
+import action from '../actions'
+
 function createVnode(vnode, parent = null, position = '0') {
   if (!vnode.tag) throw 'arguments vnode.tag is required'
   let dom = null
   vnode.parent = parent
   if (!vnode.position) vnode.position = parent ? (parent.position ? parent.position + '-' + position : position) : position
-  // if (vnode.tag !== 'text' && vnode.tag !== 'br') {
   if (!leafTag.includes(vnode.tag)) {
     dom = document.createElement(vnode.tag)
     dom.vnode = vnode
     vnode.dom = dom
+    if (vnode.tag === 'a') {
+      dom.onclick = () => {
+        action.emit('test', 'vnode-value')
+      }
+    }
     vnode.childrens &&
       vnode.childrens.forEach((element, index) => {
         dom.appendChild(createVnode(element, vnode, index))
