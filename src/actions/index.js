@@ -22,5 +22,4 @@ const actions = {
 for (const key in actions) {
   emitter.on(key, actions[key])
 }
-
 export default emitter

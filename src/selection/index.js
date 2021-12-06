@@ -1,15 +1,15 @@
 export default class Selection {
-  selection = null;
+  selection = null
   constructor() {
-    this.selection = document.getSelection();
+    this.selection = document.getSelection()
   }
   getRange() {
-    return this.selection.getRangeAt(0);
+    return this.selection.getRangeAt(0)
   }
   removeAllRanges() {
-    this.selection.removeAllRanges();
+    this.selection.removeAllRanges()
   }
   addRange(range) {
-    this.selection.addRange(range);
+    this.selection.addRange(range)
   }
 }

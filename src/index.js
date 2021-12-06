@@ -9,7 +9,7 @@ class Editor {
   root = null
   editorBody = null
   constructor(id) {
-    this.on('test', (value) => {
+    action.on('test', (value) => {
       console.log(value)
     })
     this.vnode = new VNode({
@@ -68,6 +68,14 @@ class Editor {
                 src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
               },
             },
+            {
+              tag: 'img',
+              attr: {
+                width: '50px',
+                height: '50px',
+                src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
+              },
+            },
           ],
         },
         {
@@ -99,12 +107,6 @@ class Editor {
     this.root = document.getElementById(id)
     this.cursor = new Cursor(this)
     this.addListeners()
-  }
-  on(actionName, cb) {
-    action.emit('addAction', {
-      actionName,
-      cb,
-    })
   }
   addListeners() {
     window.addEventListener('mousedown', this.handGolobalMouseDown.bind(this))
@@ -201,9 +203,15 @@ class Editor {
   }
   handMouseup() {
     this.mouseStats = 'up'
-    // setTimeout(() => {
     this.cursor.caret.style.animationName = 'caret-static'
-    const range = this.cursor.selection.getRange()
+    let range = null
+    try {
+      range = this.cursor.selection.getRange()
+    } catch (error) {
+      console.warn(error)
+      range = this.cursor.meta.range
+    }
+    if (!range) return
     if (range.collapsed) {
       this.editorBody.setAttribute('contenteditable', true)
       this.cursor.focus()
@@ -212,7 +220,6 @@ class Editor {
       this.cursor.hidden()
       this.editorBody.setAttribute('contenteditable', false)
     }
-    // })
   }
 }
 window.editor = new Editor('editor-container')

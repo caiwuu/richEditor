@@ -126,12 +126,13 @@ export default class Cursor {
   }
   // 自定义光标跟随系统光标
   followSysCaret() {
-    // console.trace()
     this.updateMeta()
     const { x, y, range } = this.meta
-    this.setPosition(x, y, range.endContainer.parentNode)
+    // console.log(range)
+    range && this.setPosition(x, y, range.endContainer.parentNode)
   }
   updateMeta() {
+    console.log(this.selection.selection)
     if (this.selection.selection.rangeCount === 0) {
       return this.meta
     }
