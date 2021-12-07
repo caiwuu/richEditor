@@ -128,11 +128,9 @@ export default class Cursor {
   followSysCaret() {
     this.updateMeta()
     const { x, y, range } = this.meta
-    // console.log(range)
     range && this.setPosition(x, y, range.endContainer.parentNode)
   }
   updateMeta() {
-    console.log(this.selection.selection)
     if (this.selection.selection.rangeCount === 0) {
       return this.meta
     }
@@ -141,10 +139,18 @@ export default class Cursor {
     this.meta.end = range.endOffset
     this.meta.start = range.startOffset
     this.meta.selection = this.selection
+    // 点击图片中间阻止执行
+    if (!range.endContainer.vnode) return
     const { tag, dom } = range.endContainer.vnode
-    console.log(tag, range.endOffset)
+    // 处理光标在img和br之间的游走
     if (tag === 'text') {
       dom.parentNode.insertBefore(this.caretMarker, dom.splitText(range.endOffset))
+    } else {
+      if (range.endContainer.vnode.childrens[range.endOffset]) {
+        dom.insertBefore(this.caretMarker, dom.childNodes[range.endOffset])
+      } else {
+        dom.appendChild(this.caretMarker)
+      }
     }
     const { offsetLeft: x, offsetTop: y } = this.caretMarker
     this.meta.x = x

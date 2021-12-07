@@ -197,6 +197,7 @@ class Editor {
     })
   }
   handMousemove() {
+    // 选择内容时隐藏光标
     if (this.mouseStats === 'down') {
       this.cursor.hidden()
     }
