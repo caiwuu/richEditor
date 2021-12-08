@@ -2,6 +2,7 @@ import Cursor from './cursor'
 import VNode from './vnode'
 import action from './actions'
 class Editor {
+  scrollTop = 0
   mouseStats = 'up'
   vnode = null
   cursor = null
@@ -182,6 +183,8 @@ class Editor {
     }, 1000)
   }
   handMousedown() {
+    // 记录滚动条，因为focus浮动元素会重置滚动条
+    this.scrollTop = document.documentElement.scrollTop || document.body.scrollTop
     this.mouseStats = 'down'
     this.cursor.meta.range && this.cursor.meta.range.collapse(true)
     this.cursor.show()

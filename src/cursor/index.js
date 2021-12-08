@@ -58,7 +58,7 @@ export default class Cursor {
         this.inputState.value = event.data || ''
         this.meta.range.endContainer.data = this.meta.range.endContainer.data.slice(0, this.meta.end) + this.inputState.value
         const { offsetLeft: x, offsetTop: y } = this.caretMarker
-        this.setCaret(x, y, this.meta.range.endContainer.parentNode)
+        this.setCaret(x, y, this.meta.range.endContainer)
       }
     } else if (event.type === 'compositionstart') {
       // 开始聚合输入 插入光标标记dom
@@ -86,29 +86,13 @@ export default class Cursor {
       })
     }
   }
-  setPosition(x, y, parentNode) {
-    if (!parentNode) return
-    const copyStyle = getComputedStyle(parentNode)
-    const lineHeight = multiplication(copyStyle.fontSize, 1.3)
-    const inputStyle = {
-      top: y + 'px',
-      left: x + 'px',
-      lineHeight,
-      fontSize: copyStyle.fontSize,
-    }
-    const caretStyle = {
-      top: y + 'px',
-      left: x + 'px',
-      height: lineHeight,
-      fontSize: copyStyle.fontSize,
-      background: copyStyle.color,
-    }
-    styleSet(this.input, inputStyle)
-    styleSet(this.caret, caretStyle)
-  }
   // 设置自定义光标位置
-  setCaret(x, y, parentNode) {
-    const copyStyle = getComputedStyle(parentNode)
+  setCaret(x, y, container) {
+    if (!container) return
+    if (!(container instanceof Element)) {
+      container = container.parentNode
+    }
+    const copyStyle = getComputedStyle(container)
     const lineHeight = multiplication(copyStyle.fontSize, 1.3)
     const caretStyle = {
       top: y + 'px',
@@ -123,12 +107,15 @@ export default class Cursor {
   focus() {
     this.input.focus()
     this.show()
+    // 恢复滚动条
+    document.documentElement.scrollTop = this.vm.scrollTop
+    document.body.scrollTop = this.vm.scrollTop
   }
   // 自定义光标跟随系统光标
   followSysCaret() {
     this.updateMeta()
     const { x, y, range } = this.meta
-    range && this.setPosition(x, y, range.endContainer.parentNode)
+    range && this.setCaret(x, y, range.endContainer)
   }
   updateMeta() {
     if (this.selection.selection.rangeCount === 0) {
