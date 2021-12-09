@@ -17,7 +17,6 @@ export default function input({ vm, inputData }) {
       range.endContainer.vnode.childrens.push(insertTextNode)
     }
     updateNode(range.endContainer.vnode)
-    console.log(insertTextNode)
     setRange(vm, insertTextNode.dom, inputData.length)
   }
 }

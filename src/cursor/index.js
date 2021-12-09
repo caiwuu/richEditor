@@ -93,11 +93,11 @@ export default class Cursor {
       container = container.parentNode
     }
     const copyStyle = getComputedStyle(container)
-    const lineHeight = multiplication(copyStyle.fontSize, 1.3)
+    const height = multiplication(copyStyle.fontSize, 1.3)
     const caretStyle = {
       top: y + 'px',
       left: x + 'px',
-      height: lineHeight,
+      height: height,
       fontSize: copyStyle.fontSize,
       background: copyStyle.color,
     }

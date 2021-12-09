@@ -19,17 +19,17 @@ export default function del(vm) {
     删除分为 选区删除和非选区删除
   */
   if (range.collapsed) {
-    orgText = orgText.slice(0, end - 1) + orgText.slice(end)
+    // 兼容非text光标容器的情况，如，img，br
+    orgText = orgText = range.endContainer.vnode.tag === 'text' ? orgText.slice(0, end - 1) + orgText.slice(end) : ''
     // 删除线在节点开头
     if (end === 0) {
       console.log(range.endContainer.vnode)
       const { vnode: prevVnode, layer } = preLeafNode(range.endContainer.vnode)
       console.log(layer)
-      const prevVnodeLen = prevVnode.context.length
-      const preLayer = getLayer(range.endContainer.vnode)
+      // const preLayer = getLayer(range.endContainer.vnode)
       // 同一块内
-      if (preLayer === layer) {
-      }
+      // if (preLayer === layer) {
+      // }
       // console.log(blockIsEmptyCheck(range.endContainer.vnode))
       // 当前节点内容被清空，则删除当前节点
       if (orgText === '' && blockIsEmptyCheck(range.endContainer.vnode)) {
@@ -54,6 +54,9 @@ export default function del(vm) {
         }
       }
       if (prevVnode) {
+        // 如果前一个叶子节点不是text，需额外处理
+        console.log(prevVnode)
+        const prevVnodeLen = prevVnode.context.length
         setRange(vm, prevVnode.dom, prevVnodeLen)
         // 跨行内dom删除 自动执行一步，相当于删除当前节点之后再删除上一节点一个单位的内容
         !blockTag.includes(layer.tag) && del(vm)
@@ -65,6 +68,7 @@ export default function del(vm) {
     }
   } else {
     const { startContainer, endContainer, commonAncestorContainer } = range
+    console.log(range)
     // 选区删除-同一标签
     if (startContainer === endContainer) {
       orgText = orgText.slice(0, start) + orgText.slice(end)
