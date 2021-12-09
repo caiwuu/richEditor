@@ -2,9 +2,7 @@ import { createVnode } from '../vnode'
 import { leafTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function'
-    ? item instanceof HTMLElement
-    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
@@ -135,7 +133,7 @@ export function updateNode(vnode) {
   return dom
 }
 // 重新设置选区
-export function setRange(vm, startcontainer, start, notFocus = false, endcontainer, end) {
+export function setRange(vm, startcontainer, start, endcontainer, end, notFocus = false) {
   const { range, selection } = vm.cursor.meta
   endcontainer = endcontainer === undefined ? startcontainer : endcontainer
   end = end === undefined ? start : end

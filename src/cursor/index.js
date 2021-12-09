@@ -101,6 +101,7 @@ export default class Cursor {
       fontSize: copyStyle.fontSize,
       background: copyStyle.color,
     }
+    styleSet(this.input, caretStyle)
     styleSet(this.caret, caretStyle)
   }
   // 聚焦到模拟输入

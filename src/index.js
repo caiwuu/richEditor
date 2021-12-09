@@ -138,6 +138,8 @@ class Editor {
     this.cursor.hidden()
   }
   handGolobalKeydown(event) {
+    // 记录滚动条，因为focus浮动元素会重置滚动条
+    this.scrollTop = document.documentElement.scrollTop || document.body.scrollTop
     if (this.cursor.meta.range && !this.cursor.meta.range.collapsed) {
       this.editorBody.setAttribute('contenteditable', true)
       this.cursor.focus()
@@ -183,7 +185,6 @@ class Editor {
     }, 1000)
   }
   handMousedown() {
-    // 记录滚动条，因为focus浮动元素会重置滚动条
     this.scrollTop = document.documentElement.scrollTop || document.body.scrollTop
     this.mouseStats = 'down'
     this.cursor.meta.range && this.cursor.meta.range.collapse(true)
