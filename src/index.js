@@ -1,6 +1,7 @@
 import Cursor from './cursor'
 import VNode from './vnode'
 import action from './actions'
+import testData from './test'
 class Editor {
   scrollTop = 0
   mouseStats = 'up'
@@ -8,103 +9,16 @@ class Editor {
   cursor = null
   timmer = null
   root = null
+  editorContainer = null
   editorBody = null
   constructor(id) {
     action.on('test', (value) => {
       console.log(value)
     })
-    this.vnode = new VNode({
-      tag: 'div',
-      childrens: [
-        {
-          tag: 'p',
-          childrens: [
-            { tag: 'text', context: '普通文字' },
-            {
-              tag: 'span',
-              childrens: [{ tag: 'text', context: '加了样式的文字' }],
-              style: { color: '#bbb', fontSize: '36px' },
-            },
-            // { tag: 'br' },
-          ],
-          style: { color: '#888' },
-        },
-        {
-          tag: 'ul',
-          childrens: [
-            {
-              tag: 'li',
-              childrens: [
-                {
-                  tag: 'span',
-                  childrens: [{ tag: 'text', context: '加了样式的文字' }],
-                },
-                {
-                  tag: 'span',
-                  childrens: [{ tag: 'text', context: '加了样式的文字' }],
-                },
-              ],
-            },
-            { tag: 'li', childrens: [{ tag: 'text', context: '12333333' }] },
-            { tag: 'li', childrens: [{ tag: 'text', context: '456' }] },
-            {
-              tag: 'li',
-              childrens: [
-                {
-                  tag: 'span',
-                  childrens: [{ tag: 'text', context: '这是一个pan' }],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          tag: 'p',
-          childrens: [
-            {
-              tag: 'img',
-              attr: {
-                width: '100px',
-                height: '100px',
-                src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
-              },
-            },
-            {
-              tag: 'img',
-              attr: {
-                width: '50px',
-                height: '50px',
-                src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
-              },
-            },
-          ],
-        },
-        {
-          tag: 'p',
-          childrens: [
-            {
-              tag: 'a',
-              attr: {
-                href: 'https://www.baidu.com',
-                contenteditable: true,
-              },
-              childrens: [{ tag: 'text', context: '百度链接' }],
-            },
-          ],
-        },
-        {
-          tag: 'p',
-          style: { background: '#eee' },
-          childrens: [{ tag: 'span', childrens: [{ tag: 'br' }] }],
-        },
-      ],
-      attr: {
-        id: 'editor-body',
-        contenteditable: true,
-      },
-      style: { minHeight: '200px' },
-    })
-    this.editorBody = this.vnode.mount(id)
+    this.vnode = new VNode(testData)
+    const { editorContainer, editorBody } = this.vnode.mount(id)
+    this.editorBody = editorBody
+    this.editorContainer = editorContainer
     this.root = document.getElementById(id)
     this.cursor = new Cursor(this)
     this.addListeners()
@@ -112,24 +26,24 @@ class Editor {
   addListeners() {
     window.addEventListener('mousedown', this.handGolobalMouseDown.bind(this))
     window.addEventListener('blur', this.handGolobalBlur.bind(this))
-    this.root.addEventListener('mousedown', this.handMousedown.bind(this))
-    this.root.addEventListener('mousemove', this.handMousemove.bind(this))
-    this.root.addEventListener('mouseup', this.handMouseup.bind(this))
+    this.editorContainer.addEventListener('mousedown', this.handMousedown.bind(this))
+    this.editorContainer.addEventListener('mousemove', this.handMousemove.bind(this))
+    this.editorContainer.addEventListener('mouseup', this.handMouseup.bind(this))
     document.addEventListener('keydown', this.handGolobalKeydown.bind(this))
     document.addEventListener('keyup', this.handGolobalKeyup.bind(this))
   }
   destroy() {
     window.removeEventListener('mousedown', this.handGolobalMouseDown.bind(this))
     window.removeEventListener('blur', this.handGolobalBlur.bind(this))
-    this.root.removeEventListener('mousedown', this.handMousedown.bind(this))
-    this.root.removeEventListener('mousemove', this.handMousemove.bind(this))
-    this.root.removeEventListener('mouseup', this.handMouseup.bind(this))
+    this.editorContainer.removeEventListener('mousedown', this.handMousedown.bind(this))
+    this.editorContainer.removeEventListener('mousemove', this.handMousemove.bind(this))
+    this.editorContainer.removeEventListener('mouseup', this.handMouseup.bind(this))
     document.removeEventListener('keydown', this.handGolobalKeydown.bind(this))
     document.removeEventListener('keyup', this.handGolobalKeyup.bind(this))
   }
   handGolobalMouseDown() {
     setTimeout(() => {
-      if (!this.root.contains(document.activeElement)) {
+      if (!this.editorContainer.contains(document.activeElement)) {
         this.cursor.hidden()
       }
     })
@@ -227,4 +141,4 @@ class Editor {
     }
   }
 }
-window.editor = new Editor('editor-container')
+window.editor = new Editor('editor-root')

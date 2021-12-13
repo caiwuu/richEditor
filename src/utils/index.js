@@ -2,7 +2,9 @@ import { createVnode } from '../vnode'
 import { leafTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function'
+    ? item instanceof HTMLElement
+    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
@@ -73,6 +75,11 @@ export function styleSet(dom, style) {
 export function attrSet(dom, attr) {
   for (const key in attr) {
     dom.setAttribute(key, attr[key])
+  }
+}
+export function eventSet(dom, event) {
+  for (const key in event) {
+    dom[key] = event[key]
   }
 }
 // 纯净克隆(运行时无关，去除了依赖引用关系数据；去除循环引用；需要通过createVnode来创建依赖)
@@ -147,6 +154,9 @@ export function setRange(vm, startcontainer, start, endcontainer, end, notFocus 
     vm.cursor.focus()
   }
 }
+export function getIndex(vnode) {
+  return vnode.position.split('-').pop() / 1
+}
 // 获取前一个叶子节点
 export function preLeafNode(vnode, layer, direction = 'R') {
   if (!layer || !blockTag.includes(layer.tag)) {
@@ -214,9 +224,12 @@ function isEmptyNode(vnode) {
     }
   }
 }
-// 块级检测 检查vnode所属块级是否为空
+// 块级检测 检查vnode所属块级是否为空 vnode必须是个叶子节点
 export function blockIsEmptyCheck(vnode) {
-  if (vnode.parent.childrens.length === 1) {
+  console.log(vnode)
+  if (vnode.context) {
+    return false
+  } else if (vnode.parent.childrens.length === 1) {
     if (!blockTag.includes(vnode.parent.tag)) {
       return blockIsEmptyCheck(vnode.parent)
     } else {

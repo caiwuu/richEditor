@@ -1,6 +1,7 @@
-import { styleSet, attrSet } from '../utils/index'
+import { styleSet, attrSet, eventSet } from '../utils/index'
 import { leafTag } from '../type/index'
 import action from '../actions'
+import operBar from './operBar'
 
 function createVnode(vnode, parent = null, position = '0') {
   if (!vnode.tag) throw 'arguments vnode.tag is required'
@@ -27,6 +28,7 @@ function createVnode(vnode, parent = null, position = '0') {
   }
   if (vnode.style) styleSet(dom, vnode.style)
   if (vnode.attr) attrSet(dom, vnode.attr)
+  if (vnode.event) eventSet(dom, vnode.event)
   return dom
 }
 
@@ -39,18 +41,25 @@ export default class VNode {
     this.vnode = vnode
     this.dom = createVnode(vnode, null)
   }
+  initOperBar() {
+    return createVnode(operBar)
+  }
   mount(id) {
     this.rootId = id
-    const parent = document.getElementById(id)
-    this.vnode.parent = { dom: parent, isRoot: true }
-    return parent.appendChild(this.dom)
+    const root = document.getElementById(id)
+    const editorContainer = document.createElement('div')
+    this.vnode.parent = { dom: editorContainer, isRoot: true }
+    root.appendChild(this.initOperBar())
+    editorContainer.appendChild(this.dom)
+    root.appendChild(editorContainer)
+    return { editorContainer, editorBody: this.dom }
   }
-  update(vnode) {
+  update(vnode, vm) {
     this.vnode = vnode
     const dom = createVnode(vnode, null)
     const parent = document.getElementById(this.rootId)
     this.vnode.parent = { dom: parent, isRoot: true }
     document.getElementById(this.rootId).replaceChild(dom, this.dom)
-    this.dom = dom
+    this.dom = vm.editorBody = dom
   }
 }
