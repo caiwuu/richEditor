@@ -2,9 +2,7 @@ import { createVnode } from '../vnode'
 import { leafTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function'
-    ? item instanceof HTMLElement
-    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
@@ -106,6 +104,8 @@ export function delVnode(vnode) {
   } else {
     const index = vnode.position.charAt(vnode.position.length - 1)
     parent.childrens.splice(index, 1)
+    console.log('remove', vnode.tag)
+    vnode.dom.remove()
     normalize(parent)
     reArrangement(parent)
     // TODO 内容删空后立马初始化内容

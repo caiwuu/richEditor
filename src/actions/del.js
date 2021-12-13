@@ -1,16 +1,4 @@
-import {
-  getNode,
-  delVnode,
-  updateNode,
-  setRange,
-  preLeafNode,
-  getLayer,
-  rangeDel,
-  reArrangement,
-  normalize,
-  blockIsEmptyCheck,
-  getIndex,
-} from '../utils/index'
+import { getNode, delVnode, updateNode, setRange, preLeafNode, getLayer, rangeDel, reArrangement, normalize, blockIsEmptyCheck, getIndex } from '../utils/index'
 import { blockTag } from '../type'
 export default function del(vm) {
   const { range, end, start } = vm.cursor.meta
@@ -21,8 +9,8 @@ export default function del(vm) {
   */
   if (range.collapsed) {
     // 兼容非text光标容器的情况，如，img，br
-    orgText =
-      range.endContainer.vnode.tag === 'text' ? orgText.slice(0, end - 1) + orgText.slice(end) : range.endContainer.vnode.childrens.length
+    orgText = range.endContainer.vnode.tag === 'text' ? orgText.slice(0, end - 1) + orgText.slice(end) : range.endContainer.vnode.childrens.length
+    const oldContainer = range.endContainer.vnode
     // 删除线在节点开头
     if (end === 0) {
       let shouldNormalize = false
@@ -35,15 +23,16 @@ export default function del(vm) {
         console.log('删空')
         console.log(range.endContainer.vnode)
         const shouldUpdate = delVnode(range.endContainer.vnode)
-        console.log(shouldUpdate)
-        updateNode(shouldUpdate)
+        // console.log(shouldUpdate)
+        // updateNode(shouldUpdate)
         if (!prevVnode) {
           console.log('没有前置节点')
           return setRange(vm, shouldUpdate.childrens[0].dom, 0)
         }
+        console.log(range.endContainer)
       }
-      console.log(range.endContainer.vnode)
-      if (prevVnode && blockTag.includes(layer.tag) && !blockIsEmptyCheck(range.endContainer.vnode)) {
+      console.log(blockIsEmptyCheck(oldContainer), oldContainer)
+      if (prevVnode && blockTag.includes(layer.tag) && !blockIsEmptyCheck(oldContainer)) {
         console.log('跨块级')
         // 跨块级，将改块级子元素移动到prevVnode之后，并删除该节点
         // 未清空，但是光标即将离开块元素,将该块元素的子元素移动到上一个叶子块元素的末尾
@@ -55,7 +44,7 @@ export default function del(vm) {
         shouldNormalize && normalize(newLayer)
         const shouldUpdate = delVnode(layer)
         updateNode(shouldUpdate)
-        // 性能优化，如果newLayer和shouldUpdate不是在同一树分支才更新两个分支
+        // // 性能优化，如果newLayer和shouldUpdate不是在同一树分支才更新两个分支
         if (!newLayer.position.includes(shouldUpdate.position)) {
           updateNode(newLayer)
         }
