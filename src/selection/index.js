@@ -1,15 +1,30 @@
+import Range from './range'
 export default class Selection {
-  selection = null
+  nativeSelection = document.getSelection()
+  ranges = []
   constructor() {
-    this.selection = document.getSelection()
+    this.setRanges()
   }
-  getRange() {
-    return this.selection.getRangeAt(0)
+  getRange(index) {
+    return this.ranges[index]
+  }
+  getCount() {
+    return this.ranges.length
+  }
+  setRanges() {
+    this.ranges = []
+    const count = this.nativeSelection.rangeCount
+    for (let index = 0; index < count; index++) {
+      const nativeRange = this.nativeSelection.getRangeAt(index)
+      this.ranges.push(new Range(nativeRange.cloneRange()))
+    }
   }
   removeAllRanges() {
-    this.selection.removeAllRanges()
+    this.nativeSelection.removeAllRanges()
+    this.ranges = []
   }
-  addRange(range) {
-    this.selection.addRange(range)
+  addRange(nativeRange) {
+    this.nativeSelection.addRange(nativeRange)
+    this.ranges.push(new Range(nativeRange.cloneRange()))
   }
 }

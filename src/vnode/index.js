@@ -1,4 +1,4 @@
-import { styleSet, attrSet, eventSet } from '../utils/index'
+import { setStyle, setAttr, setEvent } from '../utils/index'
 import { leafTag } from '../type/index'
 import action from '../actions'
 import operBar from './operBar'
@@ -26,9 +26,9 @@ function createVnode(vnode, parent = null, position = '0') {
     dom.vnode = vnode
     vnode.dom = dom
   }
-  if (vnode.style) styleSet(dom, vnode.style)
-  if (vnode.attr) attrSet(dom, vnode.attr)
-  if (vnode.event) eventSet(dom, vnode.event)
+  if (vnode.style) setStyle(dom, vnode.style)
+  if (vnode.attr) setAttr(dom, vnode.attr)
+  if (vnode.event) setEvent(dom, vnode.event)
   return dom
 }
 
