@@ -21,7 +21,6 @@ const devConfig = merge(baseConfig, {
     port: 9000,
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: 'index.html',

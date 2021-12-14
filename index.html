@@ -7,37 +7,72 @@
     <title>Document</title>
     <style>
       body {
-        margin: 50px;
+        margin: 80px 200px;
         overflow-x: hidden;
+        /* margin: 0; */
+        background-color: rgb(252, 252, 252);
       }
-      #pointer {
-        position: absolute;
-        display: inline-block;
-        width: 0.5px;
-        height: 16px;
-        background: transparent;
-        /* background: red; */
-        border: none;
+      #editor-body {
+        caret-color: transparent;
+        background-color: rgb(255, 255, 255);
+        padding: 30px;
+        border: rgb(226, 226, 226) solid 2px;
       }
-      #pointer:focus {
+      #editor-body:focus,
+      #custom-input:focus {
         outline: none;
+      }
+      #custom-caret,
+      #custom-input {
+        top: -100px;
+        left: 0;
+        position: absolute;
+        width: 2px;
+        background: transparent;
+        border: none;
+        padding: 0;
+      }
+      #custom-measure {
+        display: inline-block;
+        position: fixed;
+        left: 0;
+        bottom: -100px;
+        color: transparent;
+      }
+      #custom-input {
+        opacity: 0;
+        caret-color: transparent;
+        color: transparent;
+      }
+      #custom-caret {
+        display: block;
+        animation: caret 1s infinite steps(1, start);
+      }
+      @keyframes static-caret {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes caret {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      #editor-body ::selection {
+        background: rgb(186, 210, 250);
       }
     </style>
   </head>
   <body>
-    <div id="editor-body">
-      <span
-        >我是添加了contenteditable属性的文本节点文字,咿呀咿呀呦,咿呀咿呀呦,咿呀咿呀呦,咿呀咿呀呦,咿呀咿呀,咿呀咿呀呦</span
-      >
-      <div>DIV</div>
-    </div>
-    <div>
-      <input id="insert-input" type="text" />
-    </div>
-    <div onclick="insertText(event)" class="btn">
-      <div>插入内容1</div>
-      <span>插入内容2</span>
-      <div>插入内容3</div>
-    </div>
+    <div id="editor-root"></div>
   </body>
 </html>
