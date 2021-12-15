@@ -6,8 +6,13 @@ export default class Measure {
   measure(range) {
     const startOffset = range.startOffset
     const vnode = range.startContainer.vnode
+    // splitText(0)会使原dom销毁造成startContainer向上逃逸，
     if (vnode.tag === 'text') {
-      vnode.ele.parentNode.insertBefore(this.dom, vnode.ele.splitText(startOffset))
+      if (!startOffset) {
+        vnode.ele.parentNode.insertBefore(this.dom, vnode.ele)
+      } else {
+        vnode.ele.parentNode.insertBefore(this.dom, vnode.ele.splitText(startOffset))
+      }
     } else {
       if (vnode.childrens[startOffset]) {
         vnode.ele.insertBefore(this.dom, vnode.ele.childNodes[startOffset])

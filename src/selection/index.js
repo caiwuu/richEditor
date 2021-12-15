@@ -8,14 +8,15 @@ export default class Selection {
   getCount() {
     return this.ranges.length
   }
-  getRangeAt(index = 0) {
+  resetRanges() {
     this.clearRanges()
     const count = this.nativeSelection.rangeCount
-    console.log(count)
     for (let i = 0; i < count; i++) {
       const nativeRange = this.nativeSelection.getRangeAt(i)
       this.ranges.push(new Range(nativeRange.cloneRange(), this.vm))
     }
+  }
+  getRangeAt(index = 0) {
     return this.ranges[index]
   }
   removeAllRanges() {
@@ -23,35 +24,44 @@ export default class Selection {
     this.clearRanges()
   }
   clearRanges() {
-    return
     while (this.ranges.length) {
       const range = this.ranges.pop()
       range && range.caret.dom.remove()
     }
   }
+  // 多选区支持
+  extendRanges() {
+    const count = this.nativeSelection.rangeCount
+    for (let i = 0; i < count; i++) {
+      const nativeRange = this.nativeSelection.getRangeAt(i)
+      this.ranges.push(new Range(nativeRange.cloneRange(), this.vm))
+    }
+  }
+  // 注意chrome不支持多选区,需要在此之前调用 removeAllRanges
   addRange(nativeRange) {
     this.nativeSelection.addRange(nativeRange)
-    // TODO 多光标这里不要add
     this.ranges.push(new Range(nativeRange.cloneRange(), this.vm))
   }
   collapse(parentNode, offset) {
     this.nativeSelection.collapse(parentNode, offset)
-    this.getRangeAt()
+    this.resetRanges()
   }
-  updateRanges() {
+  updateRanges(multiple) {
+    // 选区的创建结果需要在宏任务中获取
     setTimeout(() => {
-      this.getRangeAt()
+      if (multiple) {
+        this.extendRanges()
+      } else {
+        this.resetRanges()
+      }
       this.ranges.forEach((range) => range.updateCaret())
     })
   }
   move(direction) {
-    this.nativeSelection.removeAllRanges()
     this.ranges.forEach((range) => {
       range[direction]()
-      // this.addRange(range)
       range.updateCaret()
     })
-    // this.updateRanges()
     console.log(this.ranges)
   }
 }

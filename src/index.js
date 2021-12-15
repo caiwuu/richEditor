@@ -16,8 +16,9 @@ class Editor {
     this.editorContainer.addEventListener('mousedown', this.handMousedown.bind(this))
     document.addEventListener('keydown', this.handGolobalKeydown.bind(this))
   }
-  handMousedown() {
-    this.selection.updateRanges()
+  handMousedown(event) {
+    console.log(event.altKey)
+    this.selection.updateRanges(event.altKey)
   }
   handGolobalKeydown(event) {
     const key = event.key
