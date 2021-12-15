@@ -71,7 +71,6 @@ export default {
           tag: 'a',
           attr: {
             href: 'https://www.baidu.com',
-            contenteditable: true,
           },
           childrens: [{ tag: 'text', context: '百度链接' }],
         },
@@ -85,7 +84,7 @@ export default {
   ],
   attr: {
     id: 'editor-body',
-    contenteditable: true,
+    // contenteditable: true,
   },
   style: { minHeight: '200px' },
 }

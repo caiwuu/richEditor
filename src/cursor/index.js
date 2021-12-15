@@ -1,4 +1,4 @@
-import { styleSet } from '../utils/index'
+import { setStyle } from '../utils/index'
 import { multiplication } from '../utils/index'
 import Selection from '../selection'
 import action from '../actions'
@@ -101,8 +101,8 @@ export default class Cursor {
       fontSize: copyStyle.fontSize,
       background: copyStyle.color,
     }
-    styleSet(this.input, caretStyle)
-    styleSet(this.caret, caretStyle)
+    setStyle(this.input, caretStyle)
+    setStyle(this.caret, caretStyle)
   }
   // 聚焦到模拟输入
   focus() {

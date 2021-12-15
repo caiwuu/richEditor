@@ -2,7 +2,9 @@ import { createVnode } from '../vnode'
 import { leafTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function'
+    ? item instanceof HTMLElement
+    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
@@ -64,18 +66,18 @@ export function getNode(vm, position) {
   }, recursionTree)['dom']
 }
 // 设置dom样式
-export function styleSet(dom, style) {
+export function setStyle(dom, style) {
   for (const key in style) {
     dom.style[key] = style[key]
   }
 }
 // 设置dom属性
-export function attrSet(dom, attr) {
+export function setAttr(dom, attr) {
   for (const key in attr) {
     dom.setAttribute(key, attr[key])
   }
 }
-export function eventSet(dom, event) {
+export function setEvent(dom, event) {
   for (const key in event) {
     dom[key] = event[key]
   }

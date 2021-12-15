@@ -1,44 +1,15 @@
-data = {
-  tag: 'div',
-  childrens: [
-    {
-      tag: 'p',
-      childrens: [
-        { tag: 'text', context: '普通文字' },
-        {
-          tag: 'span',
-          childrens: [{ tag: 'text', context: '加了样式的文字' }],
-          style: { color: 'red', fontSize: '36px' },
-        },
-      ],
-      style: { color: '#888' },
-    },
-    {
-      tag: 'ul',
-      childrens: [{ tag: 'li', childrens: [{ tag: 'text', context: '123' }] }],
-    },
-  ],
-  attr: { id: 'editor-body', contenteditable: true },
-}
-
-function createDom(data, parent) {
-  let dom = null
-  data.parent = parent
-  if (data.tag !== 'text') {
-    dom = document.createElement(data.tag)
-    dom.vnode = data
-    data.dom = dom
-    data.childrens.forEach((element) => {
-      dom.appendChild(createDom(element, data))
-    })
-  } else {
-    dom = document.createTextNode(data.context)
-    dom.vnode = data
-    data.dom = dom
+class T{
+  constructor(input){
+    this.init.call(input,input)
+    return input
   }
-  return dom
+  init(input){
+    input.getName=()=>{
+      return this.name
+    }
+  }
 }
-
-let d = createDom(data)
-d.childNodes[0].vnode.context = 'ggggg'
-console.log(data)
+let t = new T({name:"caiwu"})
+t.name='sss'
+console.log(t.name);
+console.log(t.getName());
