@@ -1,4 +1,4 @@
-import {setStyle,multiplication} from '../../utils'
+import { setStyle, multiplication } from '../../utils'
 import Measure from '../measure'
 const defaultStyle = {
   top: '-100px',

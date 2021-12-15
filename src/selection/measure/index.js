@@ -1,7 +1,7 @@
 export default class Measure {
   dom = null
   constructor() {
-    this.dom = document.createElement('span')
+    this.dom = document.createElement('text')
   }
   measure(range) {
     const startOffset = range.startOffset
@@ -15,11 +15,11 @@ export default class Measure {
         vnode.ele.appendChild(this.dom)
       }
     }
-    return this.getRect(vnode,startOffset)
+    return this.getRect(vnode, startOffset)
   }
-  getRect(vnode,startOffset) {
+  getRect(vnode, startOffset) {
     const { offsetLeft: x, offsetTop: y } = this.dom
-    const rect = {x,y}
+    const rect = { x, y }
     this.dom.remove()
     if (vnode.tag === 'text') {
       if (!startOffset && vnode.ele.nextSibling) {

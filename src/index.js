@@ -3,7 +3,7 @@ import VNode from './vnode'
 import Selection from './selection'
 import testData from './test'
 class Editor {
-  constructor(id){
+  constructor(id) {
     this.vnode = new VNode(testData)
     const { editorContainer, editorBody } = this.vnode.mount(id)
     this.editorBody = editorBody
@@ -14,12 +14,22 @@ class Editor {
   }
   addListeners() {
     this.editorContainer.addEventListener('mousedown', this.handMousedown.bind(this))
+    document.addEventListener('keydown', this.handGolobalKeydown.bind(this))
   }
   handMousedown() {
-    setTimeout(()=>{
-      const range = this.selection.getRangeAt(0)
-      range&&range.updateCaret()
-    })
+    this.selection.updateRanges()
+  }
+  handGolobalKeydown(event) {
+    const key = event.key
+    console.log(key)
+    switch (key) {
+      case 'ArrowRight':
+        this.selection.move('right')
+        break
+      case 'ArrowLeft':
+        this.selection.move('left')
+        break
+    }
   }
 }
 window.editor = new Editor('editor-root')
