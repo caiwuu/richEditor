@@ -20,17 +20,13 @@ export default class Measure {
         vnode.ele.appendChild(this.dom)
       }
     }
-    return this.getRect(vnode, startOffset)
+    return this.getRect(vnode)
   }
-  getRect(vnode, startOffset) {
+  getRect(vnode) {
     const { offsetLeft: x, offsetTop: y } = this.dom
     const rect = { x, y }
     this.dom.remove()
     if (vnode.tag === 'text') {
-      if (!startOffset && vnode.ele.nextSibling) {
-        vnode.ele.data = vnode.ele.nextSibling.data
-        vnode.ele.nextSibling.data = ''
-      }
       if (!vnode.context && vnode.ele.nextSibling) {
         vnode.ele.nextSibling.remove()
       } else {

@@ -4,6 +4,7 @@ export default class Selection {
   nativeSelection = document.getSelection()
   ranges = []
   caretStatus = true
+  mouseStatus = 'up'
   constructor(vm) {
     this.vm = vm
     this.addListeners()
@@ -14,6 +15,7 @@ export default class Selection {
   resetRanges() {
     this.clearRanges()
     const count = this.nativeSelection.rangeCount
+    // console.log(count)
     for (let i = 0; i < count; i++) {
       const nativeRange = this.nativeSelection.getRangeAt(i)
       this.ranges.push(new Range(nativeRange.cloneRange(), this.vm))
@@ -35,7 +37,6 @@ export default class Selection {
   // 多选区支持
   extendRanges() {
     const count = this.nativeSelection.rangeCount
-    console.log(count)
     for (let i = 0; i < count; i++) {
       const nativeRange = this.nativeSelection.getRangeAt(i)
       this.ranges.push(new Range(nativeRange.cloneRange(), this.vm))
@@ -51,6 +52,7 @@ export default class Selection {
     this.resetRanges()
   }
   updateRanges(multiple) {
+    console.log(456)
     // 选区的创建结果需要在宏任务中获取
     setTimeout(() => {
       if (multiple) {
@@ -67,38 +69,46 @@ export default class Selection {
       range[direction]()
       range.updateCaret()
     })
-    console.log(this.ranges)
   }
   destroy() {
     this.vm.ui.editorContainer.removeEventListener('mouseup', this.handMouseup.bind(this))
     this.vm.ui.editorContainer.removeEventListener('mousedown', this.handMousedown.bind(this))
     document.removeEventListener('keydown', this.handGolobalKeydown.bind(this))
-    // this.vm.ui.editorContainer.removeEventListener('mousemove', this.handMousemove.bind(this))
+    this.vm.ui.editorContainer.removeEventListener('mousemove', this.handMousemove.bind(this))
   }
   addListeners() {
     this.vm.ui.editorContainer.addEventListener('mouseup', this.handMouseup.bind(this))
     this.vm.ui.editorContainer.addEventListener('mousedown', this.handMousedown.bind(this))
     document.addEventListener('keydown', this.handGolobalKeydown.bind(this))
-    // this.vm.ui.editorContainer.addEventListener('mousemove', this.handMousemove.bind(this))
-    // document.addEventListener('keydown', throttle(this.handGolobalKeydown, 1000, this))
+    this.vm.ui.editorContainer.addEventListener('mousemove', this.handMousemove.bind(this))
   }
-  // handMousemove() {
-  //   // 选择内容时隐藏光标
-  //   if (this.mouseStats === 'down') {
-  //     this.cursor.hidden()
-  //   }
-  // }
+  handMousemove() {
+    if (this.mouseStatus === 'up') return
+    // console.log(555)
+    if (!this.nativeSelection.isCollapsed) {
+      // console.log(3333333)
+      this.caretStatus = false
+    } else {
+      this.caretStatus = true
+    }
+    this.updateRanges()
+  }
   handMousedown(event) {
+    this.mouseStatus = 'down'
     this.caretStatus = true
+    const count = this.nativeSelection.rangeCount
+    for (let i = 0; i < count; i++) {
+      const nativeRange = this.nativeSelection.getRangeAt(i)
+      nativeRange.collapse(true)
+    }
     this.updateRanges(event.altKey)
   }
   handMouseup(event) {
-    console.log(this.nativeSelection.isCollapsed)
+    this.mouseStatus = 'up'
     if (!this.nativeSelection.isCollapsed) {
       this.caretStatus = false
       this.updateRanges(event.altKey)
     }
-    console.log(this.ranges)
   }
   handGolobalKeydown(event) {
     const key = event.key

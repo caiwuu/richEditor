@@ -36,7 +36,7 @@ export default class Caret {
       height: height,
       fontSize: copyStyle.fontSize,
       background: copyStyle.color,
-      display: range.vm.display ? 'inline-block' : 'none',
+      display: range.vm.selection.caretStatus ? 'inline-block' : 'none',
     }
     this.setStyle(caretStyle)
   }
