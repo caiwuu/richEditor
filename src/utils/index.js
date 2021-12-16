@@ -1,4 +1,4 @@
-import { createVnode } from '../vnode'
+import render from '../ui/render'
 import { leafTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
@@ -126,7 +126,7 @@ export function reArrangement(parent) {
 }
 // 渲染vnode
 export function renderDom(vnode) {
-  return createVnode(vnode, vnode.parent)
+  return render(vnode, vnode.parent)
 }
 // 像素单位变量乘法
 export function multiplication(pxVal, times) {
@@ -240,4 +240,22 @@ export function blockIsEmptyCheck(vnode) {
   } else {
     return isEmptyNode(vnode.parent)
   }
+}
+// 节流throttle代码（时间戳+定时器）：
+export function throttle(func, delay, vm) {
+  let timer = null
+  let startTime = Date.now()
+  return function () {
+    const curTime = Date.now()
+    const remaining = delay - (curTime - startTime)
+    console.log(vm)
+    const args = arguments
+    clearTimeout(timer)
+    if (remaining <= 0) {
+      func.apply(vm, args)
+      startTime = Date.now()
+    } else {
+      timer = setTimeout(func.bind(vm), remaining)
+    }
+  }.bind(vm)
 }
