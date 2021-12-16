@@ -52,7 +52,6 @@ export default class Selection {
     this.resetRanges()
   }
   updateRanges(multiple) {
-    console.log(456)
     // 选区的创建结果需要在宏任务中获取
     setTimeout(() => {
       if (multiple) {
@@ -84,14 +83,13 @@ export default class Selection {
   }
   handMousemove() {
     if (this.mouseStatus === 'up') return
-    // console.log(555)
-    if (!this.nativeSelection.isCollapsed) {
-      // console.log(3333333)
+    if (!this.nativeSelection.isCollapsed && this.caretStatus) {
       this.caretStatus = false
-    } else {
+      this.updateRanges()
+    } else if (this.nativeSelection.isCollapsed && !this.caretStatus) {
       this.caretStatus = true
+      this.updateRanges()
     }
-    this.updateRanges()
   }
   handMousedown(event) {
     this.mouseStatus = 'down'
