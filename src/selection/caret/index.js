@@ -13,6 +13,7 @@ export default class Caret {
   dom = null
   constructor() {
     this.dom = document.createElement('span')
+    this.dom.classList.add('custom-caret')
     this.setStyle(this.dom)
   }
   setStyle(style = {}) {
@@ -20,7 +21,7 @@ export default class Caret {
     setStyle(this.dom, mergeStyle)
   }
   update(range) {
-    range.vm.root.appendChild(this.dom)
+    range.vm.ui.root.appendChild(this.dom)
     let container = range.startContainer
     const rect = new Measure().measure(range)
     if (!container) return
@@ -35,6 +36,7 @@ export default class Caret {
       height: height,
       fontSize: copyStyle.fontSize,
       background: copyStyle.color,
+      display: range.vm.selection.caretStatus ? 'inline-block' : 'none',
     }
     this.setStyle(caretStyle)
   }

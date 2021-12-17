@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <p>
+      <label><input type="checkbox" id="checkbox" /> Checked</label>
+    </p>
+    <p><button id="button">Click me</button></p>
+  </body>
+  <script>
+    function simulateClick() {
+      var evt = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+      })
+      var cb = document.getElementById('checkbox') //element to click on
+      var canceled = !cb.dispatchEvent(evt)
+      if (canceled) {
+        // A handler called preventDefault
+        alert('canceled')
+      } else {
+        // None of the handlers called preventDefault
+        alert('not canceled')
+      }
+    }
+    document.getElementById('button').addEventListener('click', simulateClick)
+  </script>
+</html>

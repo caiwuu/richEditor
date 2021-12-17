@@ -1,7 +1,7 @@
 import Cursor from './cursor'
-import VNode from './vnode'
+import UI from './ui'
 import action from './actions'
-import testData from './test'
+import testData from './uiVnode'
 class Editor {
   scrollTop = 0
   mouseStats = 'up'
@@ -15,7 +15,7 @@ class Editor {
     action.on('test', (value) => {
       console.log(value)
     })
-    this.vnode = new VNode(testData)
+    this.vnode = new UI(testData)
     const { editorContainer, editorBody } = this.vnode.mount(id)
     this.editorBody = editorBody
     this.editorContainer = editorContainer
