@@ -22,7 +22,6 @@
       #custom-input:focus {
         outline: none;
       }
-      .custom-caret,
       .custom-input {
         top: -100px;
         left: 0;
@@ -38,6 +37,14 @@
         color: transparent;
       }
       .custom-caret {
+        top: -100px;
+        left: 0;
+        pointer-events: none;
+        position: absolute;
+        width: 2px;
+        border: none;
+        padding: 0;
+        /* user-select: none; */
         display: block;
         animation: caret 1s infinite 0.5s steps(1, start);
       }

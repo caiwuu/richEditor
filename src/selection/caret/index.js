@@ -1,14 +1,6 @@
 import { setStyle, multiplication } from '../../utils'
 import Measure from '../measure'
-const defaultStyle = {
-  top: '-100px',
-  left: 0,
-  position: 'absolute',
-  width: '2px',
-  background: 'transparent',
-  border: 'none',
-  padding: 0,
-}
+const defaultStyle = {}
 export default class Caret {
   dom = null
   constructor() {
