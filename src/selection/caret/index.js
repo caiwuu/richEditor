@@ -1,17 +1,11 @@
 import { setStyle, multiplication } from '../../utils'
 import Measure from '../measure'
-const defaultStyle = {
-  top: '-100px',
-  left: 0,
-  position: 'absolute',
-  width: '2px',
-  background: 'transparent',
-  border: 'none',
-  padding: 0,
-}
+const defaultStyle = {}
 export default class Caret {
   dom = null
+  rect = null
   constructor() {
+    this.measure = new Measure()
     this.dom = document.createElement('span')
     this.dom.classList.add('custom-caret')
     this.setStyle(this.dom)
@@ -23,7 +17,7 @@ export default class Caret {
   update(range) {
     range.vm.ui.root.appendChild(this.dom)
     let container = range.startContainer
-    const rect = new Measure().measure(range)
+    this.rect = this.measure.measure(range)
     if (!container) return
     if (!(container instanceof Element)) {
       container = container.parentNode
@@ -31,8 +25,8 @@ export default class Caret {
     const copyStyle = getComputedStyle(container)
     const height = multiplication(copyStyle.fontSize, 1.3)
     const caretStyle = {
-      top: rect.y + 'px',
-      left: rect.x + 'px',
+      top: this.rect.y + 'px',
+      left: this.rect.x + 'px',
       height: height,
       fontSize: copyStyle.fontSize,
       background: copyStyle.color,

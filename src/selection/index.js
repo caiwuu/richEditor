@@ -7,12 +7,12 @@ export default class Selection {
   mouseStatus = 'up'
   constructor(vm) {
     this.vm = vm
-    this.addListeners()
+    this._addListeners()
   }
   getCount() {
     return this.ranges.length
   }
-  resetRanges() {
+  _resetRanges() {
     this.clearRanges()
     const count = this.nativeSelection.rangeCount
     // console.log(count)
@@ -35,7 +35,7 @@ export default class Selection {
     }
   }
   // 多选区支持
-  extendRanges() {
+  _extendRanges() {
     const count = this.nativeSelection.rangeCount
     for (let i = 0; i < count; i++) {
       const nativeRange = this.nativeSelection.getRangeAt(i)
@@ -49,15 +49,15 @@ export default class Selection {
   }
   collapse(parentNode, offset) {
     this.nativeSelection.collapse(parentNode, offset)
-    this.resetRanges()
+    this._resetRanges()
   }
   updateRanges(multiple) {
     // 选区的创建结果需要在宏任务中获取
     setTimeout(() => {
       if (multiple) {
-        this.extendRanges()
+        this._extendRanges()
       } else {
-        this.resetRanges()
+        this._resetRanges()
       }
       this.ranges.forEach((range) => range.updateCaret())
     })
@@ -70,18 +70,18 @@ export default class Selection {
     })
   }
   destroy() {
-    this.vm.ui.editorContainer.removeEventListener('mouseup', this.handMouseup.bind(this))
-    this.vm.ui.editorContainer.removeEventListener('mousedown', this.handMousedown.bind(this))
-    document.removeEventListener('keydown', this.handGolobalKeydown.bind(this))
-    this.vm.ui.editorContainer.removeEventListener('mousemove', this.handMousemove.bind(this))
+    this.vm.ui.editorContainer.removeEventListener('mouseup', this._handMouseup.bind(this))
+    this.vm.ui.editorContainer.removeEventListener('mousedown', this._handMousedown.bind(this))
+    document.removeEventListener('keydown', this._handGolobalKeydown.bind(this))
+    this.vm.ui.editorContainer.removeEventListener('mousemove', this._handMousemove.bind(this))
   }
-  addListeners() {
-    this.vm.ui.editorContainer.addEventListener('mouseup', this.handMouseup.bind(this))
-    this.vm.ui.editorContainer.addEventListener('mousedown', this.handMousedown.bind(this))
-    document.addEventListener('keydown', this.handGolobalKeydown.bind(this))
-    this.vm.ui.editorContainer.addEventListener('mousemove', this.handMousemove.bind(this))
+  _addListeners() {
+    this.vm.ui.editorContainer.addEventListener('mouseup', this._handMouseup.bind(this))
+    this.vm.ui.editorContainer.addEventListener('mousedown', this._handMousedown.bind(this))
+    document.addEventListener('keydown', this._handGolobalKeydown.bind(this))
+    this.vm.ui.editorContainer.addEventListener('mousemove', this._handMousemove.bind(this))
   }
-  handMousemove() {
+  _handMousemove() {
     if (this.mouseStatus === 'up') return
     if (!this.nativeSelection.isCollapsed && this.caretStatus) {
       this.caretStatus = false
@@ -91,7 +91,7 @@ export default class Selection {
       this.updateRanges()
     }
   }
-  handMousedown(event) {
+  _handMousedown(event) {
     this.mouseStatus = 'down'
     this.caretStatus = true
     const count = this.nativeSelection.rangeCount
@@ -101,14 +101,14 @@ export default class Selection {
     }
     this.updateRanges(event.altKey)
   }
-  handMouseup(event) {
+  _handMouseup(event) {
     this.mouseStatus = 'up'
     if (!this.nativeSelection.isCollapsed) {
       this.caretStatus = false
       this.updateRanges(event.altKey)
     }
   }
-  handGolobalKeydown(event) {
+  _handGolobalKeydown(event) {
     const key = event.key
     switch (key) {
       case 'ArrowRight':

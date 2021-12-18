@@ -10,7 +10,7 @@ export default class UI {
   }
   mount(id) {
     const root = document.getElementById(id)
-    this.editableAreaVnode.parent = { ele: this.editorContainer, isRoot: true }
+    // this.editableAreaVnode.parent = { ele: this.editorContainer, isRoot: true }
     root.appendChild(this.actionBar)
     this.editorContainer.appendChild(this.editableArea)
     root.appendChild(this.editorContainer)
@@ -19,8 +19,8 @@ export default class UI {
   update(editableAreaVnode) {
     this.editableAreaVnode = editableAreaVnode
     const ele = render(editableAreaVnode, null)
-    this.editableAreaVnode.parent = { ele: this.root, isRoot: true }
-    document.getElementById(this.rootId).replaceChild(ele, this.editableAreaVnode)
+    // this.editableAreaVnode.parent = { ele: this.editorContainer, isRoot: true }
+    document.getElementById(this.rootId).replaceChild(ele, this.editableArea)
     this.editableArea = ele
   }
 }

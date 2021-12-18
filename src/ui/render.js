@@ -4,6 +4,7 @@ import action from '../actions'
 export default function render(vnode, parent = null, position = '0') {
   if (!vnode.tag) throw 'arguments vnode.tag is required'
   vnode.parent = parent
+  vnode.isRoot = !parent
   if (!vnode.position) vnode.position = parent ? (parent.position ? parent.position + '-' + position : position) : position
   if (!leafTag.includes(vnode.tag)) {
     vnode.ele = document.createElement(vnode.tag)
