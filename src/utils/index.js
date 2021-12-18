@@ -157,20 +157,36 @@ export function setRange(vm, startcontainer, start, endcontainer, end, notFocus 
 export function getIndex(vnode) {
   return vnode.position.split('-').pop() / 1
 }
-// 获取前一个叶子节点
-export function preLeafNode(vnode, layer, direction = 'R') {
+// 获取下一个叶子节点
+export function getNextLeafNode(vnode, layer, direction = 'L') {
+  if (vnode.isRoot) {
+    return { vnode: null, layer: null }
+  }
   if (!layer || !blockTag.includes(layer.tag)) {
     layer = vnode
   }
-  const index = vnode.position.charAt(vnode.position.length - 1)
-  if (vnode.parent.isRoot) {
+  const index = getIndex(vnode)
+  const len = vnode.parent.childrens.length
+  if (len !== 1 && index != len - 1) {
+    return direction === 'R' ? getLeafR(vnode.parent.childrens[index + 1], layer) : getLeafL(vnode.parent.childrens[index + 1], layer)
+  } else {
+    return getNextLeafNode(vnode.parent, layer, direction)
+  }
+}
+// 获取前一个叶子节点
+export function getPrevLeafNode(vnode, layer, direction = 'R') {
+  if (!layer || !blockTag.includes(layer.tag)) {
+    layer = vnode
+  }
+  if (vnode.isRoot) {
     console.log('isRoot')
     return { vnode: null, layer: null }
   }
-  if (vnode.parent.childrens.length !== 1 && index !== '0') {
+  const index = getIndex(vnode)
+  if (vnode.parent.childrens.length !== 1 && index !== 0) {
     return direction === 'R' ? getLeafR(vnode.parent.childrens[index - 1], layer) : getLeafL(vnode.parent.childrens[index - 1], layer)
   } else {
-    return preLeafNode(vnode.parent, layer, direction)
+    return getPrevLeafNode(vnode.parent, layer, direction)
   }
 }
 // 获取右叶子
@@ -226,7 +242,6 @@ function isEmptyNode(vnode) {
 }
 // 块级检测 检查vnode所属块级是否为空 vnode必须是个叶子节点
 export function blockIsEmptyCheck(vnode) {
-  console.log(vnode)
   if (vnode.context) {
     return false
   } else if (vnode.parent.childrens.length === 1) {

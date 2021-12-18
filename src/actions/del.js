@@ -1,4 +1,4 @@
-import { getNode, delVnode, updateNode, setRange, preLeafNode, getLayer, rangeDel, reArrangement, normalize, blockIsEmptyCheck, getIndex } from '../utils/index'
+import { getNode, delVnode, updateNode, setRange, getPrevLeafNode, getLayer, rangeDel, reArrangement, normalize, blockIsEmptyCheck, getIndex } from '../utils/index'
 import { blockTag } from '../type'
 export default function del(vm) {
   const { range, end, start } = vm.cursor.meta
@@ -14,7 +14,7 @@ export default function del(vm) {
     // 删除线在节点开头
     if (end === 0) {
       let shouldNormalize = false
-      const { vnode: prevVnode, layer } = preLeafNode(range.endContainer.vnode)
+      const { vnode: prevVnode, layer } = getPrevLeafNode(range.endContainer.vnode)
       // 当前节点内容被清空，则删除当前节点
 
       // 光标容器无内容;清除本节点且光标定位到上一个叶子末尾
