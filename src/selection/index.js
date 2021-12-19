@@ -62,11 +62,11 @@ export default class Selection {
       this.ranges.forEach((range) => range.updateCaret())
     })
   }
-  move(direction) {
+  move(direction, drawCaret = true) {
     if (!this.caretStatus) return
     this.ranges.forEach((range) => {
       range[direction]()
-      range.updateCaret()
+      range.updateCaret(drawCaret)
     })
   }
   destroy() {
@@ -116,6 +116,14 @@ export default class Selection {
         break
       case 'ArrowLeft':
         this.move('left')
+        break
+      case 'ArrowUp':
+        event.preventDefault()
+        this.move('up', false)
+        break
+      case 'ArrowDown':
+        event.preventDefault()
+        this.move('down', false)
         break
     }
   }

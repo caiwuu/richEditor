@@ -4,11 +4,11 @@ export const bodyVnode = {
     {
       tag: 'p',
       childrens: [
-        { tag: 'text', context: '普通文字' },
+        { tag: 'text', context: '普通文字普通文字' },
         {
           tag: 'span',
-          childrens: [{ tag: 'text', context: '加了样式的文字加了样式的文字加了样式的文字加了样式的文字加了样式的文字加了样式的文字' }],
-          style: { color: '#bbb', fontSize: '36px' },
+          childrens: [{ tag: 'text', context: '加了普通文字普通文字普通文字普' }],
+          style: { color: '#bbb', fontSize: '76px' },
         },
         // { tag: 'br' },
       ],

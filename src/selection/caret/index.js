@@ -14,10 +14,11 @@ export default class Caret {
     const mergeStyle = Object.assign({}, defaultStyle, style)
     setStyle(this.dom, mergeStyle)
   }
-  update(range) {
+  update(range, drawCaret = true) {
+    this.rect = this.measure.measure(range)
+    if (!drawCaret) return
     range.vm.ui.root.appendChild(this.dom)
     let container = range.startContainer
-    this.rect = this.measure.measure(range)
     if (!container) return
     if (!(container instanceof Element)) {
       container = container.parentNode
