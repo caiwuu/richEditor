@@ -1,5 +1,5 @@
 import Caret from '../caret'
-import { getPrevLeafNode, getNextLeafNode, getIndex, getLeafL, getLeafR } from '../../utils'
+import { getPrevLeafNode, getNextLeafNode, getIndex, getLeafL, getLeafR, isSameLine } from '../../utils'
 import { blockTag } from '../../type'
 export default class Range {
   constructor(nativeRange, vm) {
@@ -9,8 +9,8 @@ export default class Range {
   }
   factory() {
     this.caret = new Caret()
-    this.updateCaret = () => {
-      this.caret.update(this)
+    this.updateCaret = (drawCaret = true) => {
+      this.caret.update(this, drawCaret)
     }
     this.right = () => {
       let isEnd = false
@@ -19,13 +19,11 @@ export default class Range {
       } else {
         isEnd = this.startContainer.vnode.context.length === this.startOffset
       }
-      console.log(isEnd)
       if (isEnd) {
         // 向下寻找
         let endContainer, startOffset
         const { vnode, layer } = getNextLeafNode(this.endContainer.vnode)
-        console.log(layer)
-        if (!vnode) return
+        if (!vnode) return false
         if (vnode.tag === 'text') {
           endContainer = vnode.ele
           startOffset = 0
@@ -50,6 +48,7 @@ export default class Range {
         } else {
           this.setStart(this.startContainer, this.startOffset + 1)
         }
+        return true
       }
     }
     this.left = () => {
@@ -58,7 +57,7 @@ export default class Range {
         let endContainer, endOffset
         const { vnode, layer } = getPrevLeafNode(this.endContainer.vnode)
         // 到头了
-        if (!vnode) return
+        if (!vnode) return false
         if (vnode.tag === 'text') {
           endContainer = vnode.ele
           endOffset = vnode.context.length
@@ -83,7 +82,57 @@ export default class Range {
         } else {
           this.setEnd(this.endContainer, this.endOffset - 1)
         }
+        return true
       }
+    }
+    this.up = () => {
+      // 记录初时x坐标
+      const { x, y } = this.caret.rect
+      this.loop('left', x, y)
+      this.updateCaret(true)
+    }
+    this.down = () => {
+      const { x, y } = this.caret.rect
+      this.loop('right', x, y)
+      this.updateCaret(true)
+    }
+    // 光标寻路算法
+    this.loop = (direct, refX, refY, lineChanged = false, distance = 0) => {
+      const oldContainer = this.endContainer
+      let canMove = true
+      if (!lineChanged) {
+        canMove = direct === 'left' ? this.left() : this.right()
+        // console.log(canMove)
+        if (!canMove) return
+        this.updateCaret(false)
+      } else {
+        canMove = direct === 'left' ? this.left() : this.right()
+        if (!canMove) return
+        this.updateCaret(false)
+        const { x, y, h } = this.caret.rect
+        const newDistance = Math.abs(refX - x)
+        const isSameCon = this.endContainer === oldContainer
+        const sameLine = isSameLine(refX, refY, x, y, canMove, isSameCon, h)
+        if (newDistance < distance && sameLine) {
+          distance = newDistance
+        } else {
+          direct === 'left' ? this.right() : this.left()
+          this.updateCaret(false)
+          return
+        }
+      }
+      const { x, y, h } = this.caret.rect
+      const isSameCon = this.endContainer === oldContainer
+      // distance = Math.abs(refX - x)
+      const sameLine = isSameLine(refX, refY, x, y, canMove, isSameCon, h)
+      // console.log(sameLine)
+      // if (y !== refY) {
+      if (!sameLine) {
+        lineChanged = true
+        distance = Math.abs(refX - x)
+        refY = y
+      }
+      this.loop(direct, refX, refY, lineChanged, distance)
     }
   }
 }

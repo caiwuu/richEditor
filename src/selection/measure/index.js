@@ -23,8 +23,8 @@ export default class Measure {
     return this.getRect(vnode)
   }
   getRect(vnode) {
-    const { offsetLeft: x, offsetTop: y } = this.dom
-    const rect = { x, y }
+    const { offsetLeft: x, offsetTop: y, offsetHeight: h } = this.dom
+    const rect = { x, y, h }
     this.dom.remove()
     if (vnode.tag === 'text') {
       if (!vnode.context && vnode.ele.nextSibling) {

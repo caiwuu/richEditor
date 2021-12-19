@@ -128,8 +128,8 @@ export function renderDom(vnode) {
 }
 // 像素单位变量乘法
 export function multiplication(pxVal, times) {
-  return pxVal.replace(/(.*)(px)+/, function ($0, $1) {
-    return $1 * times + 'px'
+  return pxVal.replace(/(\d*)(px)+/, function ($0, $1, $2) {
+    return $1 * times + $2
   })
 }
 // 节点更新
@@ -253,6 +253,12 @@ export function blockIsEmptyCheck(vnode) {
   } else {
     return isEmptyNode(vnode.parent)
   }
+}
+// 需要优化判断的准确率
+export function isSameLine(refX, refY, x, y, canMove, isSameCon, h) {
+  // console.log(distance - Math.abs(refX - x), h)
+  // 有点问题
+  return refY === y || typeof canMove !== 'object'
 }
 
 export function throttle(func, wait, options) {
