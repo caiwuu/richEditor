@@ -255,10 +255,22 @@ export function blockIsEmptyCheck(vnode) {
   }
 }
 // 需要优化判断的准确率
-export function isSameLine(refX, refY, x, y, canMove, isSameCon, h) {
-  // console.log(distance - Math.abs(refX - x), h)
-  // 有点问题
-  return refY === y || typeof canMove !== 'object'
+export function isSameLine(initialRect, prevRect, currRect, result) {
+  console.log(initialRect, prevRect, currRect, result)
+  // 标识光标是否在同一行移动
+  let flag = true
+  if (Math.abs(currRect.x - prevRect.x) > 200) {
+    flag = false
+  }
+  // 光标移动触发块级检测说明光标必然跨行
+  if (typeof result === 'object' && blockTag.includes(result.tag)) {
+    flag = false
+  }
+  //光标Y坐标和参考点相同说明光标还在本行，最理想的情况放在最后判断
+  if (currRect.y === initialRect.y) {
+    flag = true
+  }
+  return flag
 }
 
 export function throttle(func, wait, options) {
