@@ -87,50 +87,47 @@ export default class Range {
     }
     this.up = () => {
       // 记录初时x坐标
-      const { x, y } = this.caret.rect
-      this.loop('left', x, y)
+      const initialRect = { ...this.caret.rect }
+      const prevRect = { ...this.caret.rect }
+      this.loop('left', initialRect, prevRect)
       this.updateCaret(true)
     }
     this.down = () => {
-      const { x, y } = this.caret.rect
-      this.loop('right', x, y)
+      const initialRect = { ...this.caret.rect }
+      const prevRect = { ...this.caret.rect }
+      this.loop('right', initialRect, prevRect)
       this.updateCaret(true)
     }
     // 光标寻路算法
-    this.loop = (direct, refX, refY, lineChanged = false, distance = 0) => {
+    this.loop = (direct, initialRect, prevRect, lineChanged = false) => {
       const oldContainer = this.endContainer
-      let { x, y, h } = this.caret.rect
-      let canMove = true
+      // let { x, y, h } = this.caret.rect
+      let result = true
       if (!lineChanged) {
-        canMove = direct === 'left' ? this.left() : this.right()
-        // console.log(canMove)
-        if (!canMove) return
+        result = direct === 'left' ? this.left() : this.right()
+        if (!result) return
         this.updateCaret(false)
       } else {
-        canMove = direct === 'left' ? this.left() : this.right()
-        if (!canMove) return
+        result = direct === 'left' ? this.left() : this.right()
+        if (!result) return
         this.updateCaret(false)
-        ;({ x, y, h } = this.caret.rect)
-        const newDistance = Math.abs(refX - x)
-        const isSameCon = this.endContainer === oldContainer
-        const sameLine = isSameLine(refX, refY, x, y, canMove, isSameCon, h)
-        if (newDistance < distance && sameLine) {
-          distance = newDistance
-        } else {
+        const currRect = { ...this.caret.rect }
+        const preDistance = Math.abs(prevRect.x - initialRect.x)
+        const currDistance = Math.abs(currRect.x - initialRect.x)
+        const sameLine = isSameLine(initialRect, prevRect, currRect, result)
+        if (!(currDistance < preDistance && sameLine)) {
+          console.log('rollback', currDistance, preDistance, sameLine)
           direct === 'left' ? this.right() : this.left()
           this.updateCaret(false)
           return
         }
       }
-      ;({ x, y, h } = this.caret.rect)
-      const isSameCon = this.endContainer === oldContainer
-      const sameLine = isSameLine(refX, refY, x, y, canMove, isSameCon, h)
+      const currRect = { ...this.caret.rect }
+      const sameLine = isSameLine(initialRect, prevRect, currRect, result)
       if (!sameLine) {
         lineChanged = true
-        distance = Math.abs(refX - x)
-        refY = y
       }
-      this.loop(direct, refX, refY, lineChanged, distance)
+      this.loop(direct, initialRect, currRect, lineChanged)
     }
   }
 }

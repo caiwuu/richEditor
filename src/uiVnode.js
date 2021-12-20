@@ -7,8 +7,19 @@ export const bodyVnode = {
         { tag: 'text', context: '普通文字普通文字' },
         {
           tag: 'span',
-          childrens: [{ tag: 'text', context: '加了普通文字普通文字普通文字普' }],
+          childrens: [{ tag: 'text', context: '大号文字大号文字大号文字大号文字大' }],
           style: { color: '#bbb', fontSize: '76px' },
+        },
+        {
+          tag: 'span',
+          childrens: [
+            {
+              tag: 'text',
+              context:
+                '小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字的文字小号的文字小号的文字小号的文字的文字小号的文字小号的文字',
+            },
+          ],
+          style: { color: '#bbb', fontSize: '10px' },
         },
         // { tag: 'br' },
       ],
@@ -86,7 +97,7 @@ export const bodyVnode = {
         },
         {
           tag: 'text',
-          context: 'text after image',
+          context: 'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
         },
       ],
     },
@@ -112,7 +123,7 @@ export const bodyVnode = {
     id: 'editor-body',
     // contenteditable: true,
   },
-  style: { minHeight: '200px' },
+  style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }
 export const operBarVnode = {
   tag: 'div',
