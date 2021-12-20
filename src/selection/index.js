@@ -1,5 +1,4 @@
 import Range from './range'
-import { throttle } from '../utils'
 export default class Selection {
   nativeSelection = document.getSelection()
   ranges = []
