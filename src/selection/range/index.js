@@ -100,8 +100,6 @@ export default class Range {
     }
     // 光标寻路算法
     this.loop = (direct, initialRect, prevRect, lineChanged = false) => {
-      const oldContainer = this.endContainer
-      // let { x, y, h } = this.caret.rect
       let result = true
       if (!lineChanged) {
         result = direct === 'left' ? this.left() : this.right()
@@ -116,7 +114,6 @@ export default class Range {
         const currDistance = Math.abs(currRect.x - initialRect.x)
         const sameLine = isSameLine(initialRect, prevRect, currRect, result)
         if (!(currDistance < preDistance && sameLine)) {
-          console.log('rollback', currDistance, preDistance, sameLine)
           direct === 'left' ? this.right() : this.left()
           this.updateCaret(false)
           return
