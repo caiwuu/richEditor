@@ -8,7 +8,7 @@ export const bodyVnode = {
         {
           tag: 'span',
           childrens: [{ tag: 'text', context: '大号文字大号文字大号文字大号文字大' }],
-          style: { color: '#bbb', fontSize: '76px' },
+          style: { color: '#bbb', fontSize: '16px' },
         },
         {
           tag: 'span',
@@ -97,7 +97,8 @@ export const bodyVnode = {
         },
         {
           tag: 'text',
-          context: 'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
+          context:
+            'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
         },
       ],
     },
@@ -121,7 +122,7 @@ export const bodyVnode = {
   ],
   attr: {
     id: 'editor-body',
-    // contenteditable: true,
+    contenteditable: true,
   },
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }

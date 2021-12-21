@@ -1,6 +1,7 @@
 import Caret from '../caret'
 import { getPrevLeafNode, getNextLeafNode, getIndex, getLeafL, getLeafR, isSameLine } from '../../utils'
 import { blockTag } from '../../type'
+import del from './del'
 export default class Range {
   constructor(nativeRange, vm) {
     nativeRange.vm = vm
@@ -11,6 +12,9 @@ export default class Range {
     this.caret = new Caret()
     this.updateCaret = (drawCaret = true) => {
       this.caret.update(this, drawCaret)
+    }
+    this.remove = () => {
+      this.caret.remove()
     }
     this.right = () => {
       let isEnd = false
@@ -52,6 +56,7 @@ export default class Range {
       }
     }
     this.left = () => {
+      console.log(this.cloneRange())
       if (!this.endOffset) {
         // 向上寻找
         let endContainer, endOffset
@@ -89,17 +94,17 @@ export default class Range {
       // 记录初时x坐标
       const initialRect = { ...this.caret.rect }
       const prevRect = { ...this.caret.rect }
-      this.loop('left', initialRect, prevRect)
+      this._loop('left', initialRect, prevRect)
       this.updateCaret(true)
     }
     this.down = () => {
       const initialRect = { ...this.caret.rect }
       const prevRect = { ...this.caret.rect }
-      this.loop('right', initialRect, prevRect)
+      this._loop('right', initialRect, prevRect)
       this.updateCaret(true)
     }
     // 光标寻路算法
-    this.loop = (direct, initialRect, prevRect, lineChanged = false) => {
+    this._loop = (direct, initialRect, prevRect, lineChanged = false) => {
       let result = true
       if (!lineChanged) {
         result = direct === 'left' ? this.left() : this.right()
@@ -124,7 +129,8 @@ export default class Range {
       if (!sameLine) {
         lineChanged = true
       }
-      this.loop(direct, initialRect, currRect, lineChanged)
+      this._loop(direct, initialRect, currRect, lineChanged)
     }
+    this.del = del.bind(this)
   }
 }

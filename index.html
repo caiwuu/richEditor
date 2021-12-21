@@ -19,19 +19,20 @@
         border: rgb(226, 226, 226) solid 2px;
       }
       #editor-body:focus,
-      #custom-input:focus {
+      .custom-input:focus {
         outline: none;
       }
       .custom-input {
         top: -100px;
         left: 0;
         position: absolute;
+        pointer-events: none;
         width: 2px;
         background: transparent;
         border: none;
         padding: 0;
       }
-      #custom-input {
+      .custom-input {
         opacity: 0;
         caret-color: transparent;
         color: transparent;
@@ -73,7 +74,6 @@
     </style>
   </head>
   <body>
-    <h1>富文本编辑器开发---光标系统之光标寻路算法（测试中）</h1>
     <div id="editor-root"></div>
   </body>
 </html>

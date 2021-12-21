@@ -1,4 +1,5 @@
 import Range from './range'
+import Input from './input'
 export default class Selection {
   nativeSelection = document.getSelection()
   ranges = []
@@ -6,6 +7,7 @@ export default class Selection {
   mouseStatus = 'up'
   constructor(vm) {
     this.vm = vm
+    this.input = new Input(this)
     this._addListeners()
   }
   getCount() {
@@ -14,7 +16,6 @@ export default class Selection {
   _resetRanges() {
     this.clearRanges()
     const count = this.nativeSelection.rangeCount
-    // console.log(count)
     for (let i = 0; i < count; i++) {
       const nativeRange = this.nativeSelection.getRangeAt(i)
       this.ranges.push(new Range(nativeRange.cloneRange(), this.vm))
@@ -30,14 +31,27 @@ export default class Selection {
   clearRanges() {
     while (this.ranges.length) {
       const range = this.ranges.pop()
-      range.caret.dom.remove()
+      range.remove()
     }
+  }
+  removeRange(range) {
+    const index = this.ranges.findIndex((i) => i === range)
+    range.remove()
+    this.ranges.splice(index, 1)
   }
   // 多选区支持
   _extendRanges() {
     const count = this.nativeSelection.rangeCount
-    for (let i = 0; i < count; i++) {
-      const nativeRange = this.nativeSelection.getRangeAt(i)
+    if (count > 0) {
+      const nativeRange = this.nativeSelection.getRangeAt(count - 1)
+      let flag = false
+      this.ranges.forEach((i) => {
+        if (i.endContainer === nativeRange.endContainer && i.startOffset === nativeRange.startOffset) {
+          flag = true
+          this.removeRange(i)
+        }
+      })
+      if (flag) return
       this.ranges.push(new Range(nativeRange.cloneRange(), this.vm))
     }
   }
@@ -67,6 +81,7 @@ export default class Selection {
       range[direction]()
       range.updateCaret(drawCaret)
     })
+    this.input.focus()
   }
   destroy() {
     this.vm.ui.editorContainer.removeEventListener('mouseup', this._handMouseup.bind(this))
@@ -105,7 +120,15 @@ export default class Selection {
     if (!this.nativeSelection.isCollapsed) {
       this.caretStatus = false
       this.updateRanges(event.altKey)
+    } else {
+      this.input.focus()
     }
+  }
+  del() {
+    this.ranges.forEach((range) => {
+      range.del()
+      range.updateCaret()
+    })
   }
   _handGolobalKeydown(event) {
     const key = event.key
@@ -124,6 +147,9 @@ export default class Selection {
         event.preventDefault()
         this.move('down', false)
         break
+      case 'Backspace':
+        event.preventDefault()
+        this.del()
     }
   }
 }
