@@ -14,7 +14,9 @@ export default class Range {
       this.caret.update(this, drawCaret)
     }
     this.remove = () => {
+      const index = this.vm.selection.ranges.findIndex((i) => i === this)
       this.caret.remove()
+      this.vm.selection.ranges.splice(index, 1)
     }
     this.right = () => {
       let isEnd = false
@@ -55,8 +57,9 @@ export default class Range {
         return true
       }
     }
+
     this.left = () => {
-      console.log(this.cloneRange())
+      // console.log(this.cloneRange())
       if (!this.endOffset) {
         // 向上寻找
         let endContainer, endOffset
@@ -90,6 +93,7 @@ export default class Range {
         return true
       }
     }
+
     this.up = () => {
       // 记录初时x坐标
       const initialRect = { ...this.caret.rect }

@@ -10,6 +10,7 @@ export default class Input {
   }
   focus() {
     const range = this.selection.getRangeAt(0)
+    if (!range) return
     const style = {
       top: range.caret.rect.y + 'px',
       left: range.caret.rect.x + 'px',
