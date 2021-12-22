@@ -18,7 +18,7 @@ export default class Selection {
     const count = this.nativeSelection.rangeCount
     for (let i = 0; i < count; i++) {
       const nativeRange = this.nativeSelection.getRangeAt(i)
-      this.ranges.push(new Range(nativeRange.cloneRange(), this.vm))
+      this._pushRange(nativeRange)
     }
   }
   getRangeAt(index = 0) {
@@ -47,13 +47,24 @@ export default class Selection {
         }
       })
       if (flag) return
-      this.ranges.push(new Range(nativeRange.cloneRange(), this.vm))
+      this._pushRange(nativeRange)
     }
+  }
+  _pushRange(nativeRange) {
+    const cloneRange = new Range(nativeRange.cloneRange(), this.vm)
+    if (nativeRange.collapsed) {
+      cloneRange._d = 0
+    } else if (this.nativeSelection.focusNode === nativeRange.endContainer && this.nativeSelection.focusOffset === nativeRange.endOffset) {
+      cloneRange._d = 2
+    } else {
+      cloneRange._d = 1
+    }
+    this.ranges.push(cloneRange)
   }
   // 注意chrome不支持多选区,需要在此之前调用 removeAllRanges
   addRange(nativeRange) {
     this.nativeSelection.addRange(nativeRange)
-    this.ranges.push(new Range(nativeRange.cloneRange(), this.vm))
+    this._pushRange(nativeRange)
   }
   collapse(parentNode, offset) {
     this.nativeSelection.collapse(parentNode, offset)
@@ -88,26 +99,62 @@ export default class Selection {
     }
     tempObj = null
   }
-  move(direction, drawCaret = true) {
-    if (!this.caretStatus) return
+  _setNativeRange(direction) {
+    const currRange = this.ranges[0]
+    const nativeRange = this.nativeSelection.getRangeAt(0)
+    console.log(currRange, nativeRange)
+    switch (direction) {
+      case 'right':
+      case 'down':
+        nativeRange.setEnd(currRange.endContainer, currRange.endOffset)
+        break
+      case 'left':
+      case 'up':
+        nativeRange.setStart(currRange.startContainer, currRange.startOffset)
+        break
+    }
+  }
+  move(direction, drawCaret = true, shiftKey) {
+    // if (!this.caretStatus && !shiftKey) return
+    const nativeRange = this.nativeSelection.getRangeAt(0)
     this.ranges.forEach((range) => {
-      range[direction]()
-      drawCaret && range.updateCaret()
+      // 没按shift 并且 存在选区,不移动光标
+      if (!shiftKey && !range.collapsed) {
+        const collapseToStart = direction !== 'right'
+        nativeRange.collapse(collapseToStart)
+        range.collapse(collapseToStart)
+        this.caretStatus = true
+        range.updateCaret()
+      } else {
+        range[direction](shiftKey)
+        drawCaret && range.updateCaret()
+      }
+      if (direction === 'up' || direction === 'down') {
+        range[direction](shiftKey)
+        drawCaret && range.updateCaret()
+      }
     })
     this.distinct()
     this.input.focus()
+    if (shiftKey) {
+      this._setNativeRange(direction)
+    }
   }
-
+  del() {
+    this.ranges.forEach((range) => {
+      range.del()
+      range.updateCaret()
+    })
+  }
   destroy() {
+    this.input.destroy()
     this.vm.ui.editorContainer.removeEventListener('mouseup', this._handMouseup.bind(this))
     this.vm.ui.editorContainer.removeEventListener('mousedown', this._handMousedown.bind(this))
-    document.removeEventListener('keydown', this._handGolobalKeydown.bind(this))
     this.vm.ui.editorContainer.removeEventListener('mousemove', this._handMousemove.bind(this))
   }
   _addListeners() {
     this.vm.ui.editorContainer.addEventListener('mouseup', this._handMouseup.bind(this))
     this.vm.ui.editorContainer.addEventListener('mousedown', this._handMousedown.bind(this))
-    document.addEventListener('keydown', this._handGolobalKeydown.bind(this))
     this.vm.ui.editorContainer.addEventListener('mousemove', this._handMousemove.bind(this))
   }
   _handMousemove() {
@@ -140,38 +187,9 @@ export default class Selection {
     if (!this.nativeSelection.isCollapsed || event.shiftKey) {
       this.caretStatus = false
       this.updateRanges(event.altKey)
-    } else {
-      console.log('ss')
-      this.input.focus()
     }
+    this.input.focus()
     console.log(this.ranges)
-  }
-  del() {
-    this.ranges.forEach((range) => {
-      range.del()
-      range.updateCaret()
-    })
-  }
-  _handGolobalKeydown(event) {
-    const key = event.key
-    switch (key) {
-      case 'ArrowRight':
-        this.move('right')
-        break
-      case 'ArrowLeft':
-        this.move('left')
-        break
-      case 'ArrowUp':
-        event.preventDefault()
-        this.move('up', false)
-        break
-      case 'ArrowDown':
-        event.preventDefault()
-        this.move('down', false)
-        break
-      case 'Backspace':
-        event.preventDefault()
-        this.del()
-    }
+    // console.log(this.nativeSelection.getRangeAt(0))
   }
 }

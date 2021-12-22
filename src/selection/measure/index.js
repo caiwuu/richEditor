@@ -20,9 +20,9 @@ export default class Measure {
         vnode.ele.appendChild(this.dom)
       }
     }
-    return this.getRect(vnode)
+    return this._getRect(vnode)
   }
-  getRect(vnode) {
+  _getRect(vnode) {
     const { offsetLeft: x, offsetTop: y, offsetHeight: h } = this.dom
     const rect = { x, y, h }
     this.dom.remove()

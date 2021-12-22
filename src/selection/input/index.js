@@ -1,29 +1,90 @@
 import { setStyle } from '../../utils'
 export default class Input {
-  dom = null
+  input = null
   constructor(selection) {
     this.selection = selection
-    this.dom = document.createElement('input')
-    this.dom.classList.add('custom-input')
-    selection.vm.ui.root.appendChild(this.dom)
-    this.initEvent()
+    this._initIframe()
+    this._initInput()
+    this._initEvent()
+  }
+  _initIframe() {
+    this.iframe = document.createElement('iframe')
+    this.iframe.classList.add('custom-input-iframe')
+    this.selection.vm.ui.root.appendChild(this.iframe)
+    const iframedocument = this.iframe.contentDocument
+    const style = iframedocument.createElement('style')
+    style.innerHTML = `
+      .custom-input:focus {
+       outline: none;
+    }
+      .custom-input {
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        width: 2px;
+        background: transparent;
+        border: none;
+        padding: 0;
+        opacity: 0;
+        caret-color: transparent;
+        color: transparent;
+      }
+    `
+    iframedocument.head.appendChild(style)
+  }
+  _initInput() {
+    const iframedocument = this.iframe.contentDocument
+    this.input = iframedocument.createElement('input')
+    this.input.classList.add('custom-input')
+    iframedocument.body.appendChild(this.input)
   }
   focus() {
     const range = this.selection.getRangeAt(0)
     if (!range) return
     const style = {
+      position: 'absolute',
       top: range.caret.rect.y + 'px',
       left: range.caret.rect.x + 'px',
     }
-    setStyle(this.dom, style)
-    this.dom.focus()
+    setStyle(this.iframe, style)
+    this.input.focus()
   }
-  initEvent() {
-    this.dom.addEventListener('compositionstart', this.handleEvent.bind(this))
-    this.dom.addEventListener('compositionend', this.handleEvent.bind(this))
-    this.dom.addEventListener('input', this.handleEvent.bind(this))
+  destroy() {
+    this.input.removeEventListener('compositionstart', this._handleEvent.bind(this))
+    this.input.removeEventListener('compositionend', this._handleEvent.bind(this))
+    this.input.removeEventListener('input', this._handleEvent.bind(this))
+    this.iframe.contentDocument.removeEventListener('keydown', this._handGolobalKeydown.bind(this))
   }
-  handleEvent(event) {
+  _initEvent() {
+    this.input.addEventListener('compositionstart', this._handleEvent.bind(this))
+    this.input.addEventListener('compositionend', this._handleEvent.bind(this))
+    this.input.addEventListener('input', this._handleEvent.bind(this))
+    this.iframe.contentDocument.addEventListener('keydown', this._handGolobalKeydown.bind(this))
+  }
+  _handleEvent(event) {
     // console.log(`--->${event.type}: ${event.data}--${event.isComposing}--${event.target.value}\n`)
+  }
+  _handGolobalKeydown(event) {
+    const key = event.key
+    switch (key) {
+      case 'ArrowRight':
+        console.log(event.shiftKey)
+        this.selection.move('right', true, event.shiftKey)
+        break
+      case 'ArrowLeft':
+        this.selection.move('left', true, event.shiftKey)
+        break
+      case 'ArrowUp':
+        event.preventDefault()
+        this.selection.move('up', false, event.shiftKey)
+        break
+      case 'ArrowDown':
+        event.preventDefault()
+        this.selection.move('down', false, event.shiftKey)
+        break
+      case 'Backspace':
+        event.preventDefault()
+        this.selection.del()
+    }
   }
 }
