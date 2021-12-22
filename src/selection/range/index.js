@@ -41,7 +41,7 @@ export default class Range {
         this.setEnd(endContainer, endOffset)
         collapsed && this.collapse(false)
         if (!blockTag.includes(layer.tag)) {
-          return this.right()
+          return this.right(shiftKey)
         }
         return layer
       } else {
@@ -62,40 +62,95 @@ export default class Range {
     }
 
     this.left = (shiftKey) => {
-      console.log(this)
-      const collapsed = this.collapsed
-      if (!this.startOffset) {
+      console.log(shiftKey)
+      let container, offset
+      if (shiftKey) {
+        switch (this._d) {
+          case 1:
+          case 0:
+            container = this.startContainer
+            offset = this.startOffset
+            break
+          case 2:
+            container = this.endContainer
+            offset = this.endOffset
+            break
+        }
+      } else {
+        container = this.startContainer
+        offset = this.startOffset
+      }
+      if (!offset) {
         // 向上寻找
-        let startContainer, startOffset
-        const { vnode, layer } = getPrevLeafNode(this.startContainer.vnode)
+        const { vnode, layer } = getPrevLeafNode(container.vnode)
         // 到头了
         if (!vnode) return false
         if (vnode.tag === 'text') {
-          startContainer = vnode.ele
-          startOffset = vnode.context.length
+          container = vnode.ele
+          offset = vnode.context.length
         } else {
-          startContainer = vnode.parent.ele
-          startOffset = getIndex(vnode) + 1
+          container = vnode.parent.ele
+          offset = getIndex(vnode) + 1
         }
-        this.setStart(startContainer, startOffset)
-        collapsed && this.collapse(true)
+        if (shiftKey) {
+          switch (this._d) {
+            case 0:
+            case 1:
+              this.setStart(container, offset)
+              break
+            case 2:
+              this.setEnd(container, offset)
+              break
+          }
+        } else {
+          this.setStart(container, offset)
+          this.collapse(true)
+          this._d = 0
+        }
         if (!blockTag.includes(layer.tag)) {
-          return this.left()
+          return this.left(shiftKey)
         }
         return layer
       } else {
         let vnode
-        if (this.startContainer.vnode.childrens) {
-          vnode = getLeafR(this.startContainer.vnode.childrens[this.startOffset - 1]).vnode
+        if (container.vnode.childrens) {
+          vnode = getLeafR(container.vnode.childrens[offset - 1]).vnode
         } else {
-          vnode = this.startContainer.vnode
+          vnode = container.vnode
         }
-        if (this.startContainer.vnode.tag !== 'text' && vnode.tag === 'text') {
-          this.setStart(vnode.ele, vnode.context.length - 1)
+        if (container.vnode.tag !== 'text' && vnode.tag === 'text') {
+          if (shiftKey) {
+            switch (this._d) {
+              case 0:
+              case 1:
+                this.setStart(vnode.ele, vnode.context.length - 1)
+                break
+              case 2:
+                this.setEnd(vnode.ele, vnode.context.length - 1)
+                break
+            }
+          } else {
+            this.setStart(vnode.ele, vnode.context.length - 1)
+            this.collapse(true)
+            this._d = 0
+          }
         } else {
-          this.setStart(this.startContainer, this.startOffset - 1)
+          if (shiftKey) {
+            switch (this._d) {
+              case 0:
+              case 1:
+                this.setStart(container, offset - 1)
+                break
+              case 2:
+                this.setEnd(container, offset - 1)
+                break
+            }
+          } else {
+            this.setStart(container, offset - 1)
+            this.collapse(true)
+            this._d = 0
+          }
         }
-        collapsed && this.collapse(true)
         return true
       }
     }
@@ -104,13 +159,13 @@ export default class Range {
       // 记录初时x坐标
       const initialRect = { ...this.caret.rect }
       const prevRect = { ...this.caret.rect }
-      this._loop('left', initialRect, prevRect, shiftKey)
+      this._loop('left', initialRect, prevRect, false, shiftKey)
       this.updateCaret(true)
     }
     this.down = (shiftKey) => {
       const initialRect = { ...this.caret.rect }
       const prevRect = { ...this.caret.rect }
-      this._loop('right', initialRect, prevRect, shiftKey)
+      this._loop('right', initialRect, prevRect, false, shiftKey)
       this.updateCaret(true)
     }
     // 光标寻路算法
