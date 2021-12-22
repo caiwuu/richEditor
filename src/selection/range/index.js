@@ -19,44 +19,106 @@ export default class Range {
       this.vm.selection.ranges.splice(index, 1)
     }
     this.right = (shiftKey) => {
+      console.log(this)
       const collapsed = this.collapsed
-      let isEnd = false
-      if (this.endContainer.vnode.tag !== 'text') {
-        isEnd = this.endContainer.vnode.childrens.length === this.endOffset
+      let container, offset
+      if (shiftKey) {
+        switch (this._d) {
+          case 2:
+          case 0:
+            container = this.endContainer
+            offset = this.endOffset
+            this._d = 2
+            break
+          case 1:
+            container = this.startContainer
+            offset = this.startOffset
+            break
+        }
       } else {
-        isEnd = this.endContainer.vnode.context.length === this.endOffset
+        container = this.endContainer
+        offset = this.endOffset
+      }
+      let isEnd = false
+      if (container.vnode.tag !== 'text') {
+        isEnd = container.vnode.childrens.length === offset
+      } else {
+        isEnd = container.vnode.context.length === offset
       }
       if (isEnd) {
         // 向下寻找
-        let endContainer, endOffset
-        const { vnode, layer } = getNextLeafNode(this.endContainer.vnode)
+        const { vnode, layer } = getNextLeafNode(container.vnode)
         if (!vnode) return false
         if (vnode.tag === 'text') {
-          endContainer = vnode.ele
-          endOffset = 0
+          container = vnode.ele
+          offset = 0
         } else {
-          endContainer = vnode.parent.ele
-          endOffset = getIndex(vnode)
+          container = vnode.parent.ele
+          offset = getIndex(vnode)
         }
-        this.setEnd(endContainer, endOffset)
-        collapsed && this.collapse(false)
+        if (shiftKey) {
+          switch (this._d) {
+            case 0:
+            case 2:
+              this.setEnd(container, offset)
+              this._d = 2
+              break
+            case 1:
+              this.setStart(container, offset)
+              break
+          }
+        } else {
+          this.setEnd(container, offset)
+          this.collapse(false)
+          this._d = 0
+        }
+
         if (!blockTag.includes(layer.tag)) {
           return this.right(shiftKey)
         }
         return layer
       } else {
         let vnode
-        if (this.endContainer.vnode.childrens) {
-          vnode = getLeafL(this.endContainer.vnode.childrens[this.endOffset]).vnode
+        if (container.vnode.childrens) {
+          vnode = getLeafL(container.vnode.childrens[offset]).vnode
         } else {
-          vnode = this.endContainer.vnode
+          vnode = container.vnode
         }
-        if (this.endContainer.vnode.tag !== 'text' && vnode.tag === 'text') {
-          this.setEnd(vnode.ele, 1)
+        if (container.vnode.tag !== 'text' && vnode.tag === 'text') {
+          if (shiftKey) {
+            switch (this._d) {
+              case 0:
+              case 2:
+                this.setEnd(vnode.ele, 1)
+                this._d = 2
+                break
+              case 1:
+                this.setStart(vnode.ele, 1)
+                break
+            }
+          } else {
+            this.setEnd(vnode.ele, 1)
+            this.collapse(false)
+            this._d = 0
+          }
         } else {
-          this.setEnd(this.endContainer, this.endOffset + 1)
+          if (shiftKey) {
+            switch (this._d) {
+              case 0:
+              case 2:
+                this.setEnd(container, offset + 1)
+                this._d = 2
+                break
+              case 1:
+                this.setStart(container, offset + 1)
+                break
+            }
+          } else {
+            this.setEnd(container, offset + 1)
+            this.collapse(false)
+            this._d = 0
+          }
         }
-        collapsed && this.collapse(false)
         return true
       }
     }
@@ -70,6 +132,7 @@ export default class Range {
           case 0:
             container = this.startContainer
             offset = this.startOffset
+            this._d = 1
             break
           case 2:
             container = this.endContainer
@@ -97,6 +160,7 @@ export default class Range {
             case 0:
             case 1:
               this.setStart(container, offset)
+              this._d = 1
               break
             case 2:
               this.setEnd(container, offset)
@@ -124,6 +188,7 @@ export default class Range {
               case 0:
               case 1:
                 this.setStart(vnode.ele, vnode.context.length - 1)
+                this._d = 1
                 break
               case 2:
                 this.setEnd(vnode.ele, vnode.context.length - 1)
@@ -140,6 +205,7 @@ export default class Range {
               case 0:
               case 1:
                 this.setStart(container, offset - 1)
+                this._d = 1
                 break
               case 2:
                 this.setEnd(container, offset - 1)
@@ -184,6 +250,7 @@ export default class Range {
         const currDistance = Math.abs(currRect.x - initialRect.x)
         const sameLine = isSameLine(initialRect, prevRect, currRect, result)
         if (!(currDistance < preDistance && sameLine)) {
+          console.log('???')
           direct === 'left' ? this.right(shiftKey) : this.left(shiftKey)
           this.updateCaret(false)
           return

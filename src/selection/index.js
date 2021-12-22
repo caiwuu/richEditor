@@ -101,8 +101,7 @@ export default class Selection {
   }
   _setNativeRange(direction) {
     const currRange = this.ranges[0]
-    const nativeRange = this.nativeSelection.getRangeAt(0)
-    console.log(currRange, nativeRange)
+    // const nativeRange = this.nativeSelection.getRangeAt(0)
     // switch (direction) {
     //   case 'right':
     //   case 'down':
