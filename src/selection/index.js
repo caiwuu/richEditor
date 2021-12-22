@@ -60,7 +60,7 @@ export default class Selection {
     this._resetRanges()
   }
   updateRanges(multiple) {
-    // 选区的创建结果需要在宏任务中获取
+    // 选区的创建结果需要在宏任务中获取.
     setTimeout(() => {
       if (multiple) {
         this._extendRanges()
