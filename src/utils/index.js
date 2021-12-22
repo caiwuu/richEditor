@@ -256,7 +256,6 @@ export function blockIsEmptyCheck(vnode) {
 }
 // 需要优化判断的准确率
 export function isSameLine(initialRect, prevRect, currRect, result) {
-  console.log(initialRect, prevRect, currRect, result)
   // 标识光标是否在同一行移动
   let flag = true
   if (Math.abs(currRect.x - prevRect.x) > 200) {

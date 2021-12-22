@@ -1,6 +1,7 @@
 import Caret from '../caret'
 import { getPrevLeafNode, getNextLeafNode, getIndex, getLeafL, getLeafR, isSameLine } from '../../utils'
 import { blockTag } from '../../type'
+import del from './del'
 export default class Range {
   constructor(nativeRange, vm) {
     nativeRange.vm = vm
@@ -12,103 +13,236 @@ export default class Range {
     this.updateCaret = (drawCaret = true) => {
       this.caret.update(this, drawCaret)
     }
-    this.right = () => {
-      let isEnd = false
-      if (this.startContainer.vnode.tag !== 'text') {
-        isEnd = this.startContainer.vnode.childrens.length === this.startOffset
+    this.remove = () => {
+      const index = this.vm.selection.ranges.findIndex((i) => i === this)
+      this.caret.remove()
+      this.vm.selection.ranges.splice(index, 1)
+    }
+    this.right = (shiftKey) => {
+      console.log(this)
+      const collapsed = this.collapsed
+      let container, offset
+      if (shiftKey) {
+        switch (this._d) {
+          case 2:
+          case 0:
+            container = this.endContainer
+            offset = this.endOffset
+            this._d = 2
+            break
+          case 1:
+            container = this.startContainer
+            offset = this.startOffset
+            break
+        }
       } else {
-        isEnd = this.startContainer.vnode.context.length === this.startOffset
+        container = this.endContainer
+        offset = this.endOffset
+      }
+      let isEnd = false
+      if (container.vnode.tag !== 'text') {
+        isEnd = container.vnode.childrens.length === offset
+      } else {
+        isEnd = container.vnode.context.length === offset
       }
       if (isEnd) {
         // 向下寻找
-        let endContainer, startOffset
-        const { vnode, layer } = getNextLeafNode(this.endContainer.vnode)
+        const { vnode, layer } = getNextLeafNode(container.vnode)
         if (!vnode) return false
         if (vnode.tag === 'text') {
-          endContainer = vnode.ele
-          startOffset = 0
+          container = vnode.ele
+          offset = 0
         } else {
-          endContainer = vnode.parent.ele
-          startOffset = getIndex(vnode)
+          container = vnode.parent.ele
+          offset = getIndex(vnode)
         }
-        this.setStart(endContainer, startOffset)
+        if (shiftKey) {
+          switch (this._d) {
+            case 0:
+            case 2:
+              this.setEnd(container, offset)
+              this._d = 2
+              break
+            case 1:
+              this.setStart(container, offset)
+              break
+          }
+        } else {
+          this.setEnd(container, offset)
+          this.collapse(false)
+          this._d = 0
+        }
+
         if (!blockTag.includes(layer.tag)) {
-          return this.right()
+          return this.right(shiftKey)
         }
         return layer
       } else {
         let vnode
-        if (this.startContainer.vnode.childrens) {
-          vnode = getLeafL(this.startContainer.vnode.childrens[this.startOffset]).vnode
+        if (container.vnode.childrens) {
+          vnode = getLeafL(container.vnode.childrens[offset]).vnode
         } else {
-          vnode = this.startContainer.vnode
+          vnode = container.vnode
         }
-        if (this.startContainer.vnode.tag !== 'text' && vnode.tag === 'text') {
-          this.setStart(vnode.ele, 1)
+        if (container.vnode.tag !== 'text' && vnode.tag === 'text') {
+          if (shiftKey) {
+            switch (this._d) {
+              case 0:
+              case 2:
+                this.setEnd(vnode.ele, 1)
+                this._d = 2
+                break
+              case 1:
+                this.setStart(vnode.ele, 1)
+                break
+            }
+          } else {
+            this.setEnd(vnode.ele, 1)
+            this.collapse(false)
+            this._d = 0
+          }
         } else {
-          this.setStart(this.startContainer, this.startOffset + 1)
+          if (shiftKey) {
+            switch (this._d) {
+              case 0:
+              case 2:
+                this.setEnd(container, offset + 1)
+                this._d = 2
+                break
+              case 1:
+                this.setStart(container, offset + 1)
+                break
+            }
+          } else {
+            this.setEnd(container, offset + 1)
+            this.collapse(false)
+            this._d = 0
+          }
         }
         return true
       }
     }
-    this.left = () => {
-      if (!this.endOffset) {
+
+    this.left = (shiftKey) => {
+      console.log(shiftKey)
+      let container, offset
+      if (shiftKey) {
+        switch (this._d) {
+          case 1:
+          case 0:
+            container = this.startContainer
+            offset = this.startOffset
+            this._d = 1
+            break
+          case 2:
+            container = this.endContainer
+            offset = this.endOffset
+            break
+        }
+      } else {
+        container = this.startContainer
+        offset = this.startOffset
+      }
+      if (!offset) {
         // 向上寻找
-        let endContainer, endOffset
-        const { vnode, layer } = getPrevLeafNode(this.endContainer.vnode)
+        const { vnode, layer } = getPrevLeafNode(container.vnode)
         // 到头了
         if (!vnode) return false
         if (vnode.tag === 'text') {
-          endContainer = vnode.ele
-          endOffset = vnode.context.length
+          container = vnode.ele
+          offset = vnode.context.length
         } else {
-          endContainer = vnode.parent.ele
-          endOffset = getIndex(vnode) + 1
+          container = vnode.parent.ele
+          offset = getIndex(vnode) + 1
         }
-        this.setEnd(endContainer, endOffset)
+        if (shiftKey) {
+          switch (this._d) {
+            case 0:
+            case 1:
+              this.setStart(container, offset)
+              this._d = 1
+              break
+            case 2:
+              this.setEnd(container, offset)
+              break
+          }
+        } else {
+          this.setStart(container, offset)
+          this.collapse(true)
+          this._d = 0
+        }
         if (!blockTag.includes(layer.tag)) {
-          return this.left()
+          return this.left(shiftKey)
         }
         return layer
       } else {
         let vnode
-        if (this.endContainer.vnode.childrens) {
-          vnode = getLeafR(this.endContainer.vnode.childrens[this.endOffset - 1]).vnode
+        if (container.vnode.childrens) {
+          vnode = getLeafR(container.vnode.childrens[offset - 1]).vnode
         } else {
-          vnode = this.endContainer.vnode
+          vnode = container.vnode
         }
-        if (this.endContainer.vnode.tag !== 'text' && vnode.tag === 'text') {
-          this.setEnd(vnode.ele, vnode.context.length - 1)
+        if (container.vnode.tag !== 'text' && vnode.tag === 'text') {
+          if (shiftKey) {
+            switch (this._d) {
+              case 0:
+              case 1:
+                this.setStart(vnode.ele, vnode.context.length - 1)
+                this._d = 1
+                break
+              case 2:
+                this.setEnd(vnode.ele, vnode.context.length - 1)
+                break
+            }
+          } else {
+            this.setStart(vnode.ele, vnode.context.length - 1)
+            this.collapse(true)
+            this._d = 0
+          }
         } else {
-          this.setEnd(this.endContainer, this.endOffset - 1)
+          if (shiftKey) {
+            switch (this._d) {
+              case 0:
+              case 1:
+                this.setStart(container, offset - 1)
+                this._d = 1
+                break
+              case 2:
+                this.setEnd(container, offset - 1)
+                break
+            }
+          } else {
+            this.setStart(container, offset - 1)
+            this.collapse(true)
+            this._d = 0
+          }
         }
         return true
       }
     }
-    this.up = () => {
+
+    this.up = (shiftKey) => {
       // 记录初时x坐标
       const initialRect = { ...this.caret.rect }
       const prevRect = { ...this.caret.rect }
-      this.loop('left', initialRect, prevRect)
+      this._loop('left', initialRect, prevRect, false, shiftKey)
       this.updateCaret(true)
     }
-    this.down = () => {
+    this.down = (shiftKey) => {
       const initialRect = { ...this.caret.rect }
       const prevRect = { ...this.caret.rect }
-      this.loop('right', initialRect, prevRect)
+      this._loop('right', initialRect, prevRect, false, shiftKey)
       this.updateCaret(true)
     }
     // 光标寻路算法
-    this.loop = (direct, initialRect, prevRect, lineChanged = false) => {
-      const oldContainer = this.endContainer
-      // let { x, y, h } = this.caret.rect
+    this._loop = (direct, initialRect, prevRect, lineChanged = false, shiftKey) => {
       let result = true
       if (!lineChanged) {
-        result = direct === 'left' ? this.left() : this.right()
+        result = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)
         if (!result) return
         this.updateCaret(false)
       } else {
-        result = direct === 'left' ? this.left() : this.right()
+        result = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)
         if (!result) return
         this.updateCaret(false)
         const currRect = { ...this.caret.rect }
@@ -116,8 +250,8 @@ export default class Range {
         const currDistance = Math.abs(currRect.x - initialRect.x)
         const sameLine = isSameLine(initialRect, prevRect, currRect, result)
         if (!(currDistance < preDistance && sameLine)) {
-          console.log('rollback', currDistance, preDistance, sameLine)
-          direct === 'left' ? this.right() : this.left()
+          console.log('???')
+          direct === 'left' ? this.right(shiftKey) : this.left(shiftKey)
           this.updateCaret(false)
           return
         }
@@ -127,7 +261,8 @@ export default class Range {
       if (!sameLine) {
         lineChanged = true
       }
-      this.loop(direct, initialRect, currRect, lineChanged)
+      this._loop(direct, initialRect, currRect, lineChanged, shiftKey)
     }
+    this.del = del.bind(this)
   }
 }

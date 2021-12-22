@@ -8,7 +8,7 @@ export const bodyVnode = {
         {
           tag: 'span',
           childrens: [{ tag: 'text', context: '大号文字大号文字大号文字大号文字大' }],
-          style: { color: '#bbb', fontSize: '76px' },
+          style: { color: '#bbb', fontSize: '16px' },
         },
         {
           tag: 'span',

@@ -14,6 +14,9 @@ export default class Caret {
     const mergeStyle = Object.assign({}, defaultStyle, style)
     setStyle(this.dom, mergeStyle)
   }
+  remove() {
+    this.dom.remove()
+  }
   update(range, drawCaret = true) {
     this.rect = this.measure.measure(range)
     if (!drawCaret) return
