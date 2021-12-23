@@ -4,18 +4,29 @@ export default class Measure {
     this.dom = document.createElement('text')
   }
   measure(range) {
-    const startOffset = range.startOffset
-    const vnode = range.startContainer.vnode
+    let container, offset
+    switch (range._d) {
+      case 0:
+      case 1:
+        container = range.startContainer
+        offset = range.startOffset
+        break
+      case 2:
+        container = range.endContainer
+        offset = range.endOffset
+        break
+    }
+    const vnode = container.vnode
     // splitText(0)会使原dom销毁造成startContainer向上逃逸，
     if (vnode.tag === 'text') {
-      if (!startOffset) {
+      if (!offset) {
         vnode.ele.parentNode.insertBefore(this.dom, vnode.ele)
       } else {
-        vnode.ele.parentNode.insertBefore(this.dom, vnode.ele.splitText(startOffset))
+        vnode.ele.parentNode.insertBefore(this.dom, vnode.ele.splitText(offset))
       }
     } else {
-      if (vnode.childrens[startOffset]) {
-        vnode.ele.insertBefore(this.dom, vnode.ele.childNodes[startOffset])
+      if (vnode.childrens[offset]) {
+        vnode.ele.insertBefore(this.dom, vnode.ele.childNodes[offset])
       } else {
         vnode.ele.appendChild(this.dom)
       }
