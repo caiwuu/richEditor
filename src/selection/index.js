@@ -113,7 +113,7 @@ export default class Selection {
     this.ranges.forEach((range) => {
       // 没按shift 并且 存在选区,取消选区，左右不移动光标，上下可移动光标
       if (!shiftKey && !range.collapsed) {
-        const collapseToStart = direction === 'left' || direction === 'up'
+        const collapseToStart = range._d === 1
         nativeRange.collapse(collapseToStart)
         range.collapse(collapseToStart)
         range._d = 0
