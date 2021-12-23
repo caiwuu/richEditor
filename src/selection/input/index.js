@@ -68,7 +68,6 @@ export default class Input {
     const key = event.key
     switch (key) {
       case 'ArrowRight':
-        console.log(event.shiftKey)
         this.selection.move('right', true, event.shiftKey)
         break
       case 'ArrowLeft':
