@@ -99,34 +99,26 @@ export default class Selection {
     }
     tempObj = null
   }
-  _setNativeRange(direction) {
+  _setNativeRange() {
     const currRange = this.ranges[0]
-    // const nativeRange = this.nativeSelection.getRangeAt(0)
-    // switch (direction) {
-    //   case 'right':
-    //   case 'down':
-    //     nativeRange.setStart(currRange.startContainer, currRange.startOffset)
-    //     nativeRange.setEnd(currRange.endContainer, currRange.endOffset)
-    //     break
-    //   case 'left':
-    //   case 'up':
-    //     nativeRange.setStart(currRange.startContainer, currRange.startOffset)
-    //     nativeRange.setEnd(currRange.endContainer, currRange.endOffset)
-    //     break
-    // }
     this.nativeSelection.removeAllRanges()
     this.nativeSelection.addRange(currRange)
   }
   move(direction, drawCaret = true, shiftKey) {
-    // if (!this.caretStatus && !shiftKey) return
+    // 支持多光标但是目前还不支持多选区；这里取消掉其他光标
+    if (shiftKey) {
+      while (this.ranges.length > 1) {
+        this.ranges.pop().caret.remove()
+      }
+    }
     const nativeRange = this.nativeSelection.getRangeAt(0)
     this.ranges.forEach((range) => {
-      // 没按shift 并且 存在选区,不移动光标
+      // 没按shift 并且 存在选区,取消选区，左右不移动光标，上下可移动光标
       if (!shiftKey && !range.collapsed) {
-        console.log('左右不移动光标')
-        const collapseToStart = direction !== 'right'
+        const collapseToStart = direction === 'left' || direction === 'up'
         nativeRange.collapse(collapseToStart)
         range.collapse(collapseToStart)
+        range._d = 0
         this.caretStatus = true
         range.updateCaret()
         if (direction === 'up' || direction === 'down') {
@@ -134,7 +126,9 @@ export default class Selection {
           drawCaret && range.updateCaret()
         }
       } else {
-        console.log('移动光标')
+        if (range.collapsed) {
+          range._d = 0
+        }
         range[direction](shiftKey)
         drawCaret && range.updateCaret()
       }
@@ -194,7 +188,7 @@ export default class Selection {
       this.updateRanges(event.altKey)
     }
     this.input.focus()
-    console.log(this.ranges)
+    // console.log(this.ranges)
     // console.log(this.nativeSelection.getRangeAt(0))
   }
 }

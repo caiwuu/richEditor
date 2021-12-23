@@ -19,8 +19,6 @@ export default class Range {
       this.vm.selection.ranges.splice(index, 1)
     }
     this.right = (shiftKey) => {
-      console.log(this)
-      const collapsed = this.collapsed
       let container, offset
       if (shiftKey) {
         switch (this._d) {
@@ -124,7 +122,6 @@ export default class Range {
     }
 
     this.left = (shiftKey) => {
-      console.log(shiftKey)
       let container, offset
       if (shiftKey) {
         switch (this._d) {
@@ -223,45 +220,63 @@ export default class Range {
 
     this.up = (shiftKey) => {
       // 记录初时x坐标
-      const initialRect = { ...this.caret.rect }
-      const prevRect = { ...this.caret.rect }
-      this._loop('left', initialRect, prevRect, false, shiftKey)
+      const initialRect = { ...this.caret.rect },
+        prevRect = { ...this.caret.rect },
+        oldCon = this.startContainer,
+        oldOffset = this.startOffset
+      const flag = this._loop('left', initialRect, prevRect, false, shiftKey)
+      if (this._d === 2 && flag) {
+        const newCon = this.endContainer,
+          newOffset = this.endOffset
+        this.setEnd(oldCon, oldOffset)
+        this.setStart(newCon, newOffset)
+        this._d = 1
+      }
       this.updateCaret(true)
     }
     this.down = (shiftKey) => {
-      const initialRect = { ...this.caret.rect }
-      const prevRect = { ...this.caret.rect }
-      this._loop('right', initialRect, prevRect, false, shiftKey)
+      const initialRect = { ...this.caret.rect },
+        prevRect = { ...this.caret.rect },
+        oldCon = this.endContainer,
+        oldOffset = this.endOffset
+      const flag = this._loop('right', initialRect, prevRect, false, shiftKey)
+      if (this._d === 1 && flag) {
+        const newCon = this.startContainer,
+          newOffset = this.startOffset
+        this.setStart(oldCon, oldOffset)
+        this.setEnd(newCon, newOffset)
+        this._d = 2
+      }
       this.updateCaret(true)
     }
     // 光标寻路算法
     this._loop = (direct, initialRect, prevRect, lineChanged = false, shiftKey) => {
+      const flag = this.endContainer === this.startContainer && this.endOffset === this.startOffset
       let result = true
       if (!lineChanged) {
         result = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)
-        if (!result) return
+        if (!result) return flag
         this.updateCaret(false)
       } else {
         result = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)
-        if (!result) return
+        if (!result) return flag
         this.updateCaret(false)
-        const currRect = { ...this.caret.rect }
-        const preDistance = Math.abs(prevRect.x - initialRect.x)
-        const currDistance = Math.abs(currRect.x - initialRect.x)
-        const sameLine = isSameLine(initialRect, prevRect, currRect, result)
+        const currRect = { ...this.caret.rect },
+          preDistance = Math.abs(prevRect.x - initialRect.x),
+          currDistance = Math.abs(currRect.x - initialRect.x),
+          sameLine = isSameLine(initialRect, prevRect, currRect, result)
         if (!(currDistance < preDistance && sameLine)) {
-          console.log('???')
           direct === 'left' ? this.right(shiftKey) : this.left(shiftKey)
           this.updateCaret(false)
-          return
+          return flag
         }
       }
-      const currRect = { ...this.caret.rect }
-      const sameLine = isSameLine(initialRect, prevRect, currRect, result)
+      const currRect = { ...this.caret.rect },
+        sameLine = isSameLine(initialRect, prevRect, currRect, result)
       if (!sameLine) {
         lineChanged = true
       }
-      this._loop(direct, initialRect, currRect, lineChanged, shiftKey)
+      return this._loop(direct, initialRect, currRect, lineChanged, shiftKey)
     }
     this.del = del.bind(this)
   }
