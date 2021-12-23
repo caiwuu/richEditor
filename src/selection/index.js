@@ -3,8 +3,6 @@ import Input from './input'
 export default class Selection {
   nativeSelection = document.getSelection()
   ranges = []
-  caretStatus = true
-  mouseStatus = 'up'
   constructor(vm) {
     this.vm = vm
     this.input = new Input(this)
@@ -119,7 +117,6 @@ export default class Selection {
         nativeRange.collapse(collapseToStart)
         range.collapse(collapseToStart)
         range._d = 0
-        this.caretStatus = true
         range.updateCaret()
         if (direction === 'up' || direction === 'down') {
           range[direction](shiftKey)
@@ -149,29 +146,13 @@ export default class Selection {
     this.input.destroy()
     this.vm.ui.editorContainer.removeEventListener('mouseup', this._handMouseup.bind(this))
     this.vm.ui.editorContainer.removeEventListener('mousedown', this._handMousedown.bind(this))
-    this.vm.ui.editorContainer.removeEventListener('mousemove', this._handMousemove.bind(this))
   }
   _addListeners() {
     this.vm.ui.editorContainer.addEventListener('mouseup', this._handMouseup.bind(this))
     this.vm.ui.editorContainer.addEventListener('mousedown', this._handMousedown.bind(this))
-    this.vm.ui.editorContainer.addEventListener('mousemove', this._handMousemove.bind(this))
-  }
-  _handMousemove() {
-    if (this.mouseStatus === 'up') return
-    if (!this.nativeSelection.isCollapsed && this.caretStatus) {
-      this.caretStatus = false
-      this.updateRanges()
-    } else if (this.nativeSelection.isCollapsed && !this.caretStatus) {
-      this.caretStatus = true
-      this.updateRanges()
-    }
   }
   _handMousedown(event) {
-    this.mouseStatus = 'down'
-    if (event.shiftKey) {
-      this.caretStatus = false
-    } else {
-      this.caretStatus = true
+    if (!event.shiftKey) {
       const count = this.nativeSelection.rangeCount
       for (let i = 0; i < count; i++) {
         const nativeRange = this.nativeSelection.getRangeAt(i)
@@ -181,14 +162,10 @@ export default class Selection {
     }
   }
   _handMouseup(event) {
-    this.mouseStatus = 'up'
     // 有选区
     if (!this.nativeSelection.isCollapsed || event.shiftKey) {
-      this.caretStatus = false
       this.updateRanges(event.altKey)
     }
     this.input.focus()
-    // console.log(this.ranges)
-    // console.log(this.nativeSelection.getRangeAt(0))
   }
 }
