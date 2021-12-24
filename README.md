@@ -30,6 +30,7 @@
 9. [easysync 协同算法](http://www.manongjc.com/detail/24-rpprwaiprjeuxml.html)
 10. [多人协同编辑技术的演进](https://zhuanlan.zhihu.com/p/425265438)
 11. [OT算法](https://zhuanlan.zhihu.com/p/425284127)
+11. [OT.js算法演示](http://operational-transformation.github.io/index.html)
 
 
 ### **招募共同开发者 QQ：2252711582**
