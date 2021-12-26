@@ -1,5 +1,6 @@
 import Range from './range'
 import Input from './input'
+import exec from '../operation'
 export default class Selection {
   nativeSelection = document.getSelection()
   ranges = []
@@ -140,19 +141,16 @@ export default class Selection {
     // 倒序删除
     const cloneRanges = [...this.ranges]
     cloneRanges.sort((v2, v1) => {
-      if (
-        v2.endContainer.vnode.position > v1.endContainer.vnode.position ||
-        (v2.endContainer.vnode.position === v1.endContainer.vnode.position && v2.endOffset > v1.endOffset)
-      ) {
+      if (v2.endContainer.vnode.position > v1.endContainer.vnode.position || (v2.endContainer.vnode.position === v1.endContainer.vnode.position && v2.endOffset > v1.endOffset)) {
         return -1
       } else {
         return 0
       }
     })
     cloneRanges.forEach((range) => {
-      range.del()
-      range.updateCaret()
+      exec(range.del())
     })
+    console.log(this.ranges)
   }
   destroy() {
     this.input.destroy()
