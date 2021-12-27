@@ -1,11 +1,12 @@
-import render from './render'
+// import render from './render'
+import createVnode from './createVnode'
 
 export default class UI {
   constructor(editableAreaVnode, actionBarVnode) {
-    this.editableAreaVnode = editableAreaVnode
-    this.actionBarVnode = editableAreaVnode
-    this.editableArea = render(editableAreaVnode, null)
-    this.actionBar = render(actionBarVnode, null)
+    this.editableAreaVnode = createVnode(editableAreaVnode, null)
+    this.actionBarVnode = createVnode(actionBarVnode, null)
+    this.editableArea = this.editableAreaVnode.ele
+    this.actionBar = this.actionBarVnode.ele
     this.editorContainer = document.createElement('div')
   }
   mount(id) {
@@ -17,8 +18,8 @@ export default class UI {
     this.root = root
   }
   update(editableAreaVnode) {
-    this.editableAreaVnode = editableAreaVnode
-    const ele = render(editableAreaVnode, null)
+    this.editableAreaVnode = createVnode(editableAreaVnode, null)
+    const ele = this.editableAreaVnode.ele
     // this.editableAreaVnode.parent = { ele: this.editorContainer, isRoot: true }
     document.getElementById(this.rootId).replaceChild(ele, this.editableArea)
     this.editableArea = ele
