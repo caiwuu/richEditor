@@ -1,16 +1,12 @@
 import vt from './vnodeTool'
+// import { getNode } from '../utils'
 const operation = {
-  del({ startPos, startOffset, endPos, endOffset, range }) {
-    if (range) {
-      if (range.collapsed) {
-        if (endOffset) {
-          vt(range.endContainer.vnode).from(endOffset).del(1)
-          if (range.endContainer.vnode.tag === 'text') {
-            range.setStart(range.endContainer, startOffset)
-            range.updateCaret(true)
-          }
-        } else {
-        }
+  del({ startPos, startOffset, endPos, endOffset, rootTree }) {
+    if (startPos === endPos) {
+      if (endOffset) {
+        vt(endPos).from(endOffset).del(1)
+      } else {
+        console.log('!!!')
       }
     }
   },

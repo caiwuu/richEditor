@@ -141,7 +141,10 @@ export default class Selection {
     // 倒序删除
     const cloneRanges = [...this.ranges]
     cloneRanges.sort((v2, v1) => {
-      if (v2.endContainer.vnode.position > v1.endContainer.vnode.position || (v2.endContainer.vnode.position === v1.endContainer.vnode.position && v2.endOffset > v1.endOffset)) {
+      if (
+        v2.endContainer.vnode.position > v1.endContainer.vnode.position ||
+        (v2.endContainer.vnode.position === v1.endContainer.vnode.position && v2.endOffset > v1.endOffset)
+      ) {
         return -1
       } else {
         return 0
