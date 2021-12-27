@@ -17,7 +17,7 @@ export default class Selection {
     const count = this.nativeSelection.rangeCount
     for (let i = 0; i < count; i++) {
       const nativeRange = this.nativeSelection.getRangeAt(i)
-      this._pushRange(nativeRange)
+      this.pushRange(nativeRange)
     }
   }
   getRangeAt(index = 0) {
@@ -46,10 +46,16 @@ export default class Selection {
         }
       })
       if (flag) return
-      this._pushRange(nativeRange)
+      this.pushRange(nativeRange)
     }
   }
-  _pushRange(nativeRange) {
+  createRange({ startContainer, startOffset, endContainer, endOffset }) {
+    const range = document.createRange()
+    range.setStart(startContainer, startOffset)
+    range.setEnd(endContainer, endOffset)
+    return range
+  }
+  pushRange(nativeRange) {
     const cloneRange = new Range(nativeRange.cloneRange(), this.vm)
     if (nativeRange.collapsed) {
       cloneRange._d = 0
@@ -63,7 +69,7 @@ export default class Selection {
   // 注意chrome不支持多选区,需要在此之前调用 removeAllRanges
   addRange(nativeRange) {
     this.nativeSelection.addRange(nativeRange)
-    this._pushRange(nativeRange)
+    this.pushRange(nativeRange)
   }
   collapse(parentNode, offset) {
     this.nativeSelection.collapse(parentNode, offset)
@@ -141,10 +147,7 @@ export default class Selection {
     // 倒序删除
     const cloneRanges = [...this.ranges]
     cloneRanges.sort((v2, v1) => {
-      if (
-        v2.endContainer.vnode.position > v1.endContainer.vnode.position ||
-        (v2.endContainer.vnode.position === v1.endContainer.vnode.position && v2.endOffset > v1.endOffset)
-      ) {
+      if (v2.endContainer.vnode.position > v1.endContainer.vnode.position || (v2.endContainer.vnode.position === v1.endContainer.vnode.position && v2.endOffset > v1.endOffset)) {
         return -1
       } else {
         return 0

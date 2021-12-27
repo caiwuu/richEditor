@@ -27,3 +27,30 @@ export default function render(vnode, parent = null, position = '0') {
   if (vnode.event) setEvent(vnode.ele, vnode.event)
   return vnode.ele
 }
+
+const handle = {
+  set(target, key, newValue) {
+    console.log('set')
+    Reflect.set(target, key, newValue)
+  },
+  get(target, key, receiver) {
+    console.log('get')
+    if (key === 'remove') {
+      return function () {
+        console.log('remove')
+      }
+    }
+    return Reflect.get(target, key)
+  },
+}
+function createVnode(ops) {
+  for (const key in ops) {
+    if (ops.hasOwnProperty.call(ops, key)) {
+      const element = ops[key]
+      if (typeof element === 'object') {
+        ops[key] = createVnode(element)
+      }
+    }
+  }
+  return new Proxy(ops, handle)
+}
