@@ -21,11 +21,9 @@ const handle = {
 export default function createVnode(ops, parent = null, position = '0') {
   if (ops.tag) {
     ops._isVnode = true
-    ops.isRoot = true
-    ops.position = '0'
-    // ops.parent = parent
-    // ops.isRoot = !parent
-    // if (!ops.position) ops.position = parent ? (parent.position ? parent.position + '-' + position : position) : position
+    ops.parent = parent
+    ops.isRoot = !parent
+    if (!ops.position) ops.position = parent ? (parent.position ? parent.position + '-' + position : position) : position
 
     if (!leafTag.includes(ops.tag)) {
       ops.ele = document.createElement(ops.tag)
@@ -41,22 +39,14 @@ export default function createVnode(ops, parent = null, position = '0') {
     if (ops.attr) setAttr(ops.ele, ops.attr)
     if (ops.event) setEvent(ops.ele, ops.event)
   }
-  for (const key in ops) {
-    if (ops.hasOwnProperty.call(ops, key)) {
-      const element = ops[key]
-      if (typeof element === 'object' && !['ele', 'style', 'attr', 'event', 'parent'].includes(key)) {
-        ops[key] = createVnode(element)
-      }
-    }
-  }
   const vnode = new Proxy(ops, handle)
   if (vnode.ele) vnode.ele.vnode = vnode
-  vnode.childrens &&
-    vnode.childrens.forEach((element, index) => {
-      element.parent = vnode
-      element.isRoot = false
-      element.position = vnode.position + '-' + index
-      vnode.ele.appendChild(element.ele)
+  if (vnode.childrens) {
+    vnode.childrens = vnode.childrens.map((element, index) => {
+      const itemVnode = createVnode(element, vnode, index)
+      vnode.ele.appendChild(itemVnode.ele)
+      return itemVnode
     })
+  }
   return vnode
 }

@@ -1,4 +1,4 @@
-import render from '../ui/render'
+// import render from '../ui/render'
 import { leafTag, blockTag } from '../type'
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1

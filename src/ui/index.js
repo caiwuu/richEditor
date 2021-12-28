@@ -11,7 +11,6 @@ export default class UI {
   }
   mount(id) {
     const root = document.getElementById(id)
-    // this.editableAreaVnode.parent = { ele: this.editorContainer, isRoot: true }
     root.appendChild(this.actionBar)
     this.editorContainer.appendChild(this.editableArea)
     root.appendChild(this.editorContainer)
@@ -20,7 +19,6 @@ export default class UI {
   update(editableAreaVnode) {
     this.editableAreaVnode = createVnode(editableAreaVnode, null)
     const ele = this.editableAreaVnode.ele
-    // this.editableAreaVnode.parent = { ele: this.editorContainer, isRoot: true }
     document.getElementById(this.rootId).replaceChild(ele, this.editableArea)
     this.editableArea = ele
   }

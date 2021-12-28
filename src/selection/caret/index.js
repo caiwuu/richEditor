@@ -4,7 +4,8 @@ const defaultStyle = {}
 export default class Caret {
   dom = null
   rect = null
-  constructor() {
+  constructor(range) {
+    this.range = range
     this.measure = new Measure()
     this.dom = document.createElement('span')
     this.dom.classList.add('custom-caret')
