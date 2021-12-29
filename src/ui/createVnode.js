@@ -1,4 +1,4 @@
-import { setStyle, setAttr, setEvent } from '../utils/index'
+import { setStyle, setAttr, setEvent, getIndex } from '../utils/index'
 import { leafTag } from '../type/index'
 import action from '../actions'
 /**
@@ -23,12 +23,23 @@ const handle = {
           if (target.tag === 'text') {
             target.context = target.context.slice(0, start) + target.context.slice(offset)
             target.ele.data = target.context
+          } else {
+            target.childrens.splice(start, offset - start)
+            for (let index = 0; index < offset - start; index++) {
+              target.ele.childNodes[start].remove()
+            }
           }
         }
       case 'move':
         console.log('move')
       case 'remove':
-        console.log('remove')
+        console.log('remove', target)
+        const index = getIndex(target)
+        console.log(index)
+        console.log(target.parent.childrens.splice(index, 1))
+        target.parent.childrens.splice(index, 1)[0].remove()
+      case 'isEmpty':
+        return target.tag === 'text' ? target.context === '' : target.childrens.length === 0
       default:
         return Reflect.get(target, key, receiver)
     }

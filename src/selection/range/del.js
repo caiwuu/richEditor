@@ -1,5 +1,7 @@
+import { getPrevLeafNode } from '../../utils'
 export default function del() {
   if (this.collapsed) {
+    // 行内操作
     if (this.endOffset) {
       const caches = this.vm.selection.ranges
         .filter((range) => range.endContainer === this.endContainer)
@@ -14,6 +16,13 @@ export default function del() {
         cache.range.collapse(false)
         cache.range.updateCaret()
       })
+      // 需要跨标签操作
+    } else {
+      const { vnode: prevVnode, layer } = getPrevLeafNode(this.endContainer.vnode)
+      console.log(this.endContainer.vnode.isEmpty)
+      if (this.endContainer.vnode.isEmpty) {
+        this.endContainer.vnode.remove()
+      }
     }
   }
 }
