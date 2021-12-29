@@ -2,11 +2,9 @@
 import createVnode from './createVnode'
 
 export default class UI {
-  constructor(editableAreaVnode, actionBarVnode) {
-    this.editableAreaVnode = createVnode(editableAreaVnode, null)
-    this.actionBarVnode = createVnode(actionBarVnode, null)
-    this.editableArea = this.editableAreaVnode.ele
-    this.actionBar = this.actionBarVnode.ele
+  constructor(editableAreaOps, actionBarOps) {
+    this.editableArea = createVnode(editableAreaOps, null).ele
+    this.actionBar = createVnode(actionBarOps, null).ele
     this.editorContainer = document.createElement('div')
   }
   mount(id) {
@@ -16,9 +14,8 @@ export default class UI {
     root.appendChild(this.editorContainer)
     this.root = root
   }
-  update(editableAreaVnode) {
-    this.editableAreaVnode = createVnode(editableAreaVnode, null)
-    const ele = this.editableAreaVnode.ele
+  update(editableAreaOps) {
+    const ele = createVnode(editableAreaOps, null).ele
     document.getElementById(this.rootId).replaceChild(ele, this.editableArea)
     this.editableArea = ele
   }

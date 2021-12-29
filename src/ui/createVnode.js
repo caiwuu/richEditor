@@ -1,21 +1,37 @@
 import { setStyle, setAttr, setEvent } from '../utils/index'
 import { leafTag } from '../type/index'
 import action from '../actions'
+/**
+ * 节点操作类型 insert delete move
+ */
 const handle = {
   set(target, key, newValue) {
-    if (key === 'context') {
-      console.log(target.ele)
-      target.ele.data = newValue
-    }
     return Reflect.set(target, key, newValue)
   },
   get(target, key, receiver) {
-    if (key === 'remove') {
+    if (key === '') {
       return function () {
         console.log('remove')
       }
     }
-    return Reflect.get(target, key, receiver)
+    switch (key) {
+      case 'insert':
+        console.log('insert')
+      case 'delete':
+        return function (offset, count) {
+          const start = offset - count <= 0 ? 0 : offset - count
+          if (target.tag === 'text') {
+            target.context = target.context.slice(0, start) + target.context.slice(offset)
+            target.ele.data = target.context
+          }
+        }
+      case 'move':
+        console.log('move')
+      case 'remove':
+        console.log('remove')
+      default:
+        return Reflect.get(target, key, receiver)
+    }
   },
 }
 export default function createVnode(ops, parent = null, position = '0') {
@@ -40,6 +56,7 @@ export default function createVnode(ops, parent = null, position = '0') {
     if (ops.event) setEvent(ops.ele, ops.event)
   }
   const vnode = new Proxy(ops, handle)
+  vnode.root = parent ? parent.root : vnode
   if (vnode.ele) vnode.ele.vnode = vnode
   if (vnode.childrens) {
     vnode.childrens = vnode.childrens.map((element, index) => {

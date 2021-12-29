@@ -12,9 +12,8 @@ class VnodeTool {
     switch (this.type) {
       case 0:
         if (this.vnode.tag === 'text') {
-          console.log(23232)
-          console.log(this.vnode)
-          this.vnode.context = this.vnode.context.slice(0, this.pos - num) + this.vnode.context.slice(this.pos)
+          // this.vnode.context = this.vnode.context.slice(0, this.pos - num) + this.vnode.context.slice(this.pos)
+          this.vnode.delete
           // this.vnode.ele.data = this.vnode.context
         }
         break

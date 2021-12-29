@@ -144,19 +144,8 @@ export default class Selection {
     }
   }
   del() {
-    // 倒序删除
-    const cloneRanges = [...this.ranges]
-    cloneRanges.sort((v2, v1) => {
-      if (v2.endContainer.vnode.position > v1.endContainer.vnode.position || (v2.endContainer.vnode.position === v1.endContainer.vnode.position && v2.endOffset > v1.endOffset)) {
-        return -1
-      } else {
-        return 0
-      }
-    })
-    cloneRanges.forEach((range) => {
-      exec(range.del())
-    })
-    console.log(this.ranges)
+    this.vm.command.delete()
+    this.distinct()
   }
   destroy() {
     this.input.destroy()
