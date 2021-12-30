@@ -27,9 +27,10 @@
 6. [选区操作](https://juejin.cn/post/6844904038991921166)
 7. [主流架构](https://cloud.tencent.com/developer/article/1839793)
 8. [有道云编辑器设计架构](https://mp.weixin.qq.com/s/wIu_8yv69bR5pZwb6YYl0Q)
-9. [easysync 协同算法](http://www.manongjc.com/detail/24-rpprwaiprjeuxml.html)
-10. [多人协同编辑技术的演进](https://zhuanlan.zhihu.com/p/425265438)
-11. [OT算法](https://zhuanlan.zhihu.com/p/425284127)
+9.  [多人协同编辑技术的演进](https://zhuanlan.zhihu.com/p/425265438)
+10. [easysync 协同算法](http://www.manongjc.com/detail/24-rpprwaiprjeuxml.html)
+11. [OT.js算法演示](http://operational-transformation.github.io/index.html)
+12. [OT算法](https://zhuanlan.zhihu.com/p/425284127)
 
 
 ### **招募共同开发者 QQ：2252711582**

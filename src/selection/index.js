@@ -1,5 +1,6 @@
 import Range from './range'
 import Input from './input'
+import exec from '../operation'
 export default class Selection {
   nativeSelection = document.getSelection()
   ranges = []
@@ -16,7 +17,7 @@ export default class Selection {
     const count = this.nativeSelection.rangeCount
     for (let i = 0; i < count; i++) {
       const nativeRange = this.nativeSelection.getRangeAt(i)
-      this._pushRange(nativeRange)
+      this.pushRange(nativeRange)
     }
   }
   getRangeAt(index = 0) {
@@ -45,10 +46,16 @@ export default class Selection {
         }
       })
       if (flag) return
-      this._pushRange(nativeRange)
+      this.pushRange(nativeRange)
     }
   }
-  _pushRange(nativeRange) {
+  createRange({ startContainer, startOffset, endContainer, endOffset }) {
+    const range = document.createRange()
+    range.setStart(startContainer, startOffset)
+    range.setEnd(endContainer, endOffset)
+    return range
+  }
+  pushRange(nativeRange) {
     const cloneRange = new Range(nativeRange.cloneRange(), this.vm)
     if (nativeRange.collapsed) {
       cloneRange._d = 0
@@ -62,7 +69,7 @@ export default class Selection {
   // 注意chrome不支持多选区,需要在此之前调用 removeAllRanges
   addRange(nativeRange) {
     this.nativeSelection.addRange(nativeRange)
-    this._pushRange(nativeRange)
+    this.pushRange(nativeRange)
   }
   collapse(parentNode, offset) {
     this.nativeSelection.collapse(parentNode, offset)
@@ -137,10 +144,8 @@ export default class Selection {
     }
   }
   del() {
-    this.ranges.forEach((range) => {
-      range.del()
-      range.updateCaret()
-    })
+    this.vm.command.delete()
+    this.distinct()
   }
   destroy() {
     this.input.destroy()

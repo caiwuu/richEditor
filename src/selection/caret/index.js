@@ -4,7 +4,8 @@ const defaultStyle = {}
 export default class Caret {
   dom = null
   rect = null
-  constructor() {
+  constructor(range) {
+    this.range = range
     this.measure = new Measure()
     this.dom = document.createElement('span')
     this.dom.classList.add('custom-caret')
@@ -17,8 +18,23 @@ export default class Caret {
   remove() {
     this.dom.remove()
   }
+  getRect(range) {
+    let container, offset
+    switch (range._d) {
+      case 0:
+      case 1:
+        container = range.startContainer
+        offset = range.startOffset
+        break
+      case 2:
+        container = range.endContainer
+        offset = range.endOffset
+        break
+    }
+    return this.measure.measure(container, offset)
+  }
   update(range, drawCaret = true) {
-    this.rect = this.measure.measure(range)
+    this.rect = this.getRect(range)
     if (!drawCaret) return
     range.vm.ui.root.appendChild(this.dom)
     let container = range.startContainer

@@ -8,8 +8,10 @@ export default class Range {
     this.factory.call(nativeRange)
     return nativeRange
   }
+  connect() {}
+  unconnect() {}
   factory() {
-    this.caret = new Caret()
+    this.caret = new Caret(this)
     this.updateCaret = (drawCaret = true) => {
       this.caret.update(this, drawCaret)
     }
