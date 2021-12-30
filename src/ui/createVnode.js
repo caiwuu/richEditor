@@ -24,10 +24,7 @@ const handle = {
             target.context = target.context.slice(0, start) + target.context.slice(offset)
             target.ele.data = target.context
           } else {
-            target.childrens.splice(start, offset - start)
-            for (let index = 0; index < offset - start; index++) {
-              target.ele.childNodes[start].remove()
-            }
+            target.childrens.splice(start, offset - start).forEach((vnode) => vnode.ele.remove())
           }
         }
       case 'move':

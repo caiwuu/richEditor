@@ -10,6 +10,7 @@ export default function del() {
           offset: range.endOffset >= this.endOffset ? range.endOffset - 1 : range.endOffset,
           range,
         }))
+      console.log(caches)
       this.endContainer.vnode.delete(this.endOffset, 1)
       caches.forEach((cache) => {
         cache.range.setEnd(cache.endContainer, cache.offset)
@@ -19,10 +20,12 @@ export default function del() {
       // 需要跨标签操作
     } else {
       const { vnode: prevVnode, layer } = getPrevLeafNode(this.endContainer.vnode)
-      console.log(this.endContainer.vnode.isEmpty)
+      console.log('====')
       if (this.endContainer.vnode.isEmpty) {
+        console.log('isEmpty')
         this.endContainer.vnode.remove()
       }
     }
+    console.log(this.endContainer.vnode)
   }
 }
