@@ -30,11 +30,10 @@ const handle = {
       case 'move':
         console.log('move')
       case 'remove':
-        console.log('remove', target)
-        const index = getIndex(target)
-        console.log(index)
-        console.log(target.parent.childrens.splice(index, 1))
-        target.parent.childrens.splice(index, 1)[0].remove()
+        return function () {
+          const index = getIndex(target)
+          target.parent.childrens.splice(index, 1).forEach((i) => i.remove())
+        }
       case 'isEmpty':
         return target.tag === 'text' ? target.context === '' : target.childrens.length === 0
       default:
