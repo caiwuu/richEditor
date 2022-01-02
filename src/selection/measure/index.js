@@ -24,13 +24,13 @@ export default class Measure {
         container.appendChild(this.dom)
       }
     }
-    return this._getRect(container)
+    return this._getRect(container, offset)
   }
-  _getRect(container) {
+  _getRect(container, offset) {
     const { offsetLeft: x, offsetTop: y, offsetHeight: h } = this.dom
     const rect = { x, y, h }
     this.dom.remove()
-    if (container.nodeName === '#text') {
+    if (container.nodeName === '#text' && offset) {
       if (!container.data && container.nextSibling) {
         container.nextSibling.remove()
       } else {

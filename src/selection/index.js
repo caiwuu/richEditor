@@ -146,6 +146,7 @@ export default class Selection {
   del() {
     this.vm.command.delete()
     this.distinct()
+    console.log(this.ranges)
   }
   destroy() {
     this.input.destroy()

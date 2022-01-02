@@ -26,6 +26,6 @@ export default function del() {
         this.endContainer.vnode.remove()
       }
     }
-    console.log(this.endContainer.vnode)
+    console.log(this.endContainer.vnode.tag)
   }
 }
