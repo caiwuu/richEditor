@@ -98,12 +98,9 @@ export function delVnode(vnode) {
     }
     return delVnode(parent)
   } else {
-    const index = vnode.position.charAt(vnode.position.length - 1)
-    parent.childrens.splice(index, 1)
-    console.log('remove', vnode.tag)
-    vnode.dom.remove()
-    normalize(parent)
-    reArrangement(parent)
+    vnode.remove()
+    // normalize(parent)
+    // reArrangement(parent)
     // TODO 内容删空后立马初始化内容
     return parent
   }
@@ -223,11 +220,12 @@ export function normalize(vnode) {
     }
   }
 }
-function isEmptyNode(vnode) {
+export function isEmptyNode(vnode) {
+  console.log(vnode)
   if (vnode.childrens && vnode.childrens.length) {
-    return vnode.childrens.some((item) => isEmptyNode(item))
+    return vnode.childrens.every((item) => isEmptyNode(item))
   } else {
-    if (vnode.tag === 'text' && Text.context === '') {
+    if (vnode.tag === 'text' && vnode.context === '') {
       return true
     } else if (leafTag.includes(vnode.tag)) {
       return false
@@ -237,12 +235,14 @@ function isEmptyNode(vnode) {
   }
 }
 // 块级检测 检查vnode所属块级是否为空 vnode必须是个叶子节点
-export function blockIsEmptyCheck(vnode) {
+export function isEmptyBlock(vnode) {
+  // 有内容的文本节点
   if (vnode.context) {
     return false
   } else if (vnode.parent.childrens.length === 1) {
+    // 行内节点
     if (!blockTag.includes(vnode.parent.tag)) {
-      return blockIsEmptyCheck(vnode.parent)
+      return isEmptyBlock(vnode.parent)
     } else {
       return true
     }
@@ -266,4 +266,18 @@ export function isSameLine(initialRect, prevRect, currRect, result) {
     flag = true
   }
   return flag
+}
+export function recoverRange(caches) {
+  caches.forEach((cache) => {
+    if (cache.endContainer.vnode.childrens) {
+      const { vnode: leaf } = getLeafR(cache.endContainer.vnode.childrens[cache.offset - 1])
+      console.log(leaf)
+      if (!leaf.atom) {
+        cache.endContainer = leaf.ele
+        cache.offset = leaf.length
+      }
+    }
+    cache.range.setEnd(cache.endContainer, cache.offset)
+    cache.range.collapse(false)
+  })
 }

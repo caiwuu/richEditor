@@ -5,7 +5,16 @@ export default class Command {
   delete(pos) {
     if (pos) {
     } else {
-      this.vm.selection.ranges.forEach((range) => range.del())
+      this.vm.selection.ranges.forEach((range) => {
+        range.del()
+        range.updateCaret()
+      })
     }
+  }
+  input(event) {
+    this.vm.selection.ranges.forEach((range) => {
+      range.input(event)
+      range.updateCaret()
+    })
   }
 }
