@@ -2,6 +2,7 @@ import Caret from '../caret'
 import { getPrevLeafNode, getNextLeafNode, getIndex, getLeafL, getLeafR, isSameLine } from '../../utils'
 import { blockTag } from '../../type'
 import del from './del'
+import input from './input'
 export default class Range {
   constructor(nativeRange, vm) {
     nativeRange.vm = vm
@@ -291,5 +292,6 @@ export default class Range {
       return this._loop(direct, initialRect, currRect, lineChanged, shiftKey)
     }
     this.del = del.bind(this)
+    this.input = input.bind(this)
   }
 }

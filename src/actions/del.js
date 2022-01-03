@@ -1,4 +1,4 @@
-import { getNode, delVnode, updateNode, setRange, getPrevLeafNode, getLayer, rangeDel, reArrangement, normalize, blockIsEmptyCheck, getIndex } from '../utils/index'
+import { getNode, delVnode, updateNode, setRange, getPrevLeafNode, getLayer, rangeDel, reArrangement, normalize, isEmptyBlock, getIndex } from '../utils/index'
 import { blockTag } from '../type'
 export default function del(vm) {
   const { range, end, start } = vm.cursor.meta
@@ -31,8 +31,8 @@ export default function del(vm) {
         }
         console.log(range.endContainer)
       }
-      console.log(blockIsEmptyCheck(oldContainer), oldContainer)
-      if (prevVnode && blockTag.includes(layer.tag) && !blockIsEmptyCheck(oldContainer)) {
+      console.log(isEmptyBlock(oldContainer), oldContainer)
+      if (prevVnode && blockTag.includes(layer.tag) && !isEmptyBlock(oldContainer)) {
         console.log('跨块级')
         // 跨块级，将改块级子元素移动到prevVnode之后，并删除该节点
         // 未清空，但是光标即将离开块元素,将该块元素的子元素移动到上一个叶子块元素的末尾

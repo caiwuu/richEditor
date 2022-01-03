@@ -1,6 +1,11 @@
 import { setStyle } from '../../utils'
 export default class Input {
   input = null
+  inputState = {
+    // 输入框状态
+    value: '',
+    isComposing: false,
+  }
   constructor(selection) {
     this.selection = selection
     this._initIframe()
@@ -63,6 +68,7 @@ export default class Input {
   }
   _handleEvent(event) {
     // console.log(`--->${event.type}: ${event.data}--${event.isComposing}--${event.target.value}\n`)
+    this.selection.input(event)
   }
   _handGolobalKeydown(event) {
     const key = event.key

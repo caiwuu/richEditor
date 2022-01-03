@@ -1,12 +1,11 @@
 import Range from './range'
-import Input from './input'
-import exec from '../operation'
+import inputor from './inputor'
 export default class Selection {
   nativeSelection = document.getSelection()
   ranges = []
   constructor(vm) {
     this.vm = vm
-    this.input = new Input(this)
+    this.inputor = new inputor(this)
     this._addListeners()
   }
   getCount() {
@@ -29,8 +28,7 @@ export default class Selection {
   }
   clearRanges() {
     while (this.ranges.length) {
-      const range = this.ranges.pop()
-      range.caret.remove()
+      this.ranges.pop().caret.remove()
     }
   }
   // 多选区支持
@@ -138,7 +136,7 @@ export default class Selection {
       }
     })
     this.distinct()
-    this.input.focus()
+    this.inputor.focus()
     if (shiftKey) {
       this._setNativeRange(direction)
     }
@@ -146,10 +144,13 @@ export default class Selection {
   del() {
     this.vm.command.delete()
     this.distinct()
-    console.log(this.ranges)
+  }
+  input(event) {
+    this.vm.command.input(event)
+    this.distinct()
   }
   destroy() {
-    this.input.destroy()
+    this.inputor.destroy()
     this.vm.ui.editorContainer.removeEventListener('mouseup', this._handMouseup.bind(this))
     this.vm.ui.editorContainer.removeEventListener('mousedown', this._handMousedown.bind(this))
   }
@@ -172,6 +173,6 @@ export default class Selection {
     if (!this.nativeSelection.isCollapsed || event.shiftKey) {
       this.updateRanges(event.altKey)
     }
-    this.input.focus()
+    this.inputor.focus()
   }
 }

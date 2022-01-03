@@ -1,4 +1,4 @@
-import { setStyle, setAttr, setEvent, getIndex } from '../utils/index'
+import { setStyle, setAttr, setEvent, getIndex, isEmptyNode, normalize, reArrangement } from '../utils/index'
 import { leafTag } from '../type/index'
 import action from '../actions'
 /**
@@ -6,6 +6,14 @@ import action from '../actions'
  */
 const handle = {
   set(target, key, newValue) {
+    switch (key) {
+      case 'context':
+        target.ele.data = newValue
+        break
+
+      default:
+        break
+    }
     return Reflect.set(target, key, newValue)
   },
   get(target, key, receiver) {
@@ -32,10 +40,14 @@ const handle = {
       case 'remove':
         return function () {
           const index = getIndex(target)
-          target.parent.childrens.splice(index, 1).forEach((i) => i.remove())
+          target.parent.childrens.splice(index, 1).forEach((i) => i.ele.remove())
+          normalize(target.parent)
+          reArrangement(target.parent)
         }
       case 'isEmpty':
-        return target.tag === 'text' ? target.context === '' : target.childrens.length === 0
+        return isEmptyNode(target)
+      case 'length':
+        return target.tag === 'text' ? target.context.length : target.childrens.length
       default:
         return Reflect.get(target, key, receiver)
     }
@@ -47,20 +59,23 @@ export default function createVnode(ops, parent = null, position = '0') {
     ops.parent = parent
     ops.isRoot = !parent
     if (!ops.position) ops.position = parent ? (parent.position ? parent.position + '-' + position : position) : position
-
     if (!leafTag.includes(ops.tag)) {
       ops.ele = document.createElement(ops.tag)
-      if (ops.tag === 'a') {
-        ops.ele.onclick = () => {
-          action.emit('test', 'vnode-value')
-        }
-      }
     } else {
       ops.ele = ops.tag === 'text' ? document.createTextNode(ops.context) : document.createElement(ops.tag)
     }
     if (ops.style) setStyle(ops.ele, ops.style)
     if (ops.attr) setAttr(ops.ele, ops.attr)
     if (ops.event) setEvent(ops.ele, ops.event)
+
+    if (ops.tag === 'a') {
+      ops.ele.onclick = () => {
+        action.emit('test', 'vnode-value')
+      }
+    }
+    if (ops.tag === 'img') {
+      ops.atom = true
+    }
   }
   const vnode = new Proxy(ops, handle)
   vnode.root = parent ? parent.root : vnode

@@ -2,9 +2,7 @@ import render from '../ui/render'
 import { leafTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function'
-    ? item instanceof HTMLElement
-    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
@@ -243,12 +241,12 @@ function isEmptyNode(vnode) {
   }
 }
 // 块级检测 检查vnode所属块级是否为空 vnode必须是个叶子节点
-export function blockIsEmptyCheck(vnode) {
+export function isEmptyBlock(vnode) {
   if (vnode.context) {
     return false
   } else if (vnode.parent.childrens.length === 1) {
     if (!blockTag.includes(vnode.parent.tag)) {
-      return blockIsEmptyCheck(vnode.parent)
+      return isEmptyBlock(vnode.parent)
     } else {
       return true
     }
