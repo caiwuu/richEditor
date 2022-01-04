@@ -12,6 +12,11 @@ export default class Range {
   connect() {}
   unconnect() {}
   factory() {
+    this.inputState = {
+      // 输入框状态
+      value: '',
+      isComposing: false,
+    }
     this.caret = new Caret(this)
     this.updateCaret = (drawCaret = true) => {
       this.caret.update(this, drawCaret)

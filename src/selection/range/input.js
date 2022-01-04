@@ -1,10 +1,4 @@
 import { recoverRange } from '../../utils'
-const inputState = {
-  // 输入框状态
-  value: '',
-  isComposing: false,
-}
-
 function insert(inputData) {
   if (this.endContainer.vnode.tag == 'text') {
     let orgText = this.endContainer.vnode.context
@@ -13,7 +7,7 @@ function insert(inputData) {
       .filter((range) => range.endContainer === this.endContainer)
       .map((range) => ({
         endContainer: range.endContainer,
-        offset: range.endOffset >= this.endOffset ? range.endOffset + 1 : range.endOffset,
+        offset: range.endOffset >= this.endOffset ? range.endOffset + inputData.length : range.endOffset,
         range,
       }))
     this.endContainer.vnode.context = orgText
@@ -33,43 +27,36 @@ function insert(inputData) {
 }
 
 export default function input(event) {
+  console.log('字符输入')
   if (!this.collapsed) {
     this.del()
   } else if (event.type === 'input') {
     // 键盘字符输入
-    console.log('键盘字符输入')
-    if (!inputState.isComposing && event.data) {
+    if (!this.inputState.isComposing && event.data) {
+      console.log('键盘字符输入')
       const inputData = event.data === ' ' ? '\u00A0' : event.data
-      // mvc
       insert.call(this, inputData)
     } else {
-      // 聚合输入， 非键盘输入，如中文输入，ui变化但不会同步vnode
-      inputState.value = event.data || ''
-      this.endContainer.data = this.endContainer.data.slice(0, this.endOffset) + inputState.value
+      console.log('聚合输入:', event.data)
+      const oldValue = this.inputState.value
+      this.inputState.value = event.data || ''
+      const caches = this.vm.selection.ranges
+        .filter((range) => range.endContainer === this.endContainer)
+        .map((range) => ({
+          endContainer: range.endContainer,
+          offset: range.endOffset >= this.endOffset ? range.endOffset - oldValue.length + this.inputState.value.length : range.endOffset,
+          range,
+        }))
+      this.endContainer.vnode.context = this.endContainer.vnode.context.slice(0, this.endOffset - oldValue.length) + this.inputState.value + this.endContainer.vnode.context.slice(this.endOffset)
+      recoverRange(caches)
     }
   } else if (event.type === 'compositionstart') {
-    // 开始聚合输入 插入光标标记dom
-    inputState.isComposing = true
-    const endContainer = this.endContainer
-    const endNode = endContainer.splitText(this.endOffset)
-    // endContainer.parentNode.insertBefore(endNode, endContainer.nextSibling)
-    // endContainer.parentNode.insertBefore(this.caretMarker, endNode)
+    console.log('开始聚合输入')
+    this.inputState.isComposing = true
   } else if (event.type === 'compositionend') {
-    // 结束聚合输入 删除光标标记dom，执行输入同步vnode
-    inputState.isComposing = false
-    this.caretMarker.remove()
-    if (!this.meta.range.end) {
-      this.meta.range.endContainer.data = this.meta.range.endContainer.nextSibling.data
-      this.meta.range.endContainer.nextSibling.data = ''
-    } else {
-      this.meta.range.endContainer.parentNode.normalize()
-    }
-
-    action.emit('input', { vm: this.vm, inputData: event.data })
-    // 等待dom更新
-    setTimeout(() => {
-      event.target.value = ''
-      this.inputState.value = ''
-    })
+    console.log('结束聚合输入')
+    this.inputState.isComposing = false
+    event.target.value = ''
+    this.inputState.value = ''
   }
 }
