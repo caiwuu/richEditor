@@ -2,6 +2,8 @@ import { getPrevLeafNode, delVnode, getIndex, recoverRange } from '../../utils'
 import { blockTag } from '../../type'
 
 export default function del() {
+  if (this.inputState.isComposing) return
+  console.log('字符删除')
   if (this.collapsed) {
     // 行内操作
     if (this.endOffset) {
