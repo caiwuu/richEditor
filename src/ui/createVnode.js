@@ -25,6 +25,20 @@ const handle = {
     switch (key) {
       case 'insert':
         console.log('insert')
+        return function (index, vnode) {
+          console.log(target, index)
+          target.childrens.splice(index, 0, vnode)
+          if (target.childrens.length > index) {
+            if (index === 0) {
+              target.ele.insertBefore(vnode.ele, target.ele.childNodes[0])
+            } else {
+              target.ele.insertBefore(vnode.ele, target.ele.childNodes[index - 1].nextSibling)
+            }
+          } else {
+            target.ele.appendChild(vnode.ele)
+          }
+          reArrangement(target)
+        }
       case 'delete':
         return function (offset, count) {
           const start = offset - count <= 0 ? 0 : offset - count
@@ -47,7 +61,11 @@ const handle = {
       case 'isEmpty':
         return isEmptyNode(target)
       case 'length':
-        return target.tag === 'text' ? target.context.length : target.childrens.length
+        try {
+          return target.tag === 'text' ? target.context.length : target.childrens.length
+        } catch (error) {
+          throw 'atom node is no length attribute'
+        }
       default:
         return Reflect.get(target, key, receiver)
     }
