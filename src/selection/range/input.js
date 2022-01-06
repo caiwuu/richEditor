@@ -97,6 +97,7 @@ export default function input(event) {
           offset: range.endOffset >= this.endOffset ? range.endOffset - oldValue.length + this.inputState.value.length : range.endOffset,
           range,
         }))
+      // TODO 创建光标容器
       this.endContainer.vnode.context =
         this.endContainer.vnode.context.slice(0, this.endOffset - oldValue.length) +
         this.inputState.value +
@@ -108,6 +109,7 @@ export default function input(event) {
     this.inputState.isComposing = true
   } else if (event.type === 'compositionend') {
     console.log('结束聚合输入')
+    // TODO 接收聚合输入
     this.inputState.isComposing = false
     event.target.value = ''
     this.inputState.value = ''

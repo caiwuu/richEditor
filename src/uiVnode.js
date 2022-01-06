@@ -119,12 +119,11 @@ export const bodyVnode = {
     {
       tag: 'p',
       style: { background: '#eee' },
-      childrens: [{ tag: 'span', childrens: [{ tag: 'br' }] }],
+      childrens: [{ tag: 'text', context: '1' }],
     },
   ],
   attr: {
     id: 'editor-body',
-    // contenteditable: true,
   },
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }
