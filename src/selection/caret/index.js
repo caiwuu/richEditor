@@ -46,7 +46,8 @@ export default class Caret {
     const height = multiplication(copyStyle.fontSize, 1.3)
     const caretStyle = {
       top: this.rect.y + 'px',
-      left: this.rect.x + 'px',
+      // 光标宽度为2
+      left: this.rect.x - 1 + 'px',
       height: height,
       fontSize: copyStyle.fontSize,
       background: copyStyle.color,

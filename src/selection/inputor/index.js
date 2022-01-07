@@ -1,4 +1,4 @@
-import { setStyle } from '../../utils'
+import { setStyle, multiplication } from '../../utils'
 export default class Input {
   input = null
   inputState = {
@@ -46,9 +46,15 @@ export default class Input {
   focus() {
     const range = this.selection.getRangeAt(0)
     if (!range) return
+    let container = range.startContainer
+    if (!(container instanceof Element)) {
+      container = container.parentNode
+    }
+    const copyStyle = getComputedStyle(container)
+    const height = multiplication(copyStyle.fontSize, 1).replace(/(\d+)px/, '$1')
     const style = {
       position: 'absolute',
-      top: range.caret.rect.y + 'px',
+      top: range.caret.rect.y + height / 1 + 'px',
       left: range.caret.rect.x + 'px',
     }
     setStyle(this.iframe, style)

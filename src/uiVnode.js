@@ -70,6 +70,7 @@ export const bodyVnode = {
             },
           ],
         },
+        // { tag: 'text', context: 'caiwu11' },
         {
           tag: 'img',
           attr: {
@@ -86,6 +87,7 @@ export const bodyVnode = {
             src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
           },
         },
+        // { tag: 'text', context: 'caiwu' },
         {
           tag: 'span',
           childrens: [
@@ -97,7 +99,8 @@ export const bodyVnode = {
         },
         {
           tag: 'text',
-          context: 'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
+          context:
+            'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
         },
       ],
     },
@@ -116,12 +119,11 @@ export const bodyVnode = {
     {
       tag: 'p',
       style: { background: '#eee' },
-      childrens: [{ tag: 'span', childrens: [{ tag: 'br' }] }],
+      childrens: [{ tag: 'text', context: '1' }],
     },
   ],
   attr: {
     id: 'editor-body',
-    // contenteditable: true,
   },
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }
