@@ -6,22 +6,15 @@ import action from '../actions'
  */
 const handle = {
   set(target, key, newValue) {
+    // ui 更新
     switch (key) {
       case 'context':
         target.ele.data = newValue
-        break
-
-      default:
         break
     }
     return Reflect.set(target, key, newValue)
   },
   get(target, key, receiver) {
-    if (key === '') {
-      return function () {
-        console.log('remove')
-      }
-    }
     switch (key) {
       case 'insert':
         console.log('insert')
@@ -85,12 +78,6 @@ export default function createVnode(ops, parent = null, position = '0') {
     if (ops.style) setStyle(ops.ele, ops.style)
     if (ops.attr) setAttr(ops.ele, ops.attr)
     if (ops.event) setEvent(ops.ele, ops.event)
-
-    if (ops.tag === 'a') {
-      ops.ele.onclick = () => {
-        action.emit('test', 'vnode-value')
-      }
-    }
     if (ops.tag === 'img') {
       ops.atom = true
     }

@@ -281,3 +281,10 @@ export function recoverRange(caches) {
     cache.range.collapse(false)
   })
 }
+export function times(n, fn, context = undefined, ...args) {
+  let i = 0
+  while (i++ < n) {
+    console.log('---')
+    fn.call(context, ...args)
+  }
+}

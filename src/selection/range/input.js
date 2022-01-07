@@ -1,117 +1,139 @@
-import { recoverRange } from '../../utils'
+import { recoverRange, times } from '../../utils'
 import createVnode from '../../ui/createVnode'
-function insert(inputData) {
-  if (this.endContainer.vnode.tag == 'text') {
-    let orgText = this.endContainer.vnode.context
-    orgText = orgText.slice(0, this.endOffset) + inputData + orgText.slice(this.endOffset)
-    const caches = this.vm.selection.ranges
-      .filter((range) => range.endContainer === this.endContainer)
+const handleInsert = {
+  betweenTextAndEle: (R, inputData, newRangePos) => {
+    newRangePos.targetVnode.context = newRangePos.targetVnode.context + inputData
+  },
+  betweenEleAndText: (R, inputData, newRangePos) => {
+    newRangePos.targetVnode.context = inputData + newRangePos.targetVnode.context
+  },
+  betweenEleAndEle: (R, inputData, newRangePos) => {
+    R.endContainer.vnode.insert(R.endOffset, newRangePos.targetVnode)
+  },
+  betweenTextAndText: (R, inputData, newRangePos) => {
+    let orgText = R.endContainer.vnode.context
+    orgText = orgText.slice(0, R.endOffset) + inputData + orgText.slice(R.endOffset)
+    R.endContainer.vnode.context = orgText
+  },
+}
+const handleRangePosition = {
+  betweenTextAndEle: (R, inputData) => {
+    return {
+      targetVnode: R.endContainer.vnode.childrens[R.endOffset - 1],
+      targetOffset: targetVnode.length + inputData.length,
+    }
+  },
+  betweenEleAndText: (R, inputData) => {
+    return {
+      targetVnode: R.endContainer.vnode.childrens[R.endOffset],
+      targetOffset: inputData.length,
+    }
+  },
+  betweenEleAndEle: (R, inputData) => {
+    return {
+      targetVnode: createVnode({ tag: 'text', context: inputData }, R.endContainer.vnode),
+      targetOffset: inputData.length,
+    }
+  },
+  betweenTextAndText: (R, inputData) => {
+    return {
+      targetVnode: R.endContainer.vnode,
+      targetOffset: R.endOffset + inputData.length,
+    }
+  },
+}
+const cacheRanges = {
+  betweenTextAndEle: (R, inputData, newRangePos) => {
+    return [
+      {
+        endContainer: newRangePos.targetVnode.ele,
+        offset: newRangePos.targetOffset,
+        range: R,
+      },
+    ]
+  },
+  betweenEleAndText: (R, inputData, newRangePos) => {
+    const caches = R.vm.selection.ranges
+      .filter((range) => range.endContainer === newRangePos.targetVnode.ele)
+      .map((range) => ({
+        endContainer: newRangePos.targetVnode.ele,
+        offset: range.endOffset + newRangePos.targetOffset,
+        range: range,
+      }))
+    caches.push({
+      endContainer: newRangePos.targetVnode.ele,
+      offset: newRangePos.targetOffset,
+      range: R,
+    })
+    return caches
+  },
+  betweenEleAndEle: (R, inputData, newRangePos) => {
+    return [
+      {
+        endContainer: newRangePos.targetVnode.ele,
+        offset: newRangePos.targetOffset,
+        range: R,
+      },
+    ]
+  },
+  betweenTextAndText: (R, inputData, newRangePos) => {
+    const caches = R.vm.selection.ranges
+      .filter((range) => range.endContainer === R.endContainer)
       .map((range) => ({
         endContainer: range.endContainer,
-        offset: range.endOffset >= this.endOffset ? range.endOffset + inputData.length : range.endOffset,
-        range,
+        offset: range.endOffset >= R.endOffset ? range.endOffset + inputData.length : range.endOffset,
+        range: range,
       }))
-    this.endContainer.vnode.context = orgText
-    recoverRange(caches)
+    return caches
+  },
+}
+function getInsertType(R) {
+  if (R.endContainer.vnode.tag == 'text') {
+    return 'betweenTextAndText'
+  } else if (R.endContainer.vnode.childrens[R.endOffset] && R.endContainer.vnode.childrens[R.endOffset].tag === 'text') {
+    return 'betweenEleAndText'
+  } else if (R.endContainer.vnode.childrens[R.endOffset - 1] && R.endContainer.vnode.childrens[R.endOffset - 1].tag === 'text') {
+    return 'betweenTextAndEle'
   } else {
-    console.log(this.endOffset)
-    let caches = null,
-      targetVnode = null,
-      targetOffset = 0,
-      flag = 0
-    if (this.endContainer.vnode.childrens[this.endOffset] && this.endContainer.vnode.childrens[this.endOffset].tag === 'text') {
-      targetVnode = this.endContainer.vnode.childrens[this.endOffset]
-      targetOffset = inputData.length
-      flag = 2
-    } else if (
-      this.endContainer.vnode.childrens[this.endOffset - 1] &&
-      this.endContainer.vnode.childrens[this.endOffset - 1].tag === 'text'
-    ) {
-      targetVnode = this.endContainer.vnode.childrens[this.endOffset - 1]
-      targetOffset = targetVnode.length + inputData.length
-      flag = 1
-    } else {
-      targetVnode = createVnode({ tag: 'text', context: inputData }, this.endContainer.vnode)
-      targetOffset = inputData.length
-      flag = 0
-    }
-    switch (flag) {
-      case 2:
-        caches = this.vm.selection.ranges
-          .filter((range) => range.endContainer === targetVnode.ele)
-          .map((range) => ({
-            endContainer: targetVnode.ele,
-            offset: range.endOffset + targetOffset,
-            range,
-          }))
-        caches.push({
-          endContainer: targetVnode.ele,
-          offset: targetOffset,
-          range: this,
-        })
-        targetVnode.context = inputData + targetVnode.context
-        recoverRange(caches)
-        break
-      case 1:
-        caches = [
-          {
-            endContainer: targetVnode.ele,
-            offset: targetOffset,
-            range: this,
-          },
-        ]
-        targetVnode.context = targetVnode.context + inputData
-        recoverRange(caches)
-        break
-      case 0:
-        caches = [
-          {
-            endContainer: targetVnode.ele,
-            offset: targetOffset,
-            range: this,
-          },
-        ]
-        this.endContainer.vnode.insert(this.endOffset, targetVnode)
-        recoverRange(caches)
-    }
+    return 'betweenEleAndEle'
   }
 }
-
+function insert(R, inputData) {
+  const insertType = getInsertType(R)
+  const newRangePos = handleRangePosition[insertType](R, inputData)
+  const caches = cacheRanges[insertType](R, inputData, newRangePos)
+  handleInsert[insertType](R, inputData, newRangePos)
+  recoverRange(caches)
+}
 export default function input(event) {
   if (!this.collapsed) {
     this.del()
-  } else if (event.type === 'input') {
+  }
+  if (event.type === 'input') {
+    let prevInputValue,
+      inputData = event.data === ' ' ? '\u00A0' : event.data || ''
     // 键盘字符输入
     if (!this.inputState.isComposing && event.data) {
       console.log('键盘输入：', event.data)
-      const inputData = event.data === ' ' ? '\u00A0' : event.data
-      insert.call(this, inputData)
+      prevInputValue = this.inputState.value
     } else {
       console.log('聚合输入:', event.data)
-      const oldValue = this.inputState.value
-      this.inputState.value = event.data || ''
-      const caches = this.vm.selection.ranges
-        .filter((range) => range.endContainer === this.endContainer)
-        .map((range) => ({
-          endContainer: range.endContainer,
-          offset: range.endOffset >= this.endOffset ? range.endOffset - oldValue.length + this.inputState.value.length : range.endOffset,
-          range,
-        }))
-      // TODO 创建光标容器
-      this.endContainer.vnode.context =
-        this.endContainer.vnode.context.slice(0, this.endOffset - oldValue.length) +
-        this.inputState.value +
-        this.endContainer.vnode.context.slice(this.endOffset)
-      recoverRange(caches)
+      prevInputValue = this.inputState.value
+      this.inputState.value = inputData
     }
+    times(prevInputValue.length, this.del, this, true)
+    insert(this, inputData)
   } else if (event.type === 'compositionstart') {
-    console.log('开始聚合输入')
+    console.log('开始聚合输入:', event.data)
     this.inputState.isComposing = true
   } else if (event.type === 'compositionend') {
-    console.log('结束聚合输入')
+    console.log('结束聚合输入:', event.data)
     // TODO 接收聚合输入
     this.inputState.isComposing = false
     event.target.value = ''
-    this.inputState.value = ''
+    // 改变执行顺序（失焦input事件是微任务，需要在它之后执行） 消除失焦意外插入的bug（腾讯文档和google文档都存在此bug）
+    setTimeout(() => {
+      this.inputState.value = ''
+    })
   }
 }

@@ -1,8 +1,8 @@
 import { getPrevLeafNode, delVnode, getIndex, recoverRange } from '../../utils'
 import { blockTag } from '../../type'
 
-export default function del() {
-  if (this.inputState.isComposing) return
+export default function del(force = false) {
+  if (this.inputState.isComposing && !force) return
   console.log('字符删除')
   if (this.collapsed) {
     // 行内操作
@@ -27,7 +27,8 @@ export default function del() {
         .filter((range) => range.endContainer === this.endContainer)
         .map((range) => ({
           endContainer: prevVnode.atom ? prevVnode.parent.ele : prevVnode.ele,
-          offset: prevVnode.tag === 'text' ? range.endOffset + prevVnode.length : prevVnode.atom ? getIndex(prevVnode) + 1 : range.endOffset,
+          offset:
+            prevVnode.tag === 'text' ? range.endOffset + prevVnode.length : prevVnode.atom ? getIndex(prevVnode) + 1 : range.endOffset,
           range,
         }))
       // 如果当前节点为空则递归向上删除空节点
