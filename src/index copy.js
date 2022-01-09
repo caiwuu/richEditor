@@ -13,7 +13,7 @@ class Editor {
   editorBody = null
   constructor(id) {
     action.on('test', (value) => {
-      console.log(value)
+      log(value)
     })
     this.vnode = new UI(testData)
     const { editorContainer, editorBody } = this.vnode.mount(id)
@@ -59,7 +59,7 @@ class Editor {
       this.cursor.focus()
     }
     const key = event.key
-    console.log(key)
+    log(key)
     this.cursor.caret.style.animationName = 'caret-static'
     switch (key) {
       case 'Backspace':

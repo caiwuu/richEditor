@@ -25,6 +25,6 @@ class VnodeTool {
 }
 
 export default function vt(vnode) {
-  console.log('o')
+  log('o')
   return new VnodeTool(vnode)
 }

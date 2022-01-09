@@ -68,6 +68,7 @@ export const bodyVnode = {
               tag: 'text',
               context: 'span after image',
             },
+            // { tag: 'br' },
           ],
         },
         // { tag: 'text', context: 'caiwu11' },
@@ -99,8 +100,7 @@ export const bodyVnode = {
         },
         {
           tag: 'text',
-          context:
-            'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
+          context: 'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
         },
       ],
     },
@@ -119,7 +119,10 @@ export const bodyVnode = {
     {
       tag: 'p',
       style: { background: '#eee' },
-      childrens: [{ tag: 'text', context: '1' }],
+      childrens: [
+        // { tag: 'text', context: '1' },
+        { tag: 'br', virtual: true },
+      ],
     },
   ],
   attr: {
