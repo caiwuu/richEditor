@@ -41,14 +41,14 @@ export default class Cursor {
     this.input.addEventListener('input', this.handleEvent.bind(this))
   }
   handleEvent(event) {
-    console.log(`--->${event.type}: ${event.data}--${event.isComposing}--${event.target.value}\n`)
+    log(`--->${event.type}: ${event.data}--${event.isComposing}--${event.target.value}\n`)
     // selected时释放掉一次输入，因为不能调起中文输入法 折中做法 暂时没有好的解决办法
     if (!this.meta.range.collapsed) {
       action.emit('del', this.vm)
       this.meta.range.collapse(true)
     } else if (event.type === 'input') {
       // 键盘字符输入
-      console.log('键盘字符输入')
+      log('键盘字符输入')
       if (!this.inputState.isComposing && event.data) {
         const inputData = event.data === ' ' ? '\u00A0' : event.data
         // mvc

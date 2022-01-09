@@ -3,7 +3,7 @@ import { blockTag } from '../type'
 export default function del(vm) {
   const { range, end, start } = vm.cursor.meta
   let orgText = range.endContainer.vnode.context
-  // console.log([range.endContainer])
+  // log([range.endContainer])
   /*
     删除分为 选区删除和非选区删除
   */
@@ -20,25 +20,25 @@ export default function del(vm) {
       // 光标容器无内容;清除本节点且光标定位到上一个叶子末尾
       // TODO 遗漏一种情况
       if (orgText === '') {
-        console.log('删空')
-        console.log(range.endContainer.vnode)
+        log('删空')
+        log(range.endContainer.vnode)
         const shouldUpdate = delVnode(range.endContainer.vnode)
-        // console.log(shouldUpdate)
+        // log(shouldUpdate)
         // updateNode(shouldUpdate)
         if (!prevVnode) {
-          console.log('没有前置节点')
+          log('没有前置节点')
           return setRange(vm, shouldUpdate.childrens[0].dom, 0)
         }
-        console.log(range.endContainer)
+        log(range.endContainer)
       }
-      console.log(isEmptyBlock(oldContainer), oldContainer)
+      log(isEmptyBlock(oldContainer), oldContainer)
       if (prevVnode && blockTag.includes(layer.tag) && !isEmptyBlock(oldContainer)) {
-        console.log('跨块级')
+        log('跨块级')
         // 跨块级，将改块级子元素移动到prevVnode之后，并删除该节点
         // 未清空，但是光标即将离开块元素,将该块元素的子元素移动到上一个叶子块元素的末尾
         const newLayer = getLayer(prevVnode)
         shouldNormalize = newLayer.childrens.slice(-1)[0].tag === 'text' && layer.childrens[0].tag === 'text'
-        console.log(shouldNormalize)
+        log(shouldNormalize)
         newLayer.childrens = [...newLayer.childrens, ...layer.childrens]
         reArrangement(newLayer)
         shouldNormalize && normalize(newLayer)
@@ -50,7 +50,7 @@ export default function del(vm) {
         }
       }
       if (prevVnode) {
-        console.log('if (prevVnode)')
+        log('if (prevVnode)')
         // 如果前一个叶子节点不是text，需额外处理
         if (prevVnode.tag === 'text') {
           const prevVnodeLen = shouldNormalize ? prevVnode.context.length - layer.childrens[0].context.length : prevVnode.context.length
@@ -63,20 +63,20 @@ export default function del(vm) {
       }
     } else {
       // 删除线在节点之间或者末尾
-      console.log(range.endContainer.vnode.tag, end)
+      log(range.endContainer.vnode.tag, end)
       if (range.endContainer.vnode.tag === 'text') {
         range.endContainer.vnode.context = orgText
         setRange(vm, updateNode(range.endContainer.vnode), end - 1)
       } else {
         const shouldUpdate = delVnode(range.endContainer.vnode.childrens[end - 1])
         const t = updateNode(shouldUpdate)
-        console.log(t)
+        log(t)
         setRange(vm, t, end - 1)
       }
     }
   } else {
     const { startContainer, endContainer, commonAncestorContainer } = range
-    console.log(range)
+    log(range)
     // 选区删除-同一标签
     if (startContainer === endContainer) {
       orgText = orgText.slice(0, start) + orgText.slice(end)
@@ -98,14 +98,14 @@ export default function del(vm) {
       }
       if (startBlock !== endBlock && layer === endBlock) {
         // 不同快，且结束节点块还有内容，需要将该块内容移动到开始块
-        // console.log('需要将结束块内容移动到开始块')
+        // log('需要将结束块内容移动到开始块')
         startBlock.childrens = [...startBlock.childrens, ...endBlock.childrens]
         reArrangement(commonAncestorContainer)
         normalize(startBlock)
         delVnode(endContainer.vnode)
       }
       updateNode(commonAncestorContainer.vnode)
-      console.log(getNode(vm, position))
+      log(getNode(vm, position))
       setRange(vm, getNode(vm, position), start)
     }
   }

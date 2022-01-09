@@ -114,20 +114,20 @@ export default function input(event) {
       inputData = event.data === ' ' ? '\u00A0' : event.data || ''
     // 键盘字符输入
     if (!this.inputState.isComposing && event.data) {
-      console.log('键盘输入：', event.data)
+      log('键盘输入：', event.data)
       prevInputValue = this.inputState.value
     } else {
-      console.log('聚合输入:', event.data)
+      log('聚合输入:', event.data)
       prevInputValue = this.inputState.value
       this.inputState.value = inputData
     }
     times(prevInputValue.length, this.del, this, true)
     insert(this, inputData)
   } else if (event.type === 'compositionstart') {
-    console.log('开始聚合输入:', event.data)
+    log('开始聚合输入:', event.data)
     this.inputState.isComposing = true
   } else if (event.type === 'compositionend') {
-    console.log('结束聚合输入:', event.data)
+    log('结束聚合输入:', event.data)
     // TODO 接收聚合输入
     this.inputState.isComposing = false
     event.target.value = ''

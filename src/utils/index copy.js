@@ -104,7 +104,7 @@ export function delVnode(vnode) {
   } else {
     const index = vnode.position.charAt(vnode.position.length - 1)
     parent.childrens.splice(index, 1)
-    console.log('remove', vnode.tag)
+    log('remove', vnode.tag)
     vnode.dom.remove()
     normalize(parent)
     reArrangement(parent)
@@ -179,7 +179,7 @@ export function getPrevLeafNode(vnode, layer, direction = 'R') {
     layer = vnode
   }
   if (vnode.isRoot) {
-    console.log('isRoot')
+    log('isRoot')
     return { vnode: null, layer: null }
   }
   const index = getIndex(vnode)

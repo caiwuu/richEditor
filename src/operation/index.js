@@ -6,7 +6,7 @@ const operation = {
       if (endOffset) {
         vt(endPos).from(endOffset).del(1)
       } else {
-        console.log('!!!')
+        log('!!!')
       }
     }
   },

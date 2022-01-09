@@ -172,7 +172,7 @@ export function getPrevLeafNode(vnode, layer, direction = 'R') {
     layer = vnode
   }
   if (vnode.isRoot) {
-    console.log('isRoot')
+    log('isRoot')
     return { vnode: null, layer: null }
   }
   const index = getIndex(vnode)
@@ -221,11 +221,12 @@ export function normalize(vnode) {
   }
 }
 export function isEmptyNode(vnode) {
-  console.log(vnode)
   if (vnode.childrens && vnode.childrens.length) {
     return vnode.childrens.every((item) => isEmptyNode(item))
   } else {
     if (vnode.tag === 'text' && vnode.context === '') {
+      return true
+    } else if (vnode.virtual) {
       return true
     } else if (leafTag.includes(vnode.tag)) {
       return false
@@ -271,7 +272,6 @@ export function recoverRange(caches) {
   caches.forEach((cache) => {
     if (cache.endContainer.vnode.childrens) {
       const { vnode: leaf } = getLeafR(cache.endContainer.vnode.childrens[cache.offset - 1])
-      console.log(leaf)
       if (!leaf.atom) {
         cache.endContainer = leaf.ele
         cache.offset = leaf.length
@@ -284,7 +284,7 @@ export function recoverRange(caches) {
 export function times(n, fn, context = undefined, ...args) {
   let i = 0
   while (i++ < n) {
-    console.log('---')
+    log('---')
     fn.call(context, ...args)
   }
 }

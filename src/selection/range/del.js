@@ -1,12 +1,14 @@
-import { getPrevLeafNode, delVnode, getIndex, recoverRange } from '../../utils'
+import { getPrevLeafNode, delVnode, getIndex, recoverRange, isEmptyBlock } from '../../utils'
 import { blockTag } from '../../type'
+import createVnode from '../../ui/createVnode'
 
 export default function del(force = false) {
   if (this.inputState.isComposing && !force) return
-  console.log('字符删除')
+  log('字符删除')
   if (this.collapsed) {
     // 行内操作
     if (this.endOffset) {
+      log('行内del')
       // 缓存改变前的状态
       const caches = this.vm.selection.ranges
         .filter((range) => range.endContainer === this.endContainer)
@@ -17,22 +19,27 @@ export default function del(force = false) {
         }))
       this.endContainer.vnode.delete(this.endOffset, 1)
       recoverRange(caches)
+      if (isEmptyBlock(this.endContainer.vnode)) {
+        const br = createVnode({ tag: 'br', virtual: true })
+        this.endContainer.vnode.parent.insert(1, br)
+      }
       // 需要跨标签操作
     } else {
       // 获取上一个光标容器节点和跨越的节点
       const { vnode: prevVnode, layer } = getPrevLeafNode(this.endContainer.vnode)
-      console.log(prevVnode)
+      log(prevVnode)
+      if (!prevVnode) return
       // 缓存改变前的状态
       const caches = this.vm.selection.ranges
         .filter((range) => range.endContainer === this.endContainer)
         .map((range) => ({
           endContainer: prevVnode.atom ? prevVnode.parent.ele : prevVnode.ele,
-          offset:
-            prevVnode.tag === 'text' ? range.endOffset + prevVnode.length : prevVnode.atom ? getIndex(prevVnode) + 1 : range.endOffset,
+          offset: prevVnode.tag === 'text' ? range.endOffset + prevVnode.length : prevVnode.atom ? getIndex(prevVnode) + 1 : range.endOffset,
           range,
         }))
       // 如果当前节点为空则递归向上删除空节点
       if (this.endContainer.vnode.isEmpty) {
+        this.endContainer.vnode.parent.childrens.filter((vnode) => vnode.virtual).forEach((item) => item.remove())
         delVnode(this.endContainer.vnode)
       }
       recoverRange(caches)

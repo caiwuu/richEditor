@@ -17,9 +17,9 @@ const handle = {
   get(target, key, receiver) {
     switch (key) {
       case 'insert':
-        console.log('insert')
+        log('insert')
         return function (index, vnode) {
-          console.log(target, index)
+          log(target, index)
           target.childrens.splice(index, 0, vnode)
           if (target.childrens.length > index) {
             if (index === 0) {
@@ -30,7 +30,7 @@ const handle = {
           } else {
             target.ele.appendChild(vnode.ele)
           }
-          reArrangement(target)
+          reArrangement(receiver)
         }
       case 'delete':
         return function (offset, count) {
@@ -43,7 +43,7 @@ const handle = {
           }
         }
       case 'move':
-        console.log('move')
+        log('move')
       case 'remove':
         return function () {
           const index = getIndex(target)
@@ -66,8 +66,8 @@ const handle = {
 }
 export default function createVnode(ops, parent = null, position = '0') {
   if (ops.tag) {
-    ops._isVnode = true
     ops.parent = parent
+    ops._isVnode = true
     ops.isRoot = !parent
     if (!ops.position) ops.position = parent ? (parent.position ? parent.position + '-' + position : position) : position
     if (!leafTag.includes(ops.tag)) {
