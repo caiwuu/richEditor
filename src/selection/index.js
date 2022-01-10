@@ -84,7 +84,7 @@ export default class Selection {
       this.ranges.forEach((range) => range.updateCaret())
     })
   }
-  // 高性能去除重;
+  // 高性能去重;
   distinct() {
     let tempObj = {}
     let len = this.ranges.length
@@ -148,6 +148,9 @@ export default class Selection {
   input(event) {
     this.vm.command.input(event)
     this.distinct()
+  }
+  enter() {
+    this.vm.command.enter()
   }
   destroy() {
     this.inputor.destroy()

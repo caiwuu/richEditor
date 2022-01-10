@@ -91,7 +91,8 @@ export function clonePureVnode(vnode) {
 export function delVnode(vnode) {
   const parent = vnode.parent || vnode
   // 如果父级只有一个子集，则递归删除父级
-  if (parent.childrens.length === 1) {
+  // if (parent.childrens.length === 1) {
+  if (isEmptyNode(parent)) {
     if (parent.isRoot) {
       vnode.childrens = [{ tag: 'text', context: '' }, { tag: 'br' }]
       return vnode
@@ -109,9 +110,10 @@ export function delVnode(vnode) {
 export function reArrangement(parent) {
   if (parent.childrens) {
     parent.childrens.forEach((item, index) => {
+      const old = item.position
       item.parent = parent
       item.position = parent.position + '-' + index
-      reArrangement(item)
+      if (old !== item.position) reArrangement(item)
     })
   }
 }

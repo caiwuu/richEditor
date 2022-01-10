@@ -64,6 +64,18 @@ const handle = {
     }
   },
 }
+/**
+ * 节点字段说明：
+ * position 标识节点的位置层级信息
+ * isRoot 是否根节点
+ * virtual 非实体节点，不描述具体内容，充当支撑文档结构的作用
+ * style 样式
+ * attr 属性
+ * event dom事件
+ * tag 节点类型
+ * ele 真实dom
+ * atom 原子节点 无子集，内容不可分割
+ */
 export default function createVnode(ops, parent = null, position = '0') {
   if (ops.tag) {
     ops.parent = parent

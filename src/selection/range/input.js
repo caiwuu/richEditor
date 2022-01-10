@@ -1,25 +1,33 @@
 import { recoverRange, times } from '../../utils'
 import createVnode from '../../ui/createVnode'
+function removeVirtual(vnode) {
+  vnode.childrens.filter((vnode) => vnode.virtual).forEach((vnode) => vnode.remove())
+}
 const handleInsert = {
   betweenTextAndEle: (R, inputData, newRangePos) => {
+    removeVirtual(R.endContainer.vnode)
     newRangePos.targetVnode.context = newRangePos.targetVnode.context + inputData
   },
   betweenEleAndText: (R, inputData, newRangePos) => {
+    removeVirtual(R.endContainer.vnode)
     newRangePos.targetVnode.context = inputData + newRangePos.targetVnode.context
   },
   betweenEleAndEle: (R, inputData, newRangePos) => {
+    removeVirtual(R.endContainer.vnode)
     R.endContainer.vnode.insert(R.endOffset, newRangePos.targetVnode)
   },
   betweenTextAndText: (R, inputData, newRangePos) => {
     let orgText = R.endContainer.vnode.context
     orgText = orgText.slice(0, R.endOffset) + inputData + orgText.slice(R.endOffset)
+    removeVirtual(R.endContainer.vnode.parent)
     R.endContainer.vnode.context = orgText
   },
 }
 const handleRangePosition = {
   betweenTextAndEle: (R, inputData) => {
+    const targetVnode = R.endContainer.vnode.childrens[R.endOffset - 1]
     return {
-      targetVnode: R.endContainer.vnode.childrens[R.endOffset - 1],
+      targetVnode: targetVnode,
       targetOffset: targetVnode.length + inputData.length,
     }
   },
@@ -100,6 +108,7 @@ function getInsertType(R) {
 }
 function insert(R, inputData) {
   const insertType = getInsertType(R)
+  log(insertType)
   const newRangePos = handleRangePosition[insertType](R, inputData)
   const caches = cacheRanges[insertType](R, inputData, newRangePos)
   handleInsert[insertType](R, inputData, newRangePos)

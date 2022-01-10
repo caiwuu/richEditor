@@ -3,6 +3,7 @@ import { getPrevLeafNode, getNextLeafNode, getIndex, getLeafL, getLeafR, isSameL
 import { blockTag } from '../../type'
 import del from './del'
 import input from './input'
+import enter from './enter'
 export default class Range {
   constructor(nativeRange, vm) {
     nativeRange.vm = vm
@@ -298,5 +299,6 @@ export default class Range {
     }
     this.del = del.bind(this)
     this.input = input.bind(this)
+    this.enter = enter.bind(this)
   }
 }

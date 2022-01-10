@@ -19,7 +19,8 @@ export default function del(force = false) {
         }))
       this.endContainer.vnode.delete(this.endOffset, 1)
       recoverRange(caches)
-      if (isEmptyBlock(this.endContainer.vnode)) {
+      // 添加br防止行塌陷
+      if (isEmptyBlock(this.endContainer.vnode) && !this.endContainer.vnode.parent.childrens.some((vnode) => vnode.virtual)) {
         const br = createVnode({ tag: 'br', virtual: true })
         this.endContainer.vnode.parent.insert(1, br)
       }
@@ -34,7 +35,8 @@ export default function del(force = false) {
         .filter((range) => range.endContainer === this.endContainer)
         .map((range) => ({
           endContainer: prevVnode.atom ? prevVnode.parent.ele : prevVnode.ele,
-          offset: prevVnode.tag === 'text' ? range.endOffset + prevVnode.length : prevVnode.atom ? getIndex(prevVnode) + 1 : range.endOffset,
+          offset:
+            prevVnode.tag === 'text' ? range.endOffset + prevVnode.length : prevVnode.atom ? getIndex(prevVnode) + 1 : range.endOffset,
           range,
         }))
       // 如果当前节点为空则递归向上删除空节点
