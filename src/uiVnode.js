@@ -1,79 +1,79 @@
 export const bodyVnode = {
-  tag: 'div',
+  type: 'div',
   childrens: [
     {
-      tag: 'p',
+      type: 'p',
       childrens: [
-        { tag: 'text', context: '普通文字普通文字' },
+        { type: 'text', context: '普通文字普通文字1' },
         {
-          tag: 'span',
-          childrens: [{ tag: 'text', context: '大号文字大号文字大号文字大号文字大' }],
+          type: 'span',
+          childrens: [{ type: 'text', context: '大号文字大号文字大号文字大号文字大' }],
           style: { color: '#bbb', fontSize: '16px' },
         },
         {
-          tag: 'span',
+          type: 'span',
           childrens: [
             {
-              tag: 'text',
+              type: 'text',
               context:
                 '小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字的文字小号的文字小号的文字小号的文字的文字小号的文字小号的文字',
             },
           ],
           style: { color: '#bbb', fontSize: '10px' },
         },
-        // { tag: 'br' },
+        // { type: 'br' },
       ],
       style: { color: '#888' },
     },
     {
-      tag: 'ul',
+      type: 'ul',
       childrens: [
         {
-          tag: 'li',
+          type: 'li',
           childrens: [
             {
-              tag: 'span',
-              childrens: [{ tag: 'text', context: '加了样式的文字1' }],
+              type: 'span',
+              childrens: [{ type: 'text', context: '加了样式的文字1' }],
             },
             {
-              tag: 'span',
-              childrens: [{ tag: 'text', context: '加了样式的文字2' }],
+              type: 'span',
+              childrens: [{ type: 'text', context: '加了样式的文字2' }],
             },
           ],
         },
-        { tag: 'li', childrens: [{ tag: 'text', context: '12333333' }] },
-        { tag: 'li', childrens: [{ tag: 'text', context: '456' }] },
+        { type: 'li', childrens: [{ type: 'text', context: '12333333' }] },
+        { type: 'li', childrens: [{ type: 'text', context: '456' }] },
         {
-          tag: 'li',
+          type: 'li',
           childrens: [
             {
-              tag: 'span',
-              childrens: [{ tag: 'text', context: '这是一个pan' }],
+              type: 'span',
+              childrens: [{ type: 'text', context: '这是一个pan' }],
             },
           ],
         },
       ],
     },
     {
-      tag: 'p',
+      type: 'p',
       childrens: [
         {
-          tag: 'text',
+          type: 'text',
           context: 'text after image',
         },
         {
-          tag: 'span',
+          type: 'span',
           childrens: [
             {
-              tag: 'text',
+              type: 'text',
               context: 'span after image',
             },
-            // { tag: 'br' },
+            // { type: 'br' },
           ],
         },
-        // { tag: 'text', context: 'caiwu11' },
+        // { type: 'text', context: 'caiwu11' },
         {
-          tag: 'img',
+          type: 'img',
           attr: {
             width: '100px',
             height: '100px',
@@ -81,47 +81,48 @@ export const bodyVnode = {
           },
         },
         {
-          tag: 'img',
+          type: 'img',
           attr: {
             width: '50px',
             height: '50px',
             src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
           },
         },
-        // { tag: 'text', context: 'caiwu' },
+        // { type: 'text', context: 'caiwu' },
         {
-          tag: 'span',
+          type: 'span',
           childrens: [
             {
-              tag: 'text',
+              type: 'text',
               context: 'span after image',
             },
           ],
         },
         {
-          tag: 'text',
-          context: 'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
+          type: 'text',
+          context:
+            'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
         },
       ],
     },
     {
-      tag: 'p',
+      type: 'p',
       childrens: [
         {
-          tag: 'a',
+          type: 'a',
           attr: {
             href: 'https://www.baidu.com',
           },
-          childrens: [{ tag: 'text', context: '百度链接' }],
+          childrens: [{ type: 'text', context: '百度链接' }],
         },
       ],
     },
     {
-      tag: 'p',
+      type: 'p',
       style: { background: '#eee' },
       childrens: [
-        // { tag: 'text', context: '1' },
-        { tag: 'br', virtual: true },
+        { type: 'text', context: '' },
+        { type: 'br', virtual: true },
       ],
     },
   ],
@@ -131,22 +132,22 @@ export const bodyVnode = {
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }
 export const operBarVnode = {
-  tag: 'div',
+  type: 'div',
   style: { width: '100%', height: '30px', background: '#ddd', lineHeight: '30px' },
   childrens: [
     {
-      tag: 'span',
-      childrens: [{ tag: 'text', context: '| 加粗 | ' }],
+      type: 'span',
+      childrens: [{ type: 'text', context: '| 加粗 | ' }],
       style: { cursor: 'pointer' },
     },
     {
-      tag: 'span',
-      childrens: [{ tag: 'text', context: ' 字体变大 | ' }],
+      type: 'span',
+      childrens: [{ type: 'text', context: ' 字体变大 | ' }],
       style: { cursor: 'pointer' },
     },
     {
-      tag: 'span',
-      childrens: [{ tag: 'text', context: ' 字体减小 | ' }],
+      type: 'span',
+      childrens: [{ type: 'text', context: ' 字体减小 | ' }],
       style: { cursor: 'pointer' },
     },
   ],

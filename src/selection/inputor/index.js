@@ -73,7 +73,6 @@ export default class Input {
     this.iframe.contentDocument.addEventListener('keydown', this._handGolobalKeydown.bind(this))
   }
   _handleEvent(event) {
-    // log(`--->${event.type}: ${event.data}--${event.isComposing}--${event.target.value}\n`)
     this.selection.input(event)
   }
   _handGolobalKeydown(event) {
@@ -96,6 +95,10 @@ export default class Input {
       case 'Backspace':
         event.preventDefault()
         this.selection.del()
+        break
+      case 'Enter':
+        event.preventDefault()
+        this.selection.enter()
     }
   }
 }

@@ -3,6 +3,7 @@ import { getPrevLeafNode, getNextLeafNode, getIndex, getLeafL, getLeafR, isSameL
 import { blockTag } from '../../type'
 import del from './del'
 import input from './input'
+import enter from './enter'
 export default class Range {
   constructor(nativeRange, vm) {
     nativeRange.vm = vm
@@ -46,7 +47,7 @@ export default class Range {
         offset = this.endOffset
       }
       let isEnd = false
-      if (container.vnode.tag !== 'text') {
+      if (container.vnode.type !== 'text') {
         isEnd = container.vnode.childrens.length === offset
       } else {
         isEnd = container.vnode.context.length === offset
@@ -55,7 +56,7 @@ export default class Range {
         // 向下寻找
         const { vnode, layer } = getNextLeafNode(container.vnode)
         if (!vnode) return false
-        if (vnode.tag === 'text') {
+        if (vnode.type === 'text') {
           container = vnode.ele
           offset = 0
         } else {
@@ -79,7 +80,7 @@ export default class Range {
           this._d = 0
         }
 
-        if (!blockTag.includes(layer.tag)) {
+        if (!blockTag.includes(layer.type)) {
           return this.right(shiftKey)
         }
         return layer
@@ -90,7 +91,7 @@ export default class Range {
         } else {
           vnode = container.vnode
         }
-        if (container.vnode.tag !== 'text' && vnode.tag === 'text') {
+        if (container.vnode.type !== 'text' && vnode.type === 'text') {
           if (shiftKey) {
             switch (this._d) {
               case 0:
@@ -153,7 +154,7 @@ export default class Range {
         const { vnode, layer } = getPrevLeafNode(container.vnode)
         // 到头了
         if (!vnode) return false
-        if (vnode.tag === 'text') {
+        if (vnode.type === 'text') {
           container = vnode.ele
           offset = vnode.context.length
         } else {
@@ -176,7 +177,7 @@ export default class Range {
           this.collapse(true)
           this._d = 0
         }
-        if (!blockTag.includes(layer.tag)) {
+        if (!blockTag.includes(layer.type)) {
           return this.left(shiftKey)
         }
         return layer
@@ -187,7 +188,7 @@ export default class Range {
         } else {
           vnode = container.vnode
         }
-        if (container.vnode.tag !== 'text' && vnode.tag === 'text') {
+        if (container.vnode.type !== 'text' && vnode.type === 'text') {
           if (shiftKey) {
             switch (this._d) {
               case 0:
@@ -298,5 +299,6 @@ export default class Range {
     }
     this.del = del.bind(this)
     this.input = input.bind(this)
+    this.enter = enter.bind(this)
   }
 }

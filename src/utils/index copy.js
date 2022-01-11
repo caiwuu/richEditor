@@ -2,7 +2,9 @@ import render from '../ui/render'
 import { leafTag, blockTag } from '../type'
 // 判断是否是dom对象
 function isDOM(item) {
-  return typeof HTMLElement === 'function' ? item instanceof HTMLElement : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
+  return typeof HTMLElement === 'function'
+    ? item instanceof HTMLElement
+    : item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === 'string'
 }
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
@@ -83,7 +85,7 @@ export function setEvent(dom, event) {
 // 纯净克隆(运行时无关，去除了依赖引用关系数据；去除循环引用；需要通过createVnode来创建依赖)
 export function clonePureVnode(vnode) {
   const cloneVnode = {}
-  cloneVnode.tag = vnode.tag
+  cloneVnode.type = vnode.type
   cloneVnode.position = vnode.position
   vnode.context && (cloneVnode.context = vnode.context)
   vnode.style && (cloneVnode.style = { ...vnode.style })
@@ -97,14 +99,14 @@ export function delVnode(vnode) {
   // 如果父级只有一个子集，则递归删除父级
   if (parent.childrens.length === 1) {
     if (parent.isRoot) {
-      vnode.childrens = [{ tag: 'text', context: '' }, { tag: 'br' }]
+      vnode.childrens = [{ type: 'text', context: '' }, { type: 'br' }]
       return vnode
     }
     return delVnode(parent)
   } else {
     const index = vnode.position.charAt(vnode.position.length - 1)
     parent.childrens.splice(index, 1)
-    log('remove', vnode.tag)
+    log('remove', vnode.type)
     vnode.dom.remove()
     normalize(parent)
     reArrangement(parent)
@@ -162,7 +164,7 @@ export function getNextLeafNode(vnode, layer, direction = 'L') {
   if (vnode.isRoot) {
     return { vnode: null, layer: null }
   }
-  if (!layer || !blockTag.includes(layer.tag)) {
+  if (!layer || !blockTag.includes(layer.type)) {
     layer = vnode
   }
   const index = getIndex(vnode)
@@ -175,7 +177,7 @@ export function getNextLeafNode(vnode, layer, direction = 'L') {
 }
 // 获取前一个叶子节点
 export function getPrevLeafNode(vnode, layer, direction = 'R') {
-  if (!layer || !blockTag.includes(layer.tag)) {
+  if (!layer || !blockTag.includes(layer.type)) {
     layer = vnode
   }
   if (vnode.isRoot) {
@@ -207,7 +209,7 @@ export function getLeafL(vnode, layer) {
 }
 // 获取内容属于的第一层块级元素
 export function getLayer(vnode) {
-  if (blockTag.includes(vnode.parent.tag)) {
+  if (blockTag.includes(vnode.parent.type)) {
     return vnode.parent
   } else {
     return getLayer(vnode.parent)
@@ -219,7 +221,7 @@ export function normalize(vnode) {
   for (let index = vnode.childrens.length - 1; index >= 1; index--) {
     const curr = vnode.childrens[index]
     const next = vnode.childrens[index - 1]
-    if (curr.tag !== 'text' || next.tag !== 'text') {
+    if (curr.type !== 'text' || next.type !== 'text') {
       continue
     } else {
       next.context += curr.context
@@ -231,9 +233,9 @@ function isEmptyNode(vnode) {
   if (vnode.childrens && vnode.childrens.length) {
     return vnode.childrens.some((item) => isEmptyNode(item))
   } else {
-    if (vnode.tag === 'text' && Text.context === '') {
+    if (vnode.type === 'text' && Text.context === '') {
       return true
-    } else if (leafTag.includes(vnode.tag)) {
+    } else if (leafTag.includes(vnode.type)) {
       return false
     } else {
       return true
@@ -245,7 +247,7 @@ export function isEmptyBlock(vnode) {
   if (vnode.context) {
     return false
   } else if (vnode.parent.childrens.length === 1) {
-    if (!blockTag.includes(vnode.parent.tag)) {
+    if (!blockTag.includes(vnode.parent.type)) {
       return isEmptyBlock(vnode.parent)
     } else {
       return true
@@ -262,7 +264,7 @@ export function isSameLine(initialRect, prevRect, currRect, result) {
     flag = false
   }
   // 光标移动触发块级检测说明光标必然跨行
-  if (typeof result === 'object' && blockTag.includes(result.tag)) {
+  if (typeof result === 'object' && blockTag.includes(result.type)) {
     flag = false
   }
   //光标Y坐标和参考点相同说明光标还在本行，最理想的情况放在最后判断

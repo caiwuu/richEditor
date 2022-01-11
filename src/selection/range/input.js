@@ -1,25 +1,33 @@
 import { recoverRange, times } from '../../utils'
 import createVnode from '../../ui/createVnode'
+function removeVirtual(vnode) {
+  vnode.childrens.filter((vnode) => vnode.virtual).forEach((vnode) => vnode.remove())
+}
 const handleInsert = {
   betweenTextAndEle: (R, inputData, newRangePos) => {
+    removeVirtual(R.endContainer.vnode)
     newRangePos.targetVnode.context = newRangePos.targetVnode.context + inputData
   },
   betweenEleAndText: (R, inputData, newRangePos) => {
+    removeVirtual(R.endContainer.vnode)
     newRangePos.targetVnode.context = inputData + newRangePos.targetVnode.context
   },
   betweenEleAndEle: (R, inputData, newRangePos) => {
-    R.endContainer.vnode.insert(R.endOffset, newRangePos.targetVnode)
+    removeVirtual(R.endContainer.vnode)
+    R.endContainer.vnode.insert(newRangePos.targetVnode, R.endOffset)
   },
   betweenTextAndText: (R, inputData, newRangePos) => {
     let orgText = R.endContainer.vnode.context
     orgText = orgText.slice(0, R.endOffset) + inputData + orgText.slice(R.endOffset)
+    removeVirtual(R.endContainer.vnode.parent)
     R.endContainer.vnode.context = orgText
   },
 }
 const handleRangePosition = {
   betweenTextAndEle: (R, inputData) => {
+    const targetVnode = R.endContainer.vnode.childrens[R.endOffset - 1]
     return {
-      targetVnode: R.endContainer.vnode.childrens[R.endOffset - 1],
+      targetVnode: targetVnode,
       targetOffset: targetVnode.length + inputData.length,
     }
   },
@@ -31,7 +39,7 @@ const handleRangePosition = {
   },
   betweenEleAndEle: (R, inputData) => {
     return {
-      targetVnode: createVnode({ tag: 'text', context: inputData }, R.endContainer.vnode),
+      targetVnode: createVnode({ type: 'text', context: inputData }, R.endContainer.vnode),
       targetOffset: inputData.length,
     }
   },
@@ -88,11 +96,11 @@ const cacheRanges = {
   },
 }
 function getInsertType(R) {
-  if (R.endContainer.vnode.tag == 'text') {
+  if (R.endContainer.vnode.type == 'text') {
     return 'betweenTextAndText'
-  } else if (R.endContainer.vnode.childrens[R.endOffset] && R.endContainer.vnode.childrens[R.endOffset].tag === 'text') {
+  } else if (R.endContainer.vnode.childrens[R.endOffset] && R.endContainer.vnode.childrens[R.endOffset].type === 'text') {
     return 'betweenEleAndText'
-  } else if (R.endContainer.vnode.childrens[R.endOffset - 1] && R.endContainer.vnode.childrens[R.endOffset - 1].tag === 'text') {
+  } else if (R.endContainer.vnode.childrens[R.endOffset - 1] && R.endContainer.vnode.childrens[R.endOffset - 1].type === 'text') {
     return 'betweenTextAndEle'
   } else {
     return 'betweenEleAndEle'
@@ -100,7 +108,9 @@ function getInsertType(R) {
 }
 function insert(R, inputData) {
   const insertType = getInsertType(R)
+  log(insertType)
   const newRangePos = handleRangePosition[insertType](R, inputData)
+  console.log(newRangePos)
   const caches = cacheRanges[insertType](R, inputData, newRangePos)
   handleInsert[insertType](R, inputData, newRangePos)
   recoverRange(caches)

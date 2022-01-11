@@ -17,4 +17,10 @@ export default class Command {
       range.updateCaret()
     })
   }
+  enter() {
+    this.vm.selection.ranges.forEach((range) => {
+      range.enter()
+      range.updateCaret()
+    })
+  }
 }
