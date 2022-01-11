@@ -105,7 +105,7 @@ export default class Selection {
   _setNativeRange() {
     const currRange = this.ranges[0]
     this.nativeSelection.removeAllRanges()
-    this.nativeSelection.addRange(this.createRange(currRange))
+    this.nativeSelection.addRange(currRange)
   }
   move(direction, drawCaret = true, shiftKey) {
     // 支持多光标但是目前还不支持多选区；这里取消掉其他光标

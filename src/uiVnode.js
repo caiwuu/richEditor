@@ -4,7 +4,7 @@ export const bodyVnode = {
     {
       type: 'p',
       childrens: [
-        { type: 'text', context: '普通文字普通文字1' },
+        { type: 'text', context: '普通文字1' },
         {
           type: 'span',
           childrens: [{ type: 'text', context: '大号文字大号文字大号文字大号文字大' }],
@@ -100,8 +100,7 @@ export const bodyVnode = {
         },
         {
           type: 'text',
-          context:
-            'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
+          context: 'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
         },
       ],
     },
