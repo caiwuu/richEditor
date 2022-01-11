@@ -63,14 +63,17 @@ export default class Range {
   }
   _loop(direct, initialRect, prevRect, lineChanged = false, shiftKey) {
     const flag = this.endContainer === this.startContainer && this.endOffset === this.startOffset
+    if (flag) {
+      this._d = 0
+    }
     let result = true
     if (!lineChanged) {
       result = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)
-      if (!result) return flag
+      if (!result) return
       this.updateCaret(false)
     } else {
       result = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)
-      if (!result) return flag
+      if (!result) return
       this.updateCaret(false)
       const currRect = { ...this.caret.rect },
         preDistance = Math.abs(prevRect.x - initialRect.x),
@@ -79,7 +82,7 @@ export default class Range {
       if (!(currDistance < preDistance && sameLine)) {
         direct === 'left' ? this.right(shiftKey) : this.left(shiftKey)
         this.updateCaret(false)
-        return flag
+        return
       }
     }
     const currRect = { ...this.caret.rect },
