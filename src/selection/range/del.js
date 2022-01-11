@@ -21,8 +21,8 @@ export default function del(force = false) {
       recoverRange(caches)
       // 添加br防止行塌陷
       if (isEmptyBlock(this.endContainer.vnode) && !this.endContainer.vnode.parent.childrens.some((vnode) => vnode.virtual)) {
-        const br = createVnode({ tag: 'br', virtual: true })
-        this.endContainer.vnode.parent.insert(1, br)
+        const br = createVnode({ type: 'br', virtual: true })
+        this.endContainer.vnode.parent.insert(br, 1)
       }
       // 需要跨标签操作
     } else {
@@ -36,7 +36,7 @@ export default function del(force = false) {
         .map((range) => ({
           endContainer: prevVnode.atom ? prevVnode.parent.ele : prevVnode.ele,
           offset:
-            prevVnode.tag === 'text' ? range.endOffset + prevVnode.length : prevVnode.atom ? getIndex(prevVnode) + 1 : range.endOffset,
+            prevVnode.type === 'text' ? range.endOffset + prevVnode.length : prevVnode.atom ? getIndex(prevVnode) + 1 : range.endOffset,
           range,
         }))
       // 如果当前节点为空则递归向上删除空节点
@@ -46,7 +46,7 @@ export default function del(force = false) {
       }
       recoverRange(caches)
       // 行内跨块级自动执行一步
-      !blockTag.includes(layer.tag) && this.del()
+      !blockTag.includes(layer.type) && this.del()
     }
   }
 }

@@ -129,9 +129,9 @@ export default class Cursor {
     this.meta.selection = this.selection
     // 点击图片中间阻止执行
     if (!range.endContainer.vnode) return
-    const { tag, dom } = range.endContainer.vnode
+    const { type, dom } = range.endContainer.vnode
     // 处理光标在img和br之间的游走
-    if (tag === 'text') {
+    if (type === 'text') {
       dom.parentNode.insertBefore(this.caretMarker, dom.splitText(range.endOffset))
     } else {
       if (range.endContainer.vnode.childrens[range.endOffset]) {
@@ -146,7 +146,7 @@ export default class Cursor {
     this.caretMarker.remove()
     // normalize 非空合并内容到首节点，而空节点会直接删除，我们需要始终保持首节点的引用，故end为0时交互数据
     // 在首节点内容为空时，首位都是空节点，用normalize会全删，故只需手动删除首节点后一个节点即可
-    if (tag === 'text') {
+    if (type === 'text') {
       if (!range.endOffset && range.endContainer.nextSibling) {
         range.endContainer.data = range.endContainer.nextSibling.data
         range.endContainer.nextSibling.data = ''

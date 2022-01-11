@@ -14,7 +14,7 @@ const handleInsert = {
   },
   betweenEleAndEle: (R, inputData, newRangePos) => {
     removeVirtual(R.endContainer.vnode)
-    R.endContainer.vnode.insert(R.endOffset, newRangePos.targetVnode)
+    R.endContainer.vnode.insert(newRangePos.targetVnode, R.endOffset)
   },
   betweenTextAndText: (R, inputData, newRangePos) => {
     let orgText = R.endContainer.vnode.context
@@ -39,7 +39,7 @@ const handleRangePosition = {
   },
   betweenEleAndEle: (R, inputData) => {
     return {
-      targetVnode: createVnode({ tag: 'text', context: inputData }, R.endContainer.vnode),
+      targetVnode: createVnode({ type: 'text', context: inputData }, R.endContainer.vnode),
       targetOffset: inputData.length,
     }
   },
@@ -96,11 +96,11 @@ const cacheRanges = {
   },
 }
 function getInsertType(R) {
-  if (R.endContainer.vnode.tag == 'text') {
+  if (R.endContainer.vnode.type == 'text') {
     return 'betweenTextAndText'
-  } else if (R.endContainer.vnode.childrens[R.endOffset] && R.endContainer.vnode.childrens[R.endOffset].tag === 'text') {
+  } else if (R.endContainer.vnode.childrens[R.endOffset] && R.endContainer.vnode.childrens[R.endOffset].type === 'text') {
     return 'betweenEleAndText'
-  } else if (R.endContainer.vnode.childrens[R.endOffset - 1] && R.endContainer.vnode.childrens[R.endOffset - 1].tag === 'text') {
+  } else if (R.endContainer.vnode.childrens[R.endOffset - 1] && R.endContainer.vnode.childrens[R.endOffset - 1].type === 'text') {
     return 'betweenTextAndEle'
   } else {
     return 'betweenEleAndEle'
@@ -110,6 +110,7 @@ function insert(R, inputData) {
   const insertType = getInsertType(R)
   log(insertType)
   const newRangePos = handleRangePosition[insertType](R, inputData)
+  console.log(newRangePos)
   const caches = cacheRanges[insertType](R, inputData, newRangePos)
   handleInsert[insertType](R, inputData, newRangePos)
   recoverRange(caches)

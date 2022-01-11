@@ -95,6 +95,7 @@ export default class Input {
       case 'Backspace':
         event.preventDefault()
         this.selection.del()
+        break
       case 'Enter':
         event.preventDefault()
         this.selection.enter()
