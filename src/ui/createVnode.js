@@ -20,7 +20,6 @@ const handle = {
         return function (vnode, pos) {
           log(target, pos)
           pos = pos === undefined ? receiver : pos
-          console.log(pos)
           target.childrens.splice(pos, 0, vnode)
           if (target.childrens.length > pos) {
             if (pos === 0) {
@@ -41,6 +40,8 @@ const handle = {
             target.ele.data = target.context
           } else {
             target.childrens.splice(start, offset - start).forEach((vnode) => vnode.ele.remove())
+            receiver.normalize()
+            reArrangement(receiver)
           }
         }
       case 'moveTo':
@@ -51,18 +52,22 @@ const handle = {
             T.insert(vnode, pos)
           })
         }
+      case 'normalize':
+        return function () {
+          normalize(receiver)
+        }
       case 'remove':
         return function () {
           const index = getIndex(target)
           target.parent.childrens.splice(index, 1).forEach((i) => i.ele.remove())
-          normalize(target.parent)
+          target.parent.normalize()
           reArrangement(target.parent)
         }
       case 'isEmpty':
         return isEmptyNode(target)
       case 'length':
         try {
-          return target.type === 'text' ? target.context.length : target.childrens.length
+          return target.type === 'text' ? target.context.length : target.childrens.filter((ele) => !ele.virtual).length
         } catch (error) {
           throw 'atom node is no length attribute'
         }

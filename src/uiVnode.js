@@ -4,7 +4,8 @@ export const bodyVnode = {
     {
       type: 'p',
       childrens: [
-        { type: 'text', context: '普通文字普通文字1' },
+        { type: 'text', context: '普通文字1' },
+        { type: 'text', context: '普通文字2' },
         {
           type: 'span',
           childrens: [{ type: 'text', context: '大号文字大号文字大号文字大号文字大' }],
@@ -75,7 +76,7 @@ export const bodyVnode = {
         {
           type: 'img',
           attr: {
-            width: '100px',
+            width: '300px',
             height: '100px',
             src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
           },
@@ -88,7 +89,7 @@ export const bodyVnode = {
             src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
           },
         },
-        // { type: 'text', context: 'caiwu' },
+        { type: 'text', context: 'caiwu' },
         {
           type: 'span',
           childrens: [
@@ -100,8 +101,7 @@ export const bodyVnode = {
         },
         {
           type: 'text',
-          context:
-            'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
+          context: 'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
         },
       ],
     },

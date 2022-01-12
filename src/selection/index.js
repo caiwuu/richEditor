@@ -54,10 +54,11 @@ export default class Selection {
     return range
   }
   pushRange(nativeRange) {
-    const cloneRange = new Range(nativeRange.cloneRange(), this.vm)
-    if (nativeRange.collapsed) {
+    const { focusNode, focusOffset } = this.nativeSelection
+    const cloneRange = new Range(nativeRange, this.vm)
+    if (cloneRange.collapsed) {
       cloneRange._d = 0
-    } else if (this.nativeSelection.focusNode === nativeRange.endContainer && this.nativeSelection.focusOffset === nativeRange.endOffset) {
+    } else if (focusNode === cloneRange.endContainer && focusOffset === cloneRange.endOffset) {
       cloneRange._d = 2
     } else {
       cloneRange._d = 1
@@ -82,6 +83,7 @@ export default class Selection {
         this._resetRanges()
       }
       this.ranges.forEach((range) => range.updateCaret())
+      this._drawRangeBg()
     })
   }
   // 高性能去重;
@@ -102,17 +104,15 @@ export default class Selection {
     }
     tempObj = null
   }
-  _setNativeRange() {
+  _drawRangeBg() {
     const currRange = this.ranges[0]
     this.nativeSelection.removeAllRanges()
-    this.nativeSelection.addRange(currRange)
+    this.nativeSelection.addRange(this.createRange(currRange))
   }
   move(direction, drawCaret = true, shiftKey) {
-    // 支持多光标但是目前还不支持多选区；这里取消掉其他光标
-    if (shiftKey) {
-      while (this.ranges.length > 1) {
-        this.ranges.pop().caret.remove()
-      }
+    // 支持多光标但是目前还不支持多选区；这里禁止多光标拖蓝
+    if (shiftKey && this.ranges.length > 1) {
+      return
     }
     const nativeRange = this.nativeSelection.getRangeAt(0)
     this.ranges.forEach((range) => {
@@ -137,8 +137,9 @@ export default class Selection {
     })
     this.distinct()
     this.inputor.focus()
+    // 按住shit时同步到真实原生range绘制拖蓝 this.nativeSelection.removeAllRanges()
     if (shiftKey) {
-      this._setNativeRange(direction)
+      this._drawRangeBg()
     }
   }
   del() {
