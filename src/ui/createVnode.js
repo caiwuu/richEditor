@@ -51,11 +51,15 @@ const handle = {
             T.insert(vnode, pos)
           })
         }
+      case 'normalize':
+        return function () {
+          normalize(receiver)
+        }
       case 'remove':
         return function () {
           const index = getIndex(target)
           target.parent.childrens.splice(index, 1).forEach((i) => i.ele.remove())
-          normalize(target.parent)
+          target.parent.normalize()
           reArrangement(target.parent)
         }
       case 'isEmpty':

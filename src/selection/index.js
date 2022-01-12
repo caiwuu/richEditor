@@ -54,7 +54,8 @@ export default class Selection {
     return range
   }
   pushRange(nativeRange) {
-    const cloneRange = new Range(nativeRange.cloneRange(), this.vm)
+    const cloneRange = new Range(nativeRange, this.vm)
+    console.log(cloneRange)
     if (nativeRange.collapsed) {
       cloneRange._d = 0
     } else if (this.nativeSelection.focusNode === nativeRange.endContainer && this.nativeSelection.focusOffset === nativeRange.endOffset) {
@@ -102,13 +103,13 @@ export default class Selection {
     }
     tempObj = null
   }
-  _setNativeRange() {
+  _drawRangeBg() {
     const currRange = this.ranges[0]
     this.nativeSelection.removeAllRanges()
     this.nativeSelection.addRange(this.createRange(currRange))
   }
   move(direction, drawCaret = true, shiftKey) {
-    // 支持多光标但是目前还不支持多选区；这里取消掉其他光标
+    // 支持多光标但是目前还不支持多选区；这里取消掉其他光标;保留第一个
     if (shiftKey) {
       while (this.ranges.length > 1) {
         this.ranges.pop().caret.remove()
@@ -117,7 +118,9 @@ export default class Selection {
     const nativeRange = this.nativeSelection.getRangeAt(0)
     this.ranges.forEach((range) => {
       // 没按shift 并且 存在选区,取消选区，左右不移动光标，上下可移动光标
+      console.log(shiftKey, range)
       if (!shiftKey && !range.collapsed) {
+        console.log('www')
         const collapseToStart = range._d === 1
         nativeRange.collapse(collapseToStart)
         range.collapse(collapseToStart)
@@ -137,8 +140,9 @@ export default class Selection {
     })
     this.distinct()
     this.inputor.focus()
+    // 按住shit时同步到真实原生range绘制拖蓝 this.nativeSelection.removeAllRanges()
     if (shiftKey) {
-      this._setNativeRange(direction)
+      this._drawRangeBg()
     }
   }
   del() {
@@ -173,6 +177,7 @@ export default class Selection {
   }
   _handMouseup(event) {
     // 有选区
+    console.log(this.nativeSelection)
     if (!this.nativeSelection.isCollapsed || event.shiftKey) {
       this.updateRanges(event.altKey)
     }

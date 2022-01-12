@@ -34,13 +34,18 @@ export default class Range {
     this.input = input.bind(this)
     this.enter = enter.bind(this)
   }
+  _updateStatus() {
+    this.collapsed = this.endContainer === this.startContainer && this.endOffset === this.startOffset
+  }
   setEnd(endNode, endOffset) {
     this.endContainer = endNode
     this.endOffset = endOffset
+    this._updateStatus()
   }
   setStart(startNode, startOffset) {
     this.startContainer = startNode
     this.startOffset = startOffset
+    this._updateStatus()
   }
   collapse(toStart) {
     if (toStart) {

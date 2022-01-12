@@ -209,6 +209,7 @@ export function getLayer(vnode) {
   }
 }
 // 合并相邻的text节点
+// TODO 合并之后如果被合并的节点有选区需要重新计算选区位置
 export function normalize(vnode) {
   if (vnode.childrens.length <= 1) return
   for (let index = vnode.childrens.length - 1; index >= 1; index--) {
@@ -219,6 +220,7 @@ export function normalize(vnode) {
     } else {
       next.context += curr.context
       vnode.childrens.splice(index, 1)
+      // vnode.childrens[index].remove()
     }
   }
 }

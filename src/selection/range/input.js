@@ -86,10 +86,10 @@ const cacheRanges = {
   },
   betweenTextAndText: (R, inputData, newRangePos) => {
     const caches = R.vm.selection.ranges
-      .filter((range) => range.endContainer === R.endContainer)
+      .filter((range) => range.endContainer === R.endContainer && range.endOffset >= R.endOffset)
       .map((range) => ({
         endContainer: range.endContainer,
-        offset: range.endOffset >= R.endOffset ? range.endOffset + inputData.length : range.endOffset,
+        offset: range.endOffset + inputData.length,
         range: range,
       }))
     return caches
