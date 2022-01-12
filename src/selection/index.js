@@ -55,7 +55,6 @@ export default class Selection {
   }
   pushRange(nativeRange) {
     const cloneRange = new Range(nativeRange, this.vm)
-    console.log(cloneRange)
     if (nativeRange.collapsed) {
       cloneRange._d = 0
     } else if (this.nativeSelection.focusNode === nativeRange.endContainer && this.nativeSelection.focusOffset === nativeRange.endOffset) {
@@ -63,6 +62,7 @@ export default class Selection {
     } else {
       cloneRange._d = 1
     }
+    console.log(cloneRange, nativeRange)
     this.ranges.push(cloneRange)
   }
   // 注意chrome不支持多选区,需要在此之前调用 removeAllRanges
@@ -179,7 +179,10 @@ export default class Selection {
     // 有选区
     console.log(this.nativeSelection)
     if (!this.nativeSelection.isCollapsed || event.shiftKey) {
-      this.updateRanges(event.altKey)
+      console.log('updateRanges by mouseup')
+      setTimeout(() => {
+        this.updateRanges(event.altKey)
+      }, 1000)
     }
     this.inputor.focus()
   }
