@@ -21,14 +21,13 @@ export default function right(shiftKey) {
   }
   let isEnd = false
   if (container.vnode.type !== 'text') {
-    isEnd = container.vnode.childrens.length === offset
+    isEnd = container.vnode.length === offset
   } else {
-    isEnd = container.vnode.context.length === offset
+    isEnd = container.vnode.length === offset
   }
   if (isEnd) {
     // 向下寻找
     const { vnode, layer } = getNextLeafNode(container.vnode)
-    console.log(vnode)
     if (!vnode) return false
     if (vnode.type === 'text') {
       container = vnode.ele
@@ -49,7 +48,6 @@ export default function right(shiftKey) {
           break
       }
     } else {
-      console.log(container, offset)
       this.setEnd(container, offset)
       this.collapse(false)
       this._d = 0

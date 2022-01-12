@@ -26,7 +26,7 @@ export default function left(shiftKey) {
     if (!vnode) return false
     if (vnode.type === 'text') {
       container = vnode.ele
-      offset = vnode.context.length
+      offset = vnode.length
     } else {
       container = vnode.parent.ele
       offset = getIndex(vnode) + 1
@@ -59,21 +59,25 @@ export default function left(shiftKey) {
       vnode = container.vnode
     }
     if (container.vnode.type !== 'text' && vnode.type === 'text') {
+      const index = vnode.isEmpty ? 0 : vnode.length - 1
       if (shiftKey) {
         switch (this._d) {
           case 0:
           case 1:
-            this.setStart(vnode.ele, vnode.context.length - 1)
+            this.setStart(vnode.ele, index)
             this._d = 1
             break
           case 2:
-            this.setEnd(vnode.ele, vnode.context.length - 1)
+            this.setEnd(vnode.ele, index)
             break
         }
       } else {
-        this.setStart(vnode.ele, vnode.context.length - 1)
+        this.setStart(vnode.ele, index)
         this.collapse(true)
         this._d = 0
+      }
+      if (vnode.isEmpty) {
+        return this.left()
       }
     } else {
       if (shiftKey) {

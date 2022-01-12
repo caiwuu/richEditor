@@ -54,15 +54,15 @@ export default class Selection {
     return range
   }
   pushRange(nativeRange) {
+    const { focusNode, focusOffset } = this.nativeSelection
     const cloneRange = new Range(nativeRange, this.vm)
-    if (nativeRange.collapsed) {
+    if (cloneRange.collapsed) {
       cloneRange._d = 0
-    } else if (this.nativeSelection.focusNode === nativeRange.endContainer && this.nativeSelection.focusOffset === nativeRange.endOffset) {
+    } else if (focusNode === cloneRange.endContainer && focusOffset === cloneRange.endOffset) {
       cloneRange._d = 2
     } else {
       cloneRange._d = 1
     }
-    console.log(cloneRange, nativeRange)
     this.ranges.push(cloneRange)
   }
   // 注意chrome不支持多选区,需要在此之前调用 removeAllRanges
@@ -83,6 +83,7 @@ export default class Selection {
         this._resetRanges()
       }
       this.ranges.forEach((range) => range.updateCaret())
+      this._drawRangeBg()
     })
   }
   // 高性能去重;
@@ -109,18 +110,14 @@ export default class Selection {
     this.nativeSelection.addRange(this.createRange(currRange))
   }
   move(direction, drawCaret = true, shiftKey) {
-    // 支持多光标但是目前还不支持多选区；这里取消掉其他光标;保留第一个
-    if (shiftKey) {
-      while (this.ranges.length > 1) {
-        this.ranges.pop().caret.remove()
-      }
+    // 支持多光标但是目前还不支持多选区；这里禁止多光标拖蓝
+    if (shiftKey && this.ranges.length > 1) {
+      return
     }
     const nativeRange = this.nativeSelection.getRangeAt(0)
     this.ranges.forEach((range) => {
       // 没按shift 并且 存在选区,取消选区，左右不移动光标，上下可移动光标
-      console.log(shiftKey, range)
       if (!shiftKey && !range.collapsed) {
-        console.log('www')
         const collapseToStart = range._d === 1
         nativeRange.collapse(collapseToStart)
         range.collapse(collapseToStart)
@@ -177,12 +174,8 @@ export default class Selection {
   }
   _handMouseup(event) {
     // 有选区
-    console.log(this.nativeSelection)
     if (!this.nativeSelection.isCollapsed || event.shiftKey) {
-      console.log('updateRanges by mouseup')
-      setTimeout(() => {
-        this.updateRanges(event.altKey)
-      }, 1000)
+      this.updateRanges(event.altKey)
     }
     this.inputor.focus()
   }

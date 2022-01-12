@@ -110,7 +110,6 @@ function insert(R, inputData) {
   const insertType = getInsertType(R)
   log(insertType)
   const newRangePos = handleRangePosition[insertType](R, inputData)
-  console.log(newRangePos)
   const caches = cacheRanges[insertType](R, inputData, newRangePos)
   handleInsert[insertType](R, inputData, newRangePos)
   recoverRange(caches)

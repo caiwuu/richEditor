@@ -259,7 +259,7 @@ export function isEmptyBlock(vnode) {
 export function isSameLine(initialRect, prevRect, currRect, result) {
   // 标识光标是否在同一行移动
   let flag = true
-  if (Math.abs(currRect.x - prevRect.x) > 200) {
+  if (Math.abs(currRect.x - prevRect.x) > 800) {
     flag = false
   }
   // 光标移动触发块级检测说明光标必然跨行
@@ -288,7 +288,6 @@ export function recoverRange(caches) {
 export function times(n, fn, context = undefined, ...args) {
   let i = 0
   while (i++ < n) {
-    log('---')
     fn.call(context, ...args)
   }
 }

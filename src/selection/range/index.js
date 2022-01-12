@@ -71,6 +71,7 @@ export default class Range {
     if (flag) {
       this._d = 0
     }
+    // debugger
     let result = true
     if (!lineChanged) {
       result = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)
@@ -84,7 +85,7 @@ export default class Range {
         preDistance = Math.abs(prevRect.x - initialRect.x),
         currDistance = Math.abs(currRect.x - initialRect.x),
         sameLine = isSameLine(initialRect, prevRect, currRect, result)
-      if (!(currDistance < preDistance && sameLine)) {
+      if (!(currDistance <= preDistance && sameLine)) {
         direct === 'left' ? this.right(shiftKey) : this.left(shiftKey)
         this.updateCaret(false)
         return

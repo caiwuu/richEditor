@@ -2,11 +2,9 @@ import { recoverRange, getIndex } from '../../utils'
 import createVnode from '../../ui/createVnode'
 export default function enter() {
   log('enter')
-  console.log(this)
   splitNode(this.endContainer.vnode, this.endOffset)
 }
 function handleSplit(vnode, pos) {
-  console.log(vnode, vnode.position, getIndex(vnode))
   switch (vnode.type) {
     case 'text':
       if (!pos) {

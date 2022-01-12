@@ -1,16 +1,4 @@
-import {
-  getNode,
-  delVnode,
-  updateNode,
-  setRange,
-  getPrevLeafNode,
-  getLayer,
-  rangeDel,
-  reArrangement,
-  normalize,
-  isEmptyBlock,
-  getIndex,
-} from '../utils/index'
+import { getNode, delVnode, updateNode, setRange, getPrevLeafNode, getLayer, rangeDel, reArrangement, normalize, isEmptyBlock, getIndex } from '../utils/index'
 import { blockTag } from '../type'
 export default function del(vm) {
   const { range, end, start } = vm.cursor.meta
@@ -21,8 +9,7 @@ export default function del(vm) {
   */
   if (range.collapsed) {
     // 兼容非text光标容器的情况，如，img，br
-    orgText =
-      range.endContainer.vnode.type === 'text' ? orgText.slice(0, end - 1) + orgText.slice(end) : range.endContainer.vnode.childrens.length
+    orgText = range.endContainer.vnode.type === 'text' ? orgText.slice(0, end - 1) + orgText.slice(end) : range.endContainer.vnode.childrens.length
     const oldContainer = range.endContainer.vnode
     // 删除线在节点开头
     if (end === 0) {
@@ -66,7 +53,7 @@ export default function del(vm) {
         log('if (prevVnode)')
         // 如果前一个叶子节点不是text，需额外处理
         if (prevVnode.type === 'text') {
-          const prevVnodeLen = shouldNormalize ? prevVnode.context.length - layer.childrens[0].context.length : prevVnode.context.length
+          const prevVnodeLen = shouldNormalize ? prevVnode.length - layer.childrens[0].length : prevVnode.length
           setRange(vm, prevVnode.dom, prevVnodeLen)
         } else {
           setRange(vm, prevVnode.parent.dom, getIndex(prevVnode) + 1)
