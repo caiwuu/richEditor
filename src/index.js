@@ -19,7 +19,7 @@ class Editor {
 
 window.editor = new Editor('editor-root')
 window.log = function (params) {
-  if (!window.openLog) {
+  if (window.openLog) {
     console.log(params)
   }
 }

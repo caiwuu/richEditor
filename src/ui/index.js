@@ -6,6 +6,9 @@ export default class UI {
     this.editableArea = createVnode(editableAreaOps, null).ele
     this.actionBar = createVnode(actionBarOps, null).ele
     this.editorContainer = document.createElement('div')
+    this.editorContainer.style['border'] = '2px solid #eee'
+    this.editorContainer.style['background'] = '#ffffff'
+    this.editorContainer.style['padding'] = '30px'
   }
   mount(id) {
     const root = document.getElementById(id)

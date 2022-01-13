@@ -256,10 +256,10 @@ export function isEmptyBlock(vnode) {
   }
 }
 // 需要优化判断的准确率
-export function isSameLine(initialRect, prevRect, currRect, result) {
+export function isSameLine(initialRect, prevRect, currRect, result, vm) {
   // 标识光标是否在同一行移动
   let flag = true
-  if (Math.abs(currRect.x - prevRect.x) > 800) {
+  if (Math.abs(currRect.x - prevRect.x) > vm.ui.editableArea.offsetWidth - currRect.h) {
     flag = false
   }
   // 光标移动触发块级检测说明光标必然跨行
