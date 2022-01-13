@@ -19,8 +19,7 @@ const handle = {
         log('insert')
         return function (vnode, pos) {
           log(target, pos)
-          pos = pos === undefined ? receiver : pos
-          target.childrens.splice(pos, 0, vnode)
+          pos = pos === undefined ? receiver.length : pos
           if (target.childrens.length > pos) {
             if (pos === 0) {
               target.ele.insertBefore(vnode.ele, target.ele.childNodes[0])
@@ -28,8 +27,10 @@ const handle = {
               target.ele.insertBefore(vnode.ele, target.ele.childNodes[pos - 1].nextSibling)
             }
           } else {
+            console.log(vnode.ele)
             target.ele.appendChild(vnode.ele)
           }
+          target.childrens.splice(pos, 0, vnode)
           reArrangement(receiver)
         }
       case 'delete':
