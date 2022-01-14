@@ -113,6 +113,7 @@ export const bodyVnode = {
           type: 'a',
           attr: {
             href: 'https://www.baidu.com',
+            class: 'italic',
           },
           childrens: [{ type: 'text', context: '百度链接' }],
         },

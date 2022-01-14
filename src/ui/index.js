@@ -1,5 +1,6 @@
 // import render from './render'
 import createVnode from './createVnode'
+import initStyle from './style'
 
 export default class UI {
   constructor(editableAreaOps, actionBarOps) {
@@ -11,6 +12,7 @@ export default class UI {
     this.editorContainer.style['padding'] = '30px'
   }
   mount(id) {
+    initStyle(id)
     const root = document.getElementById(id)
     root.appendChild(this.actionBar)
     this.editorContainer.appendChild(this.editableArea)

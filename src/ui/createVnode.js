@@ -27,11 +27,10 @@ const handle = {
               target.ele.insertBefore(vnode.ele, target.ele.childNodes[pos - 1].nextSibling)
             }
           } else {
-            console.log(vnode.ele)
             target.ele.appendChild(vnode.ele)
           }
           target.childrens.splice(pos, 0, vnode)
-          reArrangement(receiver)
+          receiver.reArrangement()
         }
       case 'delete':
         return function (offset, count) {
@@ -42,14 +41,17 @@ const handle = {
           } else {
             target.childrens.splice(start, offset - start).forEach((vnode) => vnode.ele.remove())
             receiver.normalize()
-            reArrangement(receiver)
+            receiver.reArrangement()
           }
         }
       case 'moveTo':
         log('moveTo')
         return function (T, pos) {
           const index = getIndex(target)
-          target.parent.childrens.splice(index, 1).forEach((vnode) => {
+          // removeNodes reArrangement必须在执行insert之前，因为inset之后会改变parent
+          const removeNodes = target.parent.childrens.splice(index, 1)
+          receiver.parent.reArrangement()
+          removeNodes.forEach((vnode) => {
             T.insert(vnode, pos)
           })
         }
@@ -71,6 +73,10 @@ const handle = {
           return target.type === 'text' ? target.context.length : target.childrens.filter((ele) => !ele.virtual).length
         } catch (error) {
           throw 'atom node is no length attribute'
+        }
+      case 'reArrangement':
+        return function () {
+          reArrangement(receiver)
         }
       default:
         return Reflect.get(target, key, receiver)
