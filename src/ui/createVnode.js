@@ -72,7 +72,7 @@ const handle = {
         try {
           return target.type === 'text' ? target.context.length : target.childrens.filter((ele) => !ele.virtual).length
         } catch (error) {
-          throw 'atom node is no length attribute'
+          throw new Error('atom node is no length attribute')
         }
       case 'reArrangement':
         return function () {

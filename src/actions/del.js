@@ -51,8 +51,11 @@ export default function del(args) {
       recoverRange(caches)
       // 行内跨块级自动执行一步
       if (!blockTag.includes(layer.type)) {
-        console.log(prevVnode, prevVnode.length - 1)
-        const from = { node: prevVnode, pos: prevVnode.length },
+        // && this.command.delete()
+        const from = {
+            node: prevVnode.atom ? prevVnode.parent : prevVnode,
+            pos: prevVnode.atom ? getIndex(prevVnode) - 1 : prevVnode.length,
+          },
           to = 1
         del.call(this, [from, to])
       }
