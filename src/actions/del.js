@@ -3,16 +3,13 @@ import { blockTag } from '../type'
 import createVnode from '../ui/createVnode'
 
 export default function del(args) {
-  console.log(args)
-  // 不在此处
-  // if (this.inputState.isComposing && !force) return
   const [from, to] = args
   console.log(from)
   console.log(to)
   if (typeof to === 'number') {
     // 行内操作
     if (from.pos) {
-      log('行内del')
+      console.log('行内del')
       // 缓存改变前的状态
       const caches = this.selection.ranges
         .filter((range) => range.endContainer === from.node.ele)
@@ -22,6 +19,7 @@ export default function del(args) {
           range,
         }))
       from.node.delete(from.pos, 1)
+      console.log(caches)
       recoverRange(caches)
       // 添加br防止行塌陷
       if (isEmptyBlock(from.node) && !from.node.parent.childrens.some((vnode) => vnode.virtual)) {
@@ -37,10 +35,11 @@ export default function del(args) {
       if (!prevVnode) return
       // 缓存改变前的状态
       const caches = this.selection.ranges
-        .filter((range) => range.endContainer === from.node.ele)
+        .filter((range) => range.endContainer === from.node.ele && range.endOffset === from.pos)
         .map((range) => ({
           endContainer: prevVnode.atom ? prevVnode.parent.ele : prevVnode.ele,
-          offset: prevVnode.type === 'text' ? range.endOffset + prevVnode.length : prevVnode.atom ? getIndex(prevVnode) + 1 : range.endOffset,
+          offset:
+            prevVnode.type === 'text' ? range.endOffset + prevVnode.length : prevVnode.atom ? getIndex(prevVnode) + 1 : range.endOffset,
           range,
         }))
       // 如果当前节点为空则递归向上删除空节点
@@ -51,7 +50,6 @@ export default function del(args) {
       recoverRange(caches)
       // 行内跨块级自动执行一步
       if (!blockTag.includes(layer.type)) {
-        // && this.command.delete()
         const from = {
             node: prevVnode.atom ? prevVnode.parent : prevVnode,
             pos: prevVnode.atom ? getIndex(prevVnode) - 1 : prevVnode.length,

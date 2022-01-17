@@ -1,119 +1,4 @@
-import { recoverRange, times } from '../../utils'
-import createVnode from '../../ui/createVnode'
-function removeVirtual(vnode) {
-  vnode.childrens.filter((vnode) => vnode.virtual).forEach((vnode) => vnode.remove())
-}
-const handleInsert = {
-  betweenTextAndEle: (R, inputData, newRangePos) => {
-    removeVirtual(R.endContainer.vnode)
-    newRangePos.targetVnode.context = newRangePos.targetVnode.context + inputData
-  },
-  betweenEleAndText: (R, inputData, newRangePos) => {
-    removeVirtual(R.endContainer.vnode)
-    newRangePos.targetVnode.context = inputData + newRangePos.targetVnode.context
-  },
-  betweenEleAndEle: (R, inputData, newRangePos) => {
-    removeVirtual(R.endContainer.vnode)
-    R.endContainer.vnode.insert(newRangePos.targetVnode, R.endOffset)
-  },
-  betweenTextAndText: (R, inputData, newRangePos) => {
-    let orgText = R.endContainer.vnode.context
-    orgText = orgText.slice(0, R.endOffset) + inputData + orgText.slice(R.endOffset)
-    removeVirtual(R.endContainer.vnode.parent)
-    R.endContainer.vnode.context = orgText
-  },
-}
-const handleRangePosition = {
-  betweenTextAndEle: (R, inputData) => {
-    const targetVnode = R.endContainer.vnode.childrens[R.endOffset - 1]
-    return {
-      targetVnode: targetVnode,
-      targetOffset: targetVnode.length + inputData.length,
-    }
-  },
-  betweenEleAndText: (R, inputData) => {
-    return {
-      targetVnode: R.endContainer.vnode.childrens[R.endOffset],
-      targetOffset: inputData.length,
-    }
-  },
-  betweenEleAndEle: (R, inputData) => {
-    return {
-      targetVnode: createVnode({ type: 'text', context: inputData }, R.endContainer.vnode),
-      targetOffset: inputData.length,
-    }
-  },
-  betweenTextAndText: (R, inputData) => {
-    return {
-      targetVnode: R.endContainer.vnode,
-      targetOffset: R.endOffset + inputData.length,
-    }
-  },
-}
-const cacheRanges = {
-  betweenTextAndEle: (R, inputData, newRangePos) => {
-    return [
-      {
-        endContainer: newRangePos.targetVnode.ele,
-        offset: newRangePos.targetOffset,
-        range: R,
-      },
-    ]
-  },
-  betweenEleAndText: (R, inputData, newRangePos) => {
-    const caches = R.vm.selection.ranges
-      .filter((range) => range.endContainer === newRangePos.targetVnode.ele)
-      .map((range) => ({
-        endContainer: newRangePos.targetVnode.ele,
-        offset: range.endOffset + newRangePos.targetOffset,
-        range: range,
-      }))
-    caches.push({
-      endContainer: newRangePos.targetVnode.ele,
-      offset: newRangePos.targetOffset,
-      range: R,
-    })
-    return caches
-  },
-  betweenEleAndEle: (R, inputData, newRangePos) => {
-    return [
-      {
-        endContainer: newRangePos.targetVnode.ele,
-        offset: newRangePos.targetOffset,
-        range: R,
-      },
-    ]
-  },
-  betweenTextAndText: (R, inputData, newRangePos) => {
-    const caches = R.vm.selection.ranges
-      .filter((range) => range.endContainer === R.endContainer && range.endOffset >= R.endOffset)
-      .map((range) => ({
-        endContainer: range.endContainer,
-        offset: range.endOffset + inputData.length,
-        range: range,
-      }))
-    return caches
-  },
-}
-function getInsertType(R) {
-  if (R.endContainer.vnode.type == 'text') {
-    return 'betweenTextAndText'
-  } else if (R.endContainer.vnode.childrens[R.endOffset] && R.endContainer.vnode.childrens[R.endOffset].type === 'text') {
-    return 'betweenEleAndText'
-  } else if (R.endContainer.vnode.childrens[R.endOffset - 1] && R.endContainer.vnode.childrens[R.endOffset - 1].type === 'text') {
-    return 'betweenTextAndEle'
-  } else {
-    return 'betweenEleAndEle'
-  }
-}
-function insert(R, inputData) {
-  const insertType = getInsertType(R)
-  log(insertType)
-  const newRangePos = handleRangePosition[insertType](R, inputData)
-  const caches = cacheRanges[insertType](R, inputData, newRangePos)
-  handleInsert[insertType](R, inputData, newRangePos)
-  recoverRange(caches)
-}
+import { times } from '../../utils'
 export default function input(event) {
   if (!this.collapsed) {
     this.del()
@@ -131,7 +16,7 @@ export default function input(event) {
       this.inputState.value = inputData
     }
     times(prevInputValue.length, this.del, this, true)
-    insert(this, inputData)
+    this.vm.dispatch('insert', { node: this.endContainer.vnode, pos: this.endOffset, R: this }, inputData)
   } else if (event.type === 'compositionstart') {
     log('开始聚合输入:', event.data)
     this.inputState.isComposing = true
