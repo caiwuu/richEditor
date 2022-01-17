@@ -43,12 +43,11 @@ export default class Caret {
       container = container.parentNode
     }
     const copyStyle = getComputedStyle(container)
-    const height = multiplication(copyStyle.fontSize, 1.3)
     const caretStyle = {
       top: this.rect.y + 'px',
       // 光标宽度为2
       left: this.rect.x - 1 + 'px',
-      height: height,
+      height: this.rect.ch + 'px',
       fontSize: copyStyle.fontSize,
       background: copyStyle.color,
       display: range.collapsed ? 'inline-block' : 'none',

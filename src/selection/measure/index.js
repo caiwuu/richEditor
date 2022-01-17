@@ -1,3 +1,4 @@
+import { multiplication } from '../../utils'
 export default class Measure {
   dom = null
   instance = null
@@ -29,8 +30,14 @@ export default class Measure {
     return this._getRect(container, offset, temp)
   }
   _getRect(container, offset, temp) {
-    const { offsetLeft: x, offsetTop: y, offsetHeight: h } = this.dom
-    const rect = { x, y, h }
+    let con = container
+    if (!(container instanceof Element)) {
+      con = container.parentNode
+    }
+    const copyStyle = getComputedStyle(con),
+      ch = multiplication(copyStyle.fontSize, 1.3) / 1,
+      { offsetLeft: x, offsetTop: y, offsetHeight: h } = this.dom,
+      rect = { x, y, h, ch }
     this.dom.remove()
     if (container.nodeName === '#text' && offset) {
       if (!container.data && container.nextSibling) {

@@ -86,6 +86,9 @@ export default class Selection {
       this._drawRangeBg()
     })
   }
+  _isCoverd(rectA, rectB) {
+    return rectA.y < rectB.y ? rectA.y + rectA.ch >= rectB.y + rectB.ch : rectB.y + rectB.ch >= rectA.y + rectA.ch
+  }
   // 高性能去重;
   distinct() {
     let tempObj = {}
@@ -94,7 +97,18 @@ export default class Selection {
       const range = this.ranges[index]
       const key = range.startContainer.vnode.position + range.caret.rect.x + range.caret.rect.y
       if (!tempObj[key]) {
-        tempObj[key] = range
+        // 这里解决当两个光标在同一行又不在同一个节点上却又重合的情况，通常在跨行内节点会出现，这时应该当作重复光标去重
+        const covereds = Object.entries(tempObj).filter((item) => range.caret.rect.x === item[1].caret.rect.x)
+        if (covereds.length === 0) {
+          tempObj[key] = range
+        } else if (this._isCoverd(range.caret.rect, covereds[0][1].caret.rect)) {
+          range.caret.remove()
+          this.ranges.splice(index, 1)
+          len--
+          index--
+        } else {
+          tempObj[key] = range
+        }
       } else {
         range.caret.remove()
         this.ranges.splice(index, 1)

@@ -51,7 +51,7 @@ export default class Input {
       container = container.parentNode
     }
     const copyStyle = getComputedStyle(container)
-    const height = multiplication(copyStyle.fontSize, 1).replace(/(\d+)px/, '$1')
+    const height = multiplication(copyStyle.fontSize, 1)
     const style = {
       position: 'absolute',
       top: range.caret.rect.y + height / 1 + 'px',

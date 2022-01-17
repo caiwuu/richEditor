@@ -71,7 +71,6 @@ export default class Range {
     if (flag) {
       this._d = 0
     }
-    // debugger
     let result = true
     if (!lineChanged) {
       result = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)

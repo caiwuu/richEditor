@@ -124,7 +124,7 @@ export function renderDom(vnode) {
 // 像素单位变量乘法
 export function multiplication(pxVal, times) {
   return pxVal.replace(/(\d*)(px)+/, function ($0, $1, $2) {
-    return $1 * times + $2
+    return $1 * times
   })
 }
 // 节点更新
