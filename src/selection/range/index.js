@@ -84,7 +84,7 @@ export default class Range {
       const currRect = { ...this.caret.rect },
         preDistance = Math.abs(prevRect.x - initialRect.x),
         currDistance = Math.abs(currRect.x - initialRect.x),
-        sameLine = isSameLine(initialRect, prevRect, currRect, result)
+        sameLine = isSameLine(initialRect, prevRect, currRect, result, this.vm)
       if (!(currDistance <= preDistance && sameLine)) {
         direct === 'left' ? this.right(shiftKey) : this.left(shiftKey)
         this.updateCaret(false)
@@ -92,7 +92,7 @@ export default class Range {
       }
     }
     const currRect = { ...this.caret.rect },
-      sameLine = isSameLine(initialRect, prevRect, currRect, result)
+      sameLine = isSameLine(initialRect, prevRect, currRect, result, this.vm)
     if (!sameLine) {
       lineChanged = true
     }
