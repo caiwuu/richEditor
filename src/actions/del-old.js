@@ -1,7 +1,19 @@
-import { getNode, delVnode, updateNode, setRange, getPrevLeafNode, getLayer, rangeDel, reArrangement, normalize, isEmptyBlock, getIndex } from '../utils/index'
+import {
+  getNode,
+  delVnode,
+  updateNode,
+  setRange,
+  getPrevLeafNode,
+  getLayer,
+  rangeDel,
+  reArrangement,
+  normalize,
+  isEmptyBlock,
+  getIndex,
+} from '../utils/index'
 import { blockTag } from '../type'
-export default function del(vm) {
-  const { range, end, start } = vm.cursor.meta
+export default function del(editor) {
+  const { range, end, start } = editor.cursor.meta
   let orgText = range.endContainer.vnode.context
   // log([range.endContainer])
   /*
@@ -9,7 +21,8 @@ export default function del(vm) {
   */
   if (range.collapsed) {
     // 兼容非text光标容器的情况，如，img，br
-    orgText = range.endContainer.vnode.type === 'text' ? orgText.slice(0, end - 1) + orgText.slice(end) : range.endContainer.vnode.childrens.length
+    orgText =
+      range.endContainer.vnode.type === 'text' ? orgText.slice(0, end - 1) + orgText.slice(end) : range.endContainer.vnode.childrens.length
     const oldContainer = range.endContainer.vnode
     // 删除线在节点开头
     if (end === 0) {
@@ -27,7 +40,7 @@ export default function del(vm) {
         // updateNode(shouldUpdate)
         if (!prevVnode) {
           log('没有前置节点')
-          return setRange(vm, shouldUpdate.childrens[0].dom, 0)
+          return setRange(editor, shouldUpdate.childrens[0].dom, 0)
         }
         log(range.endContainer)
       }
@@ -54,24 +67,24 @@ export default function del(vm) {
         // 如果前一个叶子节点不是text，需额外处理
         if (prevVnode.type === 'text') {
           const prevVnodeLen = shouldNormalize ? prevVnode.length - layer.childrens[0].length : prevVnode.length
-          setRange(vm, prevVnode.dom, prevVnodeLen)
+          setRange(editor, prevVnode.dom, prevVnodeLen)
         } else {
-          setRange(vm, prevVnode.parent.dom, getIndex(prevVnode) + 1)
+          setRange(editor, prevVnode.parent.dom, getIndex(prevVnode) + 1)
         }
         // 跨行内dom删除 自动执行一步，相当于删除当前节点之后再删除上一节点一个单位的内容
-        !blockTag.includes(layer.type) && del(vm)
+        !blockTag.includes(layer.type) && del(editor)
       }
     } else {
       // 删除线在节点之间或者末尾
       log(range.endContainer.vnode.type, end)
       if (range.endContainer.vnode.type === 'text') {
         range.endContainer.vnode.context = orgText
-        setRange(vm, updateNode(range.endContainer.vnode), end - 1)
+        setRange(editor, updateNode(range.endContainer.vnode), end - 1)
       } else {
         const shouldUpdate = delVnode(range.endContainer.vnode.childrens[end - 1])
         const t = updateNode(shouldUpdate)
         log(t)
-        setRange(vm, t, end - 1)
+        setRange(editor, t, end - 1)
       }
     }
   } else {
@@ -81,7 +94,7 @@ export default function del(vm) {
     if (startContainer === endContainer) {
       orgText = orgText.slice(0, start) + orgText.slice(end)
       range.endContainer.vnode.context = orgText
-      setRange(vm, updateNode(range.endContainer.vnode), start)
+      setRange(editor, updateNode(range.endContainer.vnode), start)
     } else {
       // 跨标签删除
       const startBlock = getLayer(startContainer.vnode)
@@ -105,8 +118,8 @@ export default function del(vm) {
         delVnode(endContainer.vnode)
       }
       updateNode(commonAncestorContainer.vnode)
-      log(getNode(vm, position))
-      setRange(vm, getNode(vm, position), start)
+      log(getNode(editor, position))
+      setRange(editor, getNode(editor, position), start)
     }
   }
 }

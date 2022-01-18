@@ -15,7 +15,7 @@ export default class Input {
   _initIframe() {
     this.iframe = document.createElement('iframe')
     this.iframe.classList.add('custom-input-iframe')
-    this.selection.vm.ui.root.appendChild(this.iframe)
+    this.selection.editor.ui.root.appendChild(this.iframe)
     const iframedocument = this.iframe.contentDocument
     const style = iframedocument.createElement('style')
     style.innerHTML = `

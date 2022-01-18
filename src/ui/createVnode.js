@@ -1,7 +1,7 @@
 import { setStyle, setAttr, setEvent, getIndex, isEmptyNode, normalize, reArrangement } from '../utils/index'
 import { leafTag } from '../type/index'
 /**
- * 节点操作类型 insert delete move
+ * 节点操作代理 vnode update ----> dom update
  */
 const handle = {
   set(target, key, newValue) {
@@ -114,6 +114,17 @@ export default function createVnode(ops, parent = null, position = '0') {
     }
   }
   const vnode = new Proxy(ops, handle)
+  if (ops.listen) {
+    const fn =
+      ops.listen.notice ||
+      (() => {
+        // TODO
+        console.log('这里写默认行为')
+      })
+    ops.listen.mitt.on(ops.listen.key, () => {
+      fn(vnode)
+    })
+  }
   vnode.root = parent ? parent.root : vnode
   if (vnode.ele) vnode.ele.vnode = vnode
   if (vnode.childrens) {

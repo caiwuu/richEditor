@@ -3,13 +3,33 @@ import inputor from './inputor'
 export default class Selection {
   nativeSelection = document.getSelection()
   ranges = []
-  constructor(vm) {
-    this.vm = vm
+  constructor(editor) {
+    this.editor = editor
     this.inputor = new inputor(this)
     this._addListeners()
   }
   getCount() {
     return this.ranges.length
+  }
+  getRangePoints() {
+    const points = []
+    this.ranges.forEach((range) => {
+      points.push(
+        {
+          container: range.startContainer,
+          offset: range.startOffset,
+          range,
+          flag: 'start',
+        },
+        {
+          container: range.endContainer,
+          offset: range.endOffset,
+          range,
+          flag: 'end',
+        }
+      )
+    })
+    return points
   }
   _resetRanges() {
     this.clearRanges()
@@ -55,7 +75,7 @@ export default class Selection {
   }
   pushRange(nativeRange) {
     const { focusNode, focusOffset } = this.nativeSelection
-    const cloneRange = new Range(nativeRange, this.vm)
+    const cloneRange = new Range(nativeRange, this.editor)
     if (cloneRange.collapsed) {
       cloneRange._d = 0
     } else if (focusNode === cloneRange.endContainer && focusOffset === cloneRange.endOffset) {
@@ -157,24 +177,24 @@ export default class Selection {
     }
   }
   del() {
-    this.vm.command.delete()
+    this.editor.execCommand('delete')
     this.distinct()
   }
   input(event) {
-    this.vm.command.input(event)
+    this.editor.execCommand('input', null, event)
     this.distinct()
   }
   enter() {
-    this.vm.command.enter()
+    this.editor.execCommand('enter')
   }
   destroy() {
     this.inputor.destroy()
-    this.vm.ui.editorContainer.removeEventListener('mouseup', this._handMouseup.bind(this))
-    this.vm.ui.editorContainer.removeEventListener('mousedown', this._handMousedown.bind(this))
+    this.editor.ui.editorContainer.removeEventListener('mouseup', this._handMouseup.bind(this))
+    this.editor.ui.editorContainer.removeEventListener('mousedown', this._handMousedown.bind(this))
   }
   _addListeners() {
-    this.vm.ui.editorContainer.addEventListener('mouseup', this._handMouseup.bind(this))
-    this.vm.ui.editorContainer.addEventListener('mousedown', this._handMousedown.bind(this))
+    this.editor.ui.editorContainer.addEventListener('mouseup', this._handMouseup.bind(this))
+    this.editor.ui.editorContainer.addEventListener('mousedown', this._handMousedown.bind(this))
   }
   _handMousedown(event) {
     if (!event.shiftKey) {

@@ -5,7 +5,7 @@ export default function input(event) {
   }
   if (event.type === 'input') {
     let prevInputValue,
-      inputData = event.data === ' ' ? '\u00A0' : event.data || ''
+      inputData = event.data === ' ' ? '\u00A0' : event.data + '' || ''
     // 键盘字符输入
     if (!this.inputState.isComposing && event.data) {
       log('键盘输入：', event.data)
@@ -16,7 +16,7 @@ export default function input(event) {
       this.inputState.value = inputData
     }
     times(prevInputValue.length, this.del, this, true)
-    this.vm.dispatch('insert', { node: this.endContainer.vnode, pos: this.endOffset, R: this }, inputData)
+    this.editor.dispatch('insert', { node: this.endContainer.vnode, pos: this.endOffset, R: this }, inputData)
   } else if (event.type === 'compositionstart') {
     log('开始聚合输入:', event.data)
     this.inputState.isComposing = true
