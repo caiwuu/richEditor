@@ -9,11 +9,20 @@ class Editor {
     this.init(id)
   }
   init(id) {
-    this.ui = new UI(bodyVnode, operBarVnode)
+    this.ui = new UI(bodyVnode, this)
     this.ui.mount(id)
     this.selection = new Selection(this)
-    this.command = new Command(this)
+    this._command = new Command(this)
     this.initActions()
+  }
+  setActionBar(ops) {
+    this.ui.setActionBar(ops)
+  }
+  execCommand(name, ...args) {
+    this._command._exexCommand_(name, ...args)
+  }
+  defineCommand(name, fn) {
+    this._command._defineCommand_(name, fn)
   }
   destroy() {
     this.selection.destroy()
@@ -35,6 +44,18 @@ class Editor {
 }
 
 window.editor = new Editor('editor-root')
+window.editor.setActionBar([
+  {
+    key: 'bold',
+    title: '加粗',
+    command: 'bold',
+    notice: (vnode) => {
+      console.log(111)
+      console.log(vnode)
+    },
+  },
+  { key: 'delete', title: '删除', command: 'delete' },
+])
 window.log = function (params) {
   if (window.openLog) {
     console.log(params)

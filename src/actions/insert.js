@@ -1,4 +1,4 @@
-import { recoverRange } from '../utils'
+import { recoverRangePoint } from '../utils'
 import createVnode from '../ui/createVnode'
 function removeVirtual(vnode) {
   vnode.childrens.filter((vnode) => vnode.virtual).forEach((vnode) => vnode.remove())
@@ -55,47 +55,74 @@ const cacheRanges = {
     return from.R
       ? [
           {
-            endContainer: newRangePos.targetVnode.ele,
+            container: newRangePos.targetVnode.ele,
             offset: newRangePos.targetOffset,
             range: from.R,
+            flag: 'end',
+          },
+          {
+            container: newRangePos.targetVnode.ele,
+            offset: newRangePos.targetOffset,
+            range: from.R,
+            flag: 'start',
           },
         ]
       : []
   },
-  betweenEleAndText: (from, inputData, newRangePos, vm) => {
-    const caches = vm.selection.ranges
-      .filter((range) => range.endContainer === newRangePos.targetVnode.ele)
-      .map((range) => ({
-        endContainer: newRangePos.targetVnode.ele,
-        offset: range.endOffset + newRangePos.targetOffset,
-        range: range,
+  betweenEleAndText: (from, inputData, newRangePos, editor) => {
+    const caches = editor.selection
+      .getRangePoints()
+      .filter((point) => point.container === newRangePos.targetVnode.ele)
+      .map((point) => ({
+        container: newRangePos.targetVnode.ele,
+        offset: point.endOffset + newRangePos.targetOffset,
+        range: point.range,
+        flag: point.flag,
       }))
     from.R &&
-      caches.push({
-        endContainer: newRangePos.targetVnode.ele,
-        offset: newRangePos.targetOffset,
-        range: from.R,
-      })
+      caches.push(
+        {
+          container: newRangePos.targetVnode.ele,
+          offset: newRangePos.targetOffset,
+          range: from.R,
+          flag: 'start',
+        },
+        {
+          container: newRangePos.targetVnode.ele,
+          offset: newRangePos.targetOffset,
+          range: from.R,
+          flag: 'end',
+        }
+      )
     return caches
   },
   betweenEleAndEle: (from, inputData, newRangePos) => {
     return from.R
       ? [
           {
-            endContainer: newRangePos.targetVnode.ele,
+            container: newRangePos.targetVnode.ele,
             offset: newRangePos.targetOffset,
             range: from.R,
+            flag: 'start',
+          },
+          {
+            container: newRangePos.targetVnode.ele,
+            offset: newRangePos.targetOffset,
+            range: from.R,
+            flag: 'end',
           },
         ]
       : []
   },
-  betweenTextAndText: (from, inputData, newRangePos, vm) => {
-    const caches = vm.selection.ranges
-      .filter((range) => range.endContainer === from.node.ele && range.endOffset >= from.pos)
-      .map((range) => ({
-        endContainer: range.endContainer,
-        offset: range.endOffset + inputData.length,
-        range: range,
+  betweenTextAndText: (from, inputData, newRangePos, editor) => {
+    const caches = editor.selection
+      .getRangePoints()
+      .filter((point) => point.container === from.node.ele && point.offset >= from.pos)
+      .map((point) => ({
+        container: point.container,
+        offset: point.offset + inputData.length,
+        range: point.range,
+        flag: point.flag,
       }))
     return caches
   },
@@ -117,6 +144,5 @@ export default function insert(args) {
     newRangePos = handleRangePosition[insertType](from, inputData),
     caches = cacheRanges[insertType](from, inputData, newRangePos, this)
   handleInsert[insertType](from, inputData, newRangePos)
-  console.log(caches)
-  recoverRange(caches)
+  recoverRangePoint(caches)
 }

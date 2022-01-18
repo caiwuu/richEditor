@@ -135,8 +135,8 @@ export function updateNode(vnode) {
   return dom
 }
 // 重新设置选区
-export function setRange(vm, startcontainer, start, endcontainer, end, notFocus = false) {
-  const { range, selection } = vm.cursor.meta
+export function setRange(editor, startcontainer, start, endcontainer, end, notFocus = false) {
+  const { range, selection } = editor.cursor.meta
   endcontainer = endcontainer === undefined ? startcontainer : endcontainer
   end = end === undefined ? start : end
   range.setStart(startcontainer, start)
@@ -145,8 +145,8 @@ export function setRange(vm, startcontainer, start, endcontainer, end, notFocus 
   selection.addRange(range)
   // TODO
   if (!notFocus) {
-    vm.cursor.followSysCaret()
-    vm.cursor.focus()
+    editor.cursor.followSysCaret()
+    editor.cursor.focus()
   }
 }
 export function getIndex(vnode) {
@@ -256,10 +256,10 @@ export function isEmptyBlock(vnode) {
   }
 }
 // 判断是否在同一行，正确率90%以上
-export function isSameLine(initialRect, prevRect, currRect, result, vm) {
+export function isSameLine(initialRect, prevRect, currRect, result, editor) {
   // 标识光标是否在同一行移动
   let flag = true
-  if (Math.abs(currRect.x - prevRect.x) > vm.ui.editableArea.offsetWidth - 1.3 * currRect.h) {
+  if (Math.abs(currRect.x - prevRect.x) > editor.ui.editableArea.offsetWidth - 1.3 * currRect.h) {
     flag = false
   }
   // 光标移动触发块级检测说明光标必然跨行
@@ -272,17 +272,20 @@ export function isSameLine(initialRect, prevRect, currRect, result, vm) {
   }
   return flag
 }
-export function recoverRange(caches) {
-  caches.forEach((cache) => {
-    if (cache.endContainer.vnode.childrens) {
-      const { vnode: leaf } = getLeafR(cache.endContainer.vnode.childrens[cache.offset - 1])
+export function recoverRangePoint(points) {
+  points.forEach((point) => {
+    if (point.container.vnode.childrens) {
+      const { vnode: leaf } = getLeafR(point.container.vnode.childrens[point.offset || 1 - 1])
       if (!leaf.atom) {
-        cache.endContainer = leaf.ele
-        cache.offset = leaf.length
+        point.container = leaf.ele
+        point.offset = leaf.length
       }
     }
-    cache.range.setEnd(cache.endContainer, cache.offset)
-    cache.range.collapse(false)
+    if (point.flag === 'end') {
+      point.range.setEnd(point.container, point.offset)
+    } else {
+      point.range.setStart(point.container, point.offset)
+    }
   })
 }
 export function times(n, fn, context = undefined, ...args) {

@@ -141,6 +141,11 @@ export const operBarVnode = {
       type: 'span',
       childrens: [{ type: 'text', context: '| 加粗 | ' }],
       style: { cursor: 'pointer' },
+      event: {
+        onclick: function () {
+          this.vnode.root.uiMsg(this.vnode, 'bold')
+        },
+      },
     },
     {
       type: 'span',

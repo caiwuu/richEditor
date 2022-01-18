@@ -15,13 +15,13 @@ export default class Range {
   }
   _d = 0
   collapsed = true
-  constructor(ops, vm) {
+  constructor(ops, editor) {
     this.endContainer = ops.endContainer
     this.startContainer = ops.startContainer
     this.endOffset = ops.endOffset
     this.startOffset = ops.startOffset
     this.collapsed = ops.collapsed
-    this.vm = vm
+    this.editor = editor
     this._init()
   }
   _init() {
@@ -62,9 +62,9 @@ export default class Range {
     this.caret.update(this, drawCaret)
   }
   remove() {
-    const index = this.vm.selection.ranges.findIndex((i) => i === this)
+    const index = this.editor.selection.ranges.findIndex((i) => i === this)
     this.caret.remove()
-    this.vm.selection.ranges.splice(index, 1)
+    this.editor.selection.ranges.splice(index, 1)
   }
   _loop(direct, initialRect, prevRect, lineChanged = false, shiftKey) {
     const flag = this.endContainer === this.startContainer && this.endOffset === this.startOffset
@@ -83,7 +83,7 @@ export default class Range {
       const currRect = { ...this.caret.rect },
         preDistance = Math.abs(prevRect.x - initialRect.x),
         currDistance = Math.abs(currRect.x - initialRect.x),
-        sameLine = isSameLine(initialRect, prevRect, currRect, result, this.vm)
+        sameLine = isSameLine(initialRect, prevRect, currRect, result, this.editor)
       if (!(currDistance <= preDistance && sameLine)) {
         direct === 'left' ? this.right(shiftKey) : this.left(shiftKey)
         this.updateCaret(false)
@@ -91,7 +91,7 @@ export default class Range {
       }
     }
     const currRect = { ...this.caret.rect },
-      sameLine = isSameLine(initialRect, prevRect, currRect, result, this.vm)
+      sameLine = isSameLine(initialRect, prevRect, currRect, result, this.editor)
     if (!sameLine) {
       lineChanged = true
     }
