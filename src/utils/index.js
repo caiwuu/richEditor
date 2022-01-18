@@ -276,7 +276,8 @@ export function recoverRangePoint(points) {
   points.forEach((point) => {
     if (point.container.vnode.childrens) {
       const { vnode: leaf } = getLeafR(point.container.vnode.childrens[point.offset || 1 - 1])
-      if (!leaf.atom) {
+      if (!leaf.atom && !leaf.virtual) {
+        console.log(leaf)
         point.container = leaf.ele
         point.offset = leaf.length
       }

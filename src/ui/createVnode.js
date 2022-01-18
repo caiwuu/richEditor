@@ -116,13 +116,13 @@ export default function createVnode(ops, parent = null, position = '0') {
   const vnode = new Proxy(ops, handle)
   if (ops.listen) {
     const fn =
-      ops.listen.notice ||
-      (() => {
+      ops.listen.onMessage ||
+      ((vnode, args) => {
         // TODO
-        console.log('这里写默认行为')
+        console.log('这里写默认行为', vnode, args)
       })
-    ops.listen.mitt.on(ops.listen.key, () => {
-      fn(vnode)
+    ops.listen.emitter.on(ops.listen.key, (args) => {
+      fn(vnode, args)
     })
   }
   vnode.root = parent ? parent.root : vnode

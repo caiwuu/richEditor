@@ -7,7 +7,7 @@ import mitt from 'mitt'
 export default class UI {
   constructor(editableAreaOps, editor) {
     this.editor = editor
-    this.mitt = mitt()
+    this.emitter = mitt()
     this.editableArea = createVnode(editableAreaOps, null).ele
     this.actionBar = createVnode(this.genActionBarOps(defaultBar), null).ele
     this.editorContainer = document.createElement('div')
@@ -15,10 +15,11 @@ export default class UI {
     this.editorContainer.style['background'] = '#ffffff'
     this.editorContainer.style['padding'] = '30px'
   }
-  notice(key) {
-    this.mitt.emit(key)
+  notice(key, ...args) {
+    this.emitter.emit(key, args)
   }
   setActionBar(ops) {
+    this.emitter.all.clear()
     const newBar = createVnode(this.genActionBarOps(ops), null).ele
     this.updateActionBar(newBar)
   }
@@ -51,13 +52,14 @@ export default class UI {
             type: 'span',
             childrens: [{ type: 'text', context: `| ${ele.title}  ` }],
             style: { cursor: 'pointer', userSelect: 'none' },
-            listen: { mitt: self.mitt, key: ele.key, notice: ele.notice },
+            listen: { emitter: self.emitter, key: ele.key, onMessage: ele.onMessage },
             event: {
               onclick: function () {
                 if (typeof ele.command === 'function') {
                   ele.command(self.vnode, self.editor)
                 } else {
                   self.editor.execCommand(ele.command)
+                  self.notice('bold', 1, 2, 3)
                 }
               },
             },

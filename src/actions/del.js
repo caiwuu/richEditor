@@ -6,6 +6,7 @@ export default function del(args) {
   if (typeof to === 'number') {
     // 行内操作
     if (from.pos) {
+      console.log(from.pos)
       console.log('行内del')
       // 缓存改变前的状态
       const points = this.selection

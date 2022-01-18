@@ -101,8 +101,7 @@ export const bodyVnode = {
         },
         {
           type: 'text',
-          context:
-            'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
+          context: 'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
         },
       ],
     },
@@ -132,30 +131,4 @@ export const bodyVnode = {
     id: 'editor-body',
   },
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
-}
-export const operBarVnode = {
-  type: 'div',
-  style: { width: '100%', height: '30px', background: '#ddd', lineHeight: '30px' },
-  childrens: [
-    {
-      type: 'span',
-      childrens: [{ type: 'text', context: '| 加粗 | ' }],
-      style: { cursor: 'pointer' },
-      event: {
-        onclick: function () {
-          this.vnode.root.uiMsg(this.vnode, 'bold')
-        },
-      },
-    },
-    {
-      type: 'span',
-      childrens: [{ type: 'text', context: ' 字体变大 | ' }],
-      style: { cursor: 'pointer' },
-    },
-    {
-      type: 'span',
-      childrens: [{ type: 'text', context: ' 字体减小 | ' }],
-      style: { cursor: 'pointer' },
-    },
-  ],
 }
