@@ -11,21 +11,17 @@ function removeVirtual(from, insertType) {
 }
 const handleInsert = {
   betweenTextAndEle: (from, inputData, newRangePos) => {
-    // removeVirtual(from.node)
     newRangePos.targetVnode.context = newRangePos.targetVnode.context + inputData
   },
   betweenEleAndText: (from, inputData, newRangePos) => {
-    // removeVirtual(from.node)
     newRangePos.targetVnode.context = inputData + newRangePos.targetVnode.context
   },
   betweenEleAndEle: (from, inputData, newRangePos) => {
-    // removeVirtual(from.node)
     from.node.insert(newRangePos.targetVnode, from.pos)
   },
   betweenTextAndText: (from, inputData, newRangePos) => {
     let orgText = from.node.context
     orgText = orgText.slice(0, from.pos) + inputData + orgText.slice(from.pos)
-    // removeVirtual(from.node.parent)
     from.node.context = orgText
   },
 }
@@ -135,25 +131,26 @@ const cacheRanges = {
 }
 function getInsertType(from) {
   if (from.node.type == 'text') {
-    // removeVirtual(from.node.parent)
     return 'betweenTextAndText'
   } else if (from.node.childrens[from.pos] && from.node.childrens[from.pos].type === 'text') {
-    // removeVirtual(from.node)
     return 'betweenEleAndText'
   } else if (from.node.childrens[from.pos - 1] && from.node.childrens[from.pos - 1].type === 'text') {
-    // removeVirtual(from.node)
     return 'betweenTextAndEle'
   } else {
-    // removeVirtual(from.node)
     return 'betweenEleAndEle'
   }
 }
 export default function insert(args) {
   const [from, inputData] = args,
+    //获取插入类型
     insertType = getInsertType(from),
+    // 光标新位置
     newRangePos = handleRangePosition[insertType](from, inputData)
+  // 执行插入
   handleInsert[insertType](from, inputData, newRangePos)
   const caches = cacheRanges[insertType](from, inputData, newRangePos, this)
+  // 绘制光标
   recoverRangePoint(caches)
+  // 删除 占位节点
   removeVirtual(from, insertType)
 }

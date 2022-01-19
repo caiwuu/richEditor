@@ -223,7 +223,7 @@ export function normalize(vnode) {
       const points = vnode.root.editor.selection
         .getRangePoints()
         .filter((point) => {
-          console.log(point, index)
+          console.log(point.container, curr, next)
           return point.container === curr.ele || (point.container === vnode.ele && point.offset === index - 1)
         })
         .map((point) => ({
@@ -233,6 +233,7 @@ export function normalize(vnode) {
           flag: point.flag,
         }))
       next.context += curr.context
+      console.log(vnode.childrens, index)
       vnode.childrens[index].remove(false)
       console.log(points)
       // 重新绘制光标

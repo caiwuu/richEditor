@@ -101,8 +101,7 @@ export const bodyVnode = {
         },
         {
           type: 'text',
-          context:
-            'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
+          context: 'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
         },
       ],
     },
@@ -123,11 +122,6 @@ export const bodyVnode = {
       type: 'p',
       style: { background: 'rgb(255 234 206)' },
       childrens: [
-        { type: 'text', context: '' },
-        { type: 'text', context: '' },
-        { type: 'text', context: '' },
-        { type: 'text', context: '' },
-        { type: 'text', context: '' },
         { type: 'text', context: '' },
         { type: 'br', virtual: true },
       ],

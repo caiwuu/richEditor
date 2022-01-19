@@ -40,7 +40,6 @@ const handle = {
             target.ele.data = target.context
           } else {
             target.childrens.splice(start, offset - start).forEach((vnode) => vnode.ele.remove())
-            isNormalize && receiver.normalize()
             receiver.reArrangement()
           }
         }

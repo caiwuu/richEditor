@@ -7,6 +7,11 @@ export default class Command {
   constructor(editor) {
     this.editor = editor
   }
+  _updateCaret_() {
+    this.editor.selection.ranges.forEach((range) => {
+      range.updateCaret()
+    })
+  }
   _delete(pos) {
     // 外部驱动
     if (pos) {
@@ -14,8 +19,8 @@ export default class Command {
       // 内部驱动
       this.editor.selection.ranges.forEach((range) => {
         range.del()
-        range.updateCaret()
       })
+      this._updateCaret_()
     }
   }
   _input(data, event) {
@@ -30,14 +35,14 @@ export default class Command {
         // 内部驱动
         range.input(event)
       }
-      range.updateCaret()
     })
+    this._updateCaret_()
   }
   _enter() {
     this.editor.selection.ranges.forEach((range) => {
       range.enter()
-      range.updateCaret()
     })
+    this._updateCaret_()
   }
   _bold(pos) {
     if (pos) {
