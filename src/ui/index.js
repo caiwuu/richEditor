@@ -9,6 +9,7 @@ export default class UI {
     this.editor = editor
     this.emitter = mitt()
     this.editableArea = createVnode(editableAreaOps, null).ele
+    this.editableArea.vnode.editor = editor
     this.actionBar = createVnode(this.genActionBarOps(defaultBar), null).ele
     this.editorContainer = document.createElement('div')
     this.editorContainer.style['border'] = '2px solid #eee'

@@ -5,7 +5,7 @@ export default function del(args) {
   const [from, to] = args
   if (typeof to === 'number') {
     // 行内操作
-    if (from.pos) {
+    if (from.pos && !from.node.isEmpty) {
       console.log(from.pos)
       console.log('行内del')
       // 缓存改变前的状态
@@ -18,8 +18,9 @@ export default function del(args) {
           range: point.range,
           flag: point.flag,
         }))
-      from.node.delete(from.pos, 1)
+      from.node.delete(from.pos, 1, false)
       recoverRangePoint(points)
+      from.node.normalize()
       // 添加br防止行塌陷
       if (isEmptyBlock(from.node) && !from.node.parent.childrens.some((vnode) => vnode.virtual)) {
         const br = createVnode({ type: 'br', virtual: true })
@@ -27,9 +28,10 @@ export default function del(args) {
       }
       // 需要跨标签操作
     } else {
+      console.log('跨标签')
       // 获取上一个光标容器节点和跨越的节点
       const { vnode: prevVnode, layer } = getPrevLeafNode(from.node)
-      log(prevVnode)
+      console.log(prevVnode)
       if (!prevVnode) return
       // 缓存改变前的状态
       const points = this.selection
@@ -37,7 +39,7 @@ export default function del(args) {
         .filter((point) => point.container === from.node.ele && point.offset === from.pos)
         .map((point) => ({
           container: prevVnode.atom ? prevVnode.parent.ele : prevVnode.ele,
-          offset: prevVnode.type === 'text' ? point.offset + prevVnode.length : prevVnode.atom ? getIndex(prevVnode) + 1 : point.offset,
+          offset: computeOffset(prevVnode, point, from),
           range: point.range,
           flag: point.flag,
         }))
@@ -46,6 +48,7 @@ export default function del(args) {
         from.node.parent.childrens.filter((vnode) => vnode.virtual).forEach((item) => item.remove())
         delVnode(from.node)
       }
+      console.log(points)
       recoverRangePoint(points)
       // 行内跨块级自动执行一步
       if (!blockTag.includes(layer.type)) {
@@ -57,5 +60,16 @@ export default function del(args) {
         del.call(this, [from, to])
       }
     }
+  }
+}
+
+function computeOffset(prevVnode, point, from) {
+  // return prevVnode.type === 'text' ? point.offset + prevVnode.length : prevVnode.atom ? getIndex(prevVnode) + 1 : point.offset,
+  if (from.node.isEmpty) {
+    return prevVnode.length
+  } else if (prevVnode.type === 'text') {
+    return point.offset + prevVnode.length
+  } else if (prevVnode.atom) {
+    return getIndex(prevVnode) + 1
   }
 }

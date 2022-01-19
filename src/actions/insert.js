@@ -1,25 +1,31 @@
 import { recoverRangePoint } from '../utils'
 import createVnode from '../ui/createVnode'
-function removeVirtual(vnode) {
+function removeVirtual(from, insertType) {
+  let vnode
+  if (insertType === 'betweenTextAndText') {
+    vnode = from.node.parent
+  } else {
+    vnode = from.node
+  }
   vnode.childrens.filter((vnode) => vnode.virtual).forEach((vnode) => vnode.remove())
 }
 const handleInsert = {
   betweenTextAndEle: (from, inputData, newRangePos) => {
-    removeVirtual(from.node)
+    // removeVirtual(from.node)
     newRangePos.targetVnode.context = newRangePos.targetVnode.context + inputData
   },
   betweenEleAndText: (from, inputData, newRangePos) => {
-    removeVirtual(from.node)
+    // removeVirtual(from.node)
     newRangePos.targetVnode.context = inputData + newRangePos.targetVnode.context
   },
   betweenEleAndEle: (from, inputData, newRangePos) => {
-    removeVirtual(from.node)
+    // removeVirtual(from.node)
     from.node.insert(newRangePos.targetVnode, from.pos)
   },
   betweenTextAndText: (from, inputData, newRangePos) => {
     let orgText = from.node.context
     orgText = orgText.slice(0, from.pos) + inputData + orgText.slice(from.pos)
-    removeVirtual(from.node.parent)
+    // removeVirtual(from.node.parent)
     from.node.context = orgText
   },
 }
@@ -129,20 +135,25 @@ const cacheRanges = {
 }
 function getInsertType(from) {
   if (from.node.type == 'text') {
+    // removeVirtual(from.node.parent)
     return 'betweenTextAndText'
   } else if (from.node.childrens[from.pos] && from.node.childrens[from.pos].type === 'text') {
+    // removeVirtual(from.node)
     return 'betweenEleAndText'
   } else if (from.node.childrens[from.pos - 1] && from.node.childrens[from.pos - 1].type === 'text') {
+    // removeVirtual(from.node)
     return 'betweenTextAndEle'
   } else {
+    // removeVirtual(from.node)
     return 'betweenEleAndEle'
   }
 }
 export default function insert(args) {
   const [from, inputData] = args,
     insertType = getInsertType(from),
-    newRangePos = handleRangePosition[insertType](from, inputData),
-    caches = cacheRanges[insertType](from, inputData, newRangePos, this)
+    newRangePos = handleRangePosition[insertType](from, inputData)
   handleInsert[insertType](from, inputData, newRangePos)
+  const caches = cacheRanges[insertType](from, inputData, newRangePos, this)
   recoverRangePoint(caches)
+  removeVirtual(from, insertType)
 }

@@ -212,15 +212,31 @@ export function getLayer(vnode) {
 // TODO 合并之后如果被合并的节点有选区需要重新计算选区位置
 export function normalize(vnode) {
   if (vnode.childrens.length <= 1) return
+  console.log(vnode.childrens.length)
   for (let index = vnode.childrens.length - 1; index >= 1; index--) {
     const curr = vnode.childrens[index]
     const next = vnode.childrens[index - 1]
-    if (curr.type !== 'text' || next.type !== 'text') {
-      continue
-    } else {
+    console.log(index)
+    if (curr.type === 'text' && next.type === 'text') {
+      console.log('合并相邻的text节点')
+      // 重新计算光标
+      const points = vnode.root.editor.selection
+        .getRangePoints()
+        .filter((point) => {
+          console.log(point, index)
+          return point.container === curr.ele || (point.container === vnode.ele && point.offset === index - 1)
+        })
+        .map((point) => ({
+          container: point.container === curr.ele ? next.ele : point.container,
+          offset: point.container === curr.ele ? point.offset + next.length : index,
+          range: point.range,
+          flag: point.flag,
+        }))
       next.context += curr.context
-      vnode.childrens.splice(index, 1)
-      // vnode.childrens[index].remove()
+      vnode.childrens[index].remove(false)
+      console.log(points)
+      // 重新绘制光标
+      recoverRangePoint(points)
     }
   }
 }
@@ -275,7 +291,7 @@ export function isSameLine(initialRect, prevRect, currRect, result, editor) {
 export function recoverRangePoint(points) {
   points.forEach((point) => {
     if (point.container.vnode.childrens) {
-      const { vnode: leaf } = getLeafR(point.container.vnode.childrens[point.offset || 1 - 1])
+      const { vnode: leaf } = getLeafR(point.container.vnode.childrens[(point.offset || 1) - 1])
       if (!leaf.atom && !leaf.virtual) {
         console.log(leaf)
         point.container = leaf.ele
