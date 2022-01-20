@@ -268,7 +268,7 @@ export function isSameLine(initialRect, prevRect, currRect, result, editor) {
     flag = false
   }
   // 光标移动触发块级检测说明光标必然跨行
-  if (typeof result === 'object' && blockTag.includes(result.type)) {
+  if ((typeof result === 'object' && blockTag.includes(result.type)) || result === 'br') {
     flag = false
   }
   //光标Y坐标和参考点相同说明光标还在本行，最理想的情况放在最后判断

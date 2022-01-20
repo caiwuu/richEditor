@@ -139,11 +139,14 @@ const data2 = {
     {
       type: 'p',
       childrens: [
+        { type: 'text', context: '普通文字1' },
+        { type: 'text', context: '普通文字1' },
+        // { type: 'br' },
         {
           type: 'span',
           childrens: [
             { type: 'text', context: '普通文字1' },
-            { type: 'br', virtual: true },
+            // { type: 'br', virtual: true },
           ],
         },
       ],

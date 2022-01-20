@@ -108,7 +108,8 @@ export default function createVnode(ops, parent = null, position = '0') {
     if (ops.style) setStyle(ops.ele, ops.style)
     if (ops.attr) setAttr(ops.ele, ops.attr)
     if (ops.event) setEvent(ops.ele, ops.event)
-    if (ops.type === 'img') {
+    // if (ops.type === 'img') {
+    if (['br', 'img'].includes(ops.type)) {
       ops.atom = true
     }
   }

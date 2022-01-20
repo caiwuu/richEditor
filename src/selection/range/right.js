@@ -56,7 +56,7 @@ export default function right(shiftKey) {
     if (!blockTag.includes(layer.type)) {
       return this.right(shiftKey)
     }
-    return layer
+    return vnode.type === 'br' ? 'br' : layer
   } else {
     let vnode
     if (container.vnode.childrens) {
@@ -99,6 +99,6 @@ export default function right(shiftKey) {
         this._d = 0
       }
     }
-    return true
+    return vnode.type === 'br' ? 'br' : true
   }
 }

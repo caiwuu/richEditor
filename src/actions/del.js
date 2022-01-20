@@ -65,6 +65,7 @@ function crossNodeDel(from, to) {
   const { vnode: prevVnode, layer } = getPrevLeafNode(from.node)
   if (!prevVnode) {
     const block = getLayer(from.node)
+    // 首行删除逻辑 清空段落增加br
     if (block.isEmpty) {
       clearBlock(block)
       const br = createVnode({ type: 'br', virtual: true })
@@ -84,7 +85,7 @@ function crossNodeDel(from, to) {
   }
   // 重新计算受影响的range端点
   // 先移动range在执行删除
-  console.log(`上一个叶子节点${prevVnode.position}:`, prevVnode.root)
+  console.log(`上一个叶子节点${prevVnode.position}:`, prevVnode)
   const points = this.selection
     .getRangePoints()
     .filter((point) => point.container === from.node.ele && point.offset === from.pos)
