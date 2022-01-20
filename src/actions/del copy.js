@@ -1,4 +1,4 @@
-import { getPrevLeafNode, delVnode, getIndex, recoverRangePoint, isEmptyBlock } from '../utils'
+import { getPrevLeafNode, deleteEmptyNode, getIndex, recoverRangePoint, isEmptyBlock } from '../utils'
 import { blockTag } from '../type'
 import createVnode from '../ui/createVnode'
 export default function del(args) {
@@ -47,7 +47,7 @@ export default function del(args) {
       // 如果当前节点为空则递归向上删除空节点
       if (from.node.isEmpty) {
         from.node.parent.childrens.filter((vnode) => vnode.virtual).forEach((item) => item.remove())
-        delVnode(from.node)
+        deleteEmptyNode(from.node)
       }
       console.log(points)
       recoverRangePoint(points)
