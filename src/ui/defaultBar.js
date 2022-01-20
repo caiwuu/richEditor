@@ -3,7 +3,7 @@ export default [
     key: 'bold',
     title: '加粗',
     command: 'bold',
-    notice: (vnode) => {
+    onMessage: (vnode) => {
       console.log(111)
       console.log(vnode)
     },

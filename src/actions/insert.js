@@ -1,25 +1,27 @@
 import { recoverRangePoint } from '../utils'
 import createVnode from '../ui/createVnode'
-function removeVirtual(vnode) {
+function removeVirtual(from, insertType) {
+  let vnode
+  if (insertType === 'betweenTextAndText') {
+    vnode = from.node.parent
+  } else {
+    vnode = from.node
+  }
   vnode.childrens.filter((vnode) => vnode.virtual).forEach((vnode) => vnode.remove())
 }
 const handleInsert = {
   betweenTextAndEle: (from, inputData, newRangePos) => {
-    removeVirtual(from.node)
     newRangePos.targetVnode.context = newRangePos.targetVnode.context + inputData
   },
   betweenEleAndText: (from, inputData, newRangePos) => {
-    removeVirtual(from.node)
     newRangePos.targetVnode.context = inputData + newRangePos.targetVnode.context
   },
   betweenEleAndEle: (from, inputData, newRangePos) => {
-    removeVirtual(from.node)
     from.node.insert(newRangePos.targetVnode, from.pos)
   },
   betweenTextAndText: (from, inputData, newRangePos) => {
     let orgText = from.node.context
     orgText = orgText.slice(0, from.pos) + inputData + orgText.slice(from.pos)
-    removeVirtual(from.node.parent)
     from.node.context = orgText
   },
 }
@@ -140,9 +142,15 @@ function getInsertType(from) {
 }
 export default function insert(args) {
   const [from, inputData] = args,
+    //获取插入类型
     insertType = getInsertType(from),
-    newRangePos = handleRangePosition[insertType](from, inputData),
-    caches = cacheRanges[insertType](from, inputData, newRangePos, this)
+    // 光标新位置
+    newRangePos = handleRangePosition[insertType](from, inputData)
+  // 执行插入
   handleInsert[insertType](from, inputData, newRangePos)
+  const caches = cacheRanges[insertType](from, inputData, newRangePos, this)
+  // 绘制光标
   recoverRangePoint(caches)
+  // 删除 占位节点
+  removeVirtual(from, insertType)
 }

@@ -18,10 +18,10 @@ export default function del(args) {
           range: point.range,
           flag: point.flag,
         }))
-      recoverRangePoint(points)
-      from.node.delete(from.pos, 1, true)
+      from.node.delete(from.pos, 1, false)
       console.log(points)
-      // from.node.normalize()
+      recoverRangePoint(points)
+      from.node.normalize()
       // 添加br防止行塌陷
       if (isEmptyBlock(from.node) && !from.node.parent.childrens.some((vnode) => vnode.virtual)) {
         const br = createVnode({ type: 'br', virtual: true })
@@ -44,14 +44,13 @@ export default function del(args) {
           range: point.range,
           flag: point.flag,
         }))
-      recoverRangePoint(points)
       // 如果当前节点为空则递归向上删除空节点
       if (from.node.isEmpty) {
-        console.log(22345)
         from.node.parent.childrens.filter((vnode) => vnode.virtual).forEach((item) => item.remove())
         delVnode(from.node)
       }
       console.log(points)
+      recoverRangePoint(points)
       // 行内跨块级自动执行一步
       if (!blockTag.includes(layer.type)) {
         const from = {

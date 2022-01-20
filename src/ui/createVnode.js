@@ -33,14 +33,13 @@ const handle = {
           receiver.reArrangement()
         }
       case 'delete':
-        return function (offset, count) {
+        return function (offset, count, isNormalize = true) {
           const start = offset - count <= 0 ? 0 : offset - count
           if (target.type === 'text') {
             target.context = target.context.slice(0, start) + target.context.slice(offset)
             target.ele.data = target.context
           } else {
             target.childrens.splice(start, offset - start).forEach((vnode) => vnode.ele.remove())
-            receiver.normalize()
             receiver.reArrangement()
           }
         }
@@ -57,13 +56,13 @@ const handle = {
         }
       case 'normalize':
         return function () {
-          normalize(receiver)
+          receiver.childrens && normalize(receiver)
         }
       case 'remove':
-        return function () {
+        return function (isNormalize = true) {
           const index = getIndex(target)
           target.parent.childrens.splice(index, 1).forEach((i) => i.ele.remove())
-          target.parent.normalize()
+          isNormalize && target.parent.normalize()
           reArrangement(target.parent)
         }
       case 'isEmpty':
@@ -116,13 +115,13 @@ export default function createVnode(ops, parent = null, position = '0') {
   const vnode = new Proxy(ops, handle)
   if (ops.listen) {
     const fn =
-      ops.listen.notice ||
-      (() => {
+      ops.listen.onMessage ||
+      ((vnode, args) => {
         // TODO
-        console.log('这里写默认行为')
+        console.log('这里写默认行为', vnode, args)
       })
-    ops.listen.mitt.on(ops.listen.key, () => {
-      fn(vnode)
+    ops.listen.emitter.on(ops.listen.key, (args) => {
+      fn(vnode, args)
     })
   }
   vnode.root = parent ? parent.root : vnode
