@@ -1,4 +1,4 @@
-export const bodyVnode = {
+const data1 = {
   type: 'div',
   childrens: [
     {
@@ -122,7 +122,7 @@ export const bodyVnode = {
       type: 'p',
       style: { background: 'rgb(255 234 206)' },
       childrens: [
-        { type: 'text', context: '' },
+        // { type: 'text', context: '' },
         { type: 'br', virtual: true },
       ],
     },
@@ -132,3 +132,33 @@ export const bodyVnode = {
   },
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }
+
+const data2 = {
+  type: 'div',
+  childrens: [
+    {
+      type: 'p',
+      childrens: [
+        {
+          type: 'span',
+          childrens: [
+            { type: 'text', context: '普通文字1' },
+            { type: 'br', virtual: true },
+          ],
+        },
+      ],
+      style: { color: '#888' },
+    },
+    {
+      type: 'p',
+      childrens: [{ type: 'text', context: '普通文字2' }],
+      style: { color: '#888' },
+    },
+  ],
+  attr: {
+    id: 'editor-body',
+  },
+  style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
+}
+
+export default data2

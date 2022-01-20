@@ -1,4 +1,4 @@
-import { getPrevLeafNode, deleteEmptyNode, getIndex, getNode, recoverRangePoint, isEmptyBlock } from '../utils'
+import { getPrevLeafNode, deleteEmptyNode, getIndex, getNode, getLayer, recoverRangePoint, isEmptyBlock } from '../utils'
 import { blockTag } from '../type'
 import createVnode from '../ui/createVnode'
 export default function del(args) {
@@ -51,15 +51,40 @@ function innerDel(from, to) {
     from.node.parent.insert(br, 1)
   }
 }
+function clearBlock(block) {
+  console.log(block.childrens.length)
+  block.childrens.slice(0).forEach((node) => {
+    console.log(node)
+    node.remove()
+  })
+}
 // 跨节点
 function crossNodeDel(from, to) {
   console.log('跨节点')
   // 获取上一个光标容器节点和跨越的节点
   const { vnode: prevVnode, layer } = getPrevLeafNode(from.node)
-  console.log(`上一个叶子节点${prevVnode.position}:`, prevVnode.root)
-  if (!prevVnode) return
+  if (!prevVnode) {
+    const block = getLayer(from.node)
+    if (block.isEmpty) {
+      clearBlock(block)
+      const br = createVnode({ type: 'br', virtual: true })
+      block.insert(br, 1)
+      const points = this.selection
+        .getRangePoints()
+        .filter((point) => point.container === from.node.ele)
+        .map((point) => ({
+          container: block.ele,
+          offset: 0,
+          range: point.range,
+          flag: point.flag,
+        }))
+      recoverRangePoint(points)
+    }
+    return
+  }
   // 重新计算受影响的range端点
   // 先移动range在执行删除
+  console.log(`上一个叶子节点${prevVnode.position}:`, prevVnode.root)
   const points = this.selection
     .getRangePoints()
     .filter((point) => point.container === from.node.ele && point.offset === from.pos)
@@ -70,10 +95,7 @@ function crossNodeDel(from, to) {
       flag: point.flag,
     }))
   recoverRangePoint(points)
-  // 如果当前节点为空则递归向上删除空节点
-  if (from.node.isEmpty) {
-    deleteEmptyNode(from.node)
-  }
+
   // 跨行级节点自动执行一步删除
   if (!blockTag.includes(layer.type)) {
     const from = {
@@ -81,6 +103,10 @@ function crossNodeDel(from, to) {
       pos: prevVnode.atom ? getIndex(prevVnode) + 1 : prevVnode.length,
     }
     del.call(this, [from, 1])
+  }
+  // 如果当前节点为空则递归向上删除空节点
+  if (from.node.isEmpty) {
+    deleteEmptyNode(from.node)
   }
 }
 /**

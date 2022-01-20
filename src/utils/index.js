@@ -199,8 +199,8 @@ export function getLeafL(vnode, layer) {
 }
 // 获取内容属于的第一层块级元素
 export function getLayer(vnode) {
-  if (blockTag.includes(vnode.parent.type)) {
-    return vnode.parent
+  if (blockTag.includes(vnode.type)) {
+    return vnode
   } else {
     return getLayer(vnode.parent)
   }
@@ -208,6 +208,7 @@ export function getLayer(vnode) {
 // 合并相邻的text节点
 // TODO 合并之后如果被合并的节点有选区需要重新计算选区位置
 export function normalize(vnode) {
+  return
   if (vnode.childrens.length <= 1) return
   console.log(vnode.childrens.length)
   for (let index = vnode.childrens.length - 1; index >= 1; index--) {
@@ -255,6 +256,7 @@ export function isEmptyNode(vnode) {
 }
 // 块级检测 检查vnode所属块级是否为空
 export function isEmptyBlock(vnode) {
+  // debugger
   const block = getLayer(vnode)
   return isEmptyNode(block)
 }
