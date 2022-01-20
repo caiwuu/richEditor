@@ -17,16 +17,8 @@ export default function del(args) {
   }
 }
 
-function computeOffset(prevVnode, point, from) {
-  if (prevVnode.type === 'text') {
-    return point.offset + prevVnode.length
-  } else {
-    return getIndex(prevVnode) + 1
-  }
-}
 // position类型节点转化
 function transToNode(args) {
-  console.log(args)
   args.forEach((ele) => {
     if (typeof ele.node === 'string') {
       ele.node = getNode(this.ui.editableArea.vnode, ele.node)
@@ -61,7 +53,7 @@ function innerDel(from, to) {
 }
 // 跨节点
 function crossNodeDel(from, to) {
-  console.log('行级跨节点')
+  console.log('跨节点')
   // 获取上一个光标容器节点和跨越的节点
   const { vnode: prevVnode, layer } = getPrevLeafNode(from.node)
   console.log(`上一个叶子节点${prevVnode.position}:`, prevVnode.root)

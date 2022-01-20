@@ -120,7 +120,7 @@ export function renderDom(vnode) {
 }
 // 像素单位变量乘法
 export function multiplication(pxVal, times) {
-  return pxVal.replace(/(\d*)(px)+/, function ($0, $1, $2) {
+  return pxVal.replace(/(\d*).*/, function ($0, $1, $2) {
     return $1 * times
   })
 }
@@ -253,16 +253,16 @@ export function isEmptyNode(vnode) {
     }
   }
 }
-// 块级检测 检查vnode所属块级是否为空 vnode必须是个叶子节点
+// 块级检测 检查vnode所属块级是否为空
 export function isEmptyBlock(vnode) {
   const block = getLayer(vnode)
   return isEmptyNode(block)
 }
-// 判断是否在同一行，正确率90%以上
+// 判断是否在同一行，由于浏览器的排版原因不能保证百分之百准确，准确率99%
 export function isSameLine(initialRect, prevRect, currRect, result, editor) {
   // 标识光标是否在同一行移动
   let flag = true
-  if (Math.abs(currRect.x - prevRect.x) > editor.ui.editableArea.offsetWidth - 1.3 * currRect.h) {
+  if (Math.abs(currRect.x - prevRect.x) > editor.ui.editableArea.offsetWidth - 2 * currRect.h) {
     flag = false
   }
   // 光标移动触发块级检测说明光标必然跨行
