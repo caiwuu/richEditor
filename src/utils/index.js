@@ -26,7 +26,7 @@ function compareStart(vnode, start, end, samebranch = false) {
     }
   } else if (compareRes == -1) {
     if (samebranch) {
-      delVnode(vnode)
+      deleteEmptyNode(vnode)
     } else {
       compareEnd(vnode, end, false)
     }
@@ -40,7 +40,7 @@ function compareEnd(vnode, end) {
       compareEnd(element, end)
     }
   } else if (compareRes == 1) {
-    delVnode(vnode)
+    deleteEmptyNode(vnode)
   }
 }
 // 选区删除，删除两个节点之间的节点
@@ -84,26 +84,23 @@ export function clonePureVnode(vnode) {
   vnode.context && (cloneVnode.context = vnode.context)
   vnode.style && (cloneVnode.style = { ...vnode.style })
   vnode.attr && (cloneVnode.attr = { ...vnode.attr })
+  vnode.event && (cloneVnode.event = { ...vnode.event })
   vnode.childrens && (cloneVnode.childrens = vnode.childrens.map((i) => clonePureVnode(i)))
   return cloneVnode
 }
 // 节点删除
-export function delVnode(vnode) {
+export function deleteEmptyNode(vnode) {
   const parent = vnode.parent || vnode
   // 如果父级只有一个子集，则递归删除父级
-  // if (parent.childrens.length === 1) {
   if (isEmptyNode(parent)) {
     if (parent.isRoot) {
-      vnode.childrens = [{ type: 'text', context: '' }, { type: 'br' }]
-      return vnode
+      console.log(`parent isRoot,${vnode.position} is deleted`)
+      vnode.remove()
+    } else {
+      deleteEmptyNode(parent)
     }
-    return delVnode(parent)
   } else {
     vnode.remove()
-    // normalize(parent)
-    // reArrangement(parent)
-    // TODO 内容删空后立马初始化内容
-    return parent
   }
 }
 // 重排vnode 更新position parent
@@ -258,19 +255,8 @@ export function isEmptyNode(vnode) {
 }
 // 块级检测 检查vnode所属块级是否为空 vnode必须是个叶子节点
 export function isEmptyBlock(vnode) {
-  // 有内容的文本节点
-  if (vnode.context) {
-    return false
-  } else if (vnode.parent.childrens.length === 1) {
-    // 行内节点
-    if (!blockTag.includes(vnode.parent.type)) {
-      return isEmptyBlock(vnode.parent)
-    } else {
-      return true
-    }
-  } else {
-    return isEmptyNode(vnode.parent)
-  }
+  const block = getLayer(vnode)
+  return isEmptyNode(block)
 }
 // 判断是否在同一行，正确率90%以上
 export function isSameLine(initialRect, prevRect, currRect, result, editor) {
