@@ -68,10 +68,12 @@ const handle = {
       case 'isEmpty':
         return isEmptyNode(target)
       case 'length':
-        try {
-          return target.type === 'text' ? target.context.length : target.childrens.filter((ele) => !ele.virtual).length
-        } catch (error) {
-          throw new Error('atom node is no length attribute')
+        if (target.atom) {
+          return -1
+        } else if (target.type === 'text') {
+          return target.context.length
+        } else {
+          return target.childrens.filter((ele) => !ele.virtual).length
         }
       case 'reArrangement':
         return function () {
@@ -108,7 +110,8 @@ export default function createVnode(ops, parent = null, position = '0') {
     if (ops.style) setStyle(ops.ele, ops.style)
     if (ops.attr) setAttr(ops.ele, ops.attr)
     if (ops.event) setEvent(ops.ele, ops.event)
-    if (ops.type === 'img') {
+    // if (ops.type === 'img') {
+    if (['br', 'img'].includes(ops.type)) {
       ops.atom = true
     }
   }

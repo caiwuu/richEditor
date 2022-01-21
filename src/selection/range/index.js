@@ -1,4 +1,4 @@
-import { isSameLine } from '../../utils'
+import { isSameLine, getNode } from '../../utils'
 import Caret from '../caret'
 import del from './del'
 import input from './input'

@@ -1,6 +1,6 @@
 import {
   getNode,
-  deleteEmptyNode,
+  deleteNode,
   updateNode,
   setRange,
   getPrevLeafNode,
@@ -35,7 +35,7 @@ export default function del(editor) {
       if (orgText === '') {
         log('删空')
         log(range.endContainer.vnode)
-        const shouldUpdate = deleteEmptyNode(range.endContainer.vnode)
+        const shouldUpdate = deleteNode(range.endContainer.vnode)
         // log(shouldUpdate)
         // updateNode(shouldUpdate)
         if (!prevVnode) {
@@ -55,7 +55,7 @@ export default function del(editor) {
         newLayer.childrens = [...newLayer.childrens, ...layer.childrens]
         reArrangement(newLayer)
         shouldNormalize && normalize(newLayer)
-        const shouldUpdate = deleteEmptyNode(layer)
+        const shouldUpdate = deleteNode(layer)
         updateNode(shouldUpdate)
         // // 性能优化，如果newLayer和shouldUpdate不是在同一树分支才更新两个分支
         if (!newLayer.position.includes(shouldUpdate.position)) {
@@ -81,7 +81,7 @@ export default function del(editor) {
         range.endContainer.vnode.context = orgText
         setRange(editor, updateNode(range.endContainer.vnode), end - 1)
       } else {
-        const shouldUpdate = deleteEmptyNode(range.endContainer.vnode.childrens[end - 1])
+        const shouldUpdate = deleteNode(range.endContainer.vnode.childrens[end - 1])
         const t = updateNode(shouldUpdate)
         log(t)
         setRange(editor, t, end - 1)
@@ -107,7 +107,7 @@ export default function del(editor) {
       endContainer.vnode.context = endContainer.vnode.context.slice(end)
       // 如果内容为空则删除节点
       if (!endContainer.vnode.context) {
-        layer = deleteEmptyNode(endContainer.vnode)
+        layer = deleteNode(endContainer.vnode)
       }
       if (startBlock !== endBlock && layer === endBlock) {
         // 不同快，且结束节点块还有内容，需要将该块内容移动到开始块
@@ -115,7 +115,7 @@ export default function del(editor) {
         startBlock.childrens = [...startBlock.childrens, ...endBlock.childrens]
         reArrangement(commonAncestorContainer)
         normalize(startBlock)
-        deleteEmptyNode(endContainer.vnode)
+        deleteNode(endContainer.vnode)
       }
       updateNode(commonAncestorContainer.vnode)
       log(getNode(editor, position))

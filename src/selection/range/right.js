@@ -21,10 +21,13 @@ export default function right(shiftKey) {
   }
   let isEnd = false
   if (container.vnode.type !== 'text') {
-    isEnd = container.vnode.length === offset
+    // 非文本不能使用length，因为虚节点会被忽略，这里要用绝对长度
+    isEnd = container.vnode.childrens.length === offset
   } else {
     isEnd = container.vnode.length === offset
   }
+  console.log(container, offset)
+  console.log(isEnd)
   if (isEnd) {
     // 向下寻找
     const { vnode, layer } = getNextLeafNode(container.vnode)
@@ -56,10 +59,11 @@ export default function right(shiftKey) {
     if (!blockTag.includes(layer.type)) {
       return this.right(shiftKey)
     }
-    return layer
+    return vnode.type === 'br' ? 'br' : layer
   } else {
     let vnode
     if (container.vnode.childrens) {
+      console.log(container)
       vnode = getLeafL(container.vnode.childrens[offset]).vnode
     } else {
       vnode = container.vnode
@@ -99,6 +103,6 @@ export default function right(shiftKey) {
         this._d = 0
       }
     }
-    return true
+    return vnode.type === 'br' ? 'br' : true
   }
 }

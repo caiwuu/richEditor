@@ -1,11 +1,6 @@
 import { setStyle, multiplication } from '../../utils'
 export default class Input {
   input = null
-  inputState = {
-    // 输入框状态
-    value: '',
-    isComposing: false,
-  }
   constructor(selection) {
     this.selection = selection
     this._initIframe()

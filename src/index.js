@@ -3,13 +3,13 @@ import Selection from './selection'
 import Command from './command'
 import mitt from 'mitt'
 import defaultActions from './actions'
-import { bodyVnode, operBarVnode } from './ui/uiVnode'
+import mockData from './ui/mockData'
 class Editor {
   constructor(id) {
     this.init(id)
   }
   init(id) {
-    this.ui = new UI(bodyVnode, this)
+    this.ui = new UI(mockData, this)
     this.ui.mount(id)
     this.selection = new Selection(this)
     this._command = new Command(this)

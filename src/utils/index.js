@@ -2,7 +2,7 @@
 import { leafTag, blockTag } from '../type'
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
-export function compare(l, r) {
+export function comparePosition(l, r) {
   const arrL = l.split('-'),
     arrR = r.split('-'),
     minLen = Math.min(arrL.length, arrR.length)
@@ -16,39 +16,6 @@ export function compare(l, r) {
     }
   }
   return flag
-}
-function compareStart(vnode, start, end, samebranch = false) {
-  const compareRes = compare(vnode.position, start.position)
-  if (compareRes === 0 && vnode.position !== start.position) {
-    for (let index = vnode.childrens.length - 1; index >= 0; index--) {
-      const element = vnode.childrens[index]
-      compareStart(element, start, end, true)
-    }
-  } else if (compareRes == -1) {
-    if (samebranch) {
-      deleteEmptyNode(vnode)
-    } else {
-      compareEnd(vnode, end, false)
-    }
-  }
-}
-function compareEnd(vnode, end) {
-  const compareRes = compare(vnode.position, end.position)
-  if (compareRes === 0 && vnode.position !== end.position) {
-    for (let index = vnode.childrens.length - 1; index >= 0; index--) {
-      const element = vnode.childrens[index]
-      compareEnd(element, end)
-    }
-  } else if (compareRes == 1) {
-    deleteEmptyNode(vnode)
-  }
-}
-// 选区删除，删除两个节点之间的节点
-export function rangeDel(commonAncestorContainer, startContainer, endContainer) {
-  for (let index = commonAncestorContainer.childrens.length - 1; index >= 0; index--) {
-    const element = commonAncestorContainer.childrens[index]
-    compareStart(element, startContainer, endContainer)
-  }
 }
 // 通过position获取vnode
 export function getNode(rootTree, position) {
@@ -88,16 +55,16 @@ export function clonePureVnode(vnode) {
   vnode.childrens && (cloneVnode.childrens = vnode.childrens.map((i) => clonePureVnode(i)))
   return cloneVnode
 }
-// 节点删除
-export function deleteEmptyNode(vnode) {
+// 空节点递归删除 最多删除到块级
+export function deleteNode(vnode) {
   const parent = vnode.parent || vnode
   // 如果父级只有一个子集，则递归删除父级
   if (isEmptyNode(parent)) {
-    if (parent.isRoot) {
-      console.log(`parent isRoot,${vnode.position} is deleted`)
+    if (parent.isRoot || blockTag.includes(vnode.type)) {
+      console.log(`${vnode.position} is deleted`)
       vnode.remove()
     } else {
-      deleteEmptyNode(parent)
+      deleteNode(parent)
     }
   } else {
     vnode.remove()
@@ -120,7 +87,7 @@ export function renderDom(vnode) {
 }
 // 像素单位变量乘法
 export function multiplication(pxVal, times) {
-  return pxVal.replace(/(\d*)(px)+/, function ($0, $1, $2) {
+  return pxVal.replace(/(\d*).*/, function ($0, $1, $2) {
     return $1 * times
   })
 }
@@ -199,8 +166,9 @@ export function getLeafL(vnode, layer) {
 }
 // 获取内容属于的第一层块级元素
 export function getLayer(vnode) {
-  if (blockTag.includes(vnode.parent.type)) {
-    return vnode.parent
+  console.log(vnode)
+  if (blockTag.includes(vnode.type)) {
+    return vnode
   } else {
     return getLayer(vnode.parent)
   }
@@ -208,6 +176,7 @@ export function getLayer(vnode) {
 // 合并相邻的text节点
 // TODO 合并之后如果被合并的节点有选区需要重新计算选区位置
 export function normalize(vnode) {
+  return
   if (vnode.childrens.length <= 1) return
   console.log(vnode.childrens.length)
   for (let index = vnode.childrens.length - 1; index >= 1; index--) {
@@ -253,20 +222,21 @@ export function isEmptyNode(vnode) {
     }
   }
 }
-// 块级检测 检查vnode所属块级是否为空 vnode必须是个叶子节点
+// 块级检测 检查vnode所属块级是否为空
 export function isEmptyBlock(vnode) {
+  // debugger
   const block = getLayer(vnode)
   return isEmptyNode(block)
 }
-// 判断是否在同一行，正确率90%以上
+// 判断是否在同一行，由于浏览器的排版原因不能保证百分之百准确，准确率99%
 export function isSameLine(initialRect, prevRect, currRect, result, editor) {
   // 标识光标是否在同一行移动
   let flag = true
-  if (Math.abs(currRect.x - prevRect.x) > editor.ui.editableArea.offsetWidth - 1.3 * currRect.h) {
+  if (Math.abs(currRect.x - prevRect.x) > editor.ui.editableArea.offsetWidth - 2 * currRect.h) {
     flag = false
   }
   // 光标移动触发块级检测说明光标必然跨行
-  if (typeof result === 'object' && blockTag.includes(result.type)) {
+  if ((typeof result === 'object' && blockTag.includes(result.type)) || result === 'br') {
     flag = false
   }
   //光标Y坐标和参考点相同说明光标还在本行，最理想的情况放在最后判断
@@ -277,10 +247,11 @@ export function isSameLine(initialRect, prevRect, currRect, result, editor) {
 }
 export function recoverRangePoint(points) {
   points.forEach((point) => {
-    if (point.container.vnode.childrens) {
-      const { vnode: leaf } = getLeafR(point.container.vnode.childrens[(point.offset || 1) - 1])
+    const { container, offset } = point
+    if (container.vnode.childrens) {
+      const { vnode: leaf } = getLeafR(container.vnode.childrens[(offset || 1) - 1])
+      console.log(leaf)
       if (!leaf.atom && !leaf.virtual) {
-        console.log(leaf)
         point.container = leaf.ele
         point.offset = leaf.length
       }

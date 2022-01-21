@@ -67,7 +67,7 @@ export default class Selection {
       this.pushRange(nativeRange)
     }
   }
-  createRange({ startContainer, startOffset, endContainer, endOffset }) {
+  createNativeRange({ startContainer, startOffset, endContainer, endOffset }) {
     const range = document.createRange()
     range.setStart(startContainer, startOffset)
     range.setEnd(endContainer, endOffset)
@@ -141,7 +141,7 @@ export default class Selection {
   _drawRangeBg() {
     const currRange = this.ranges[0]
     this.nativeSelection.removeAllRanges()
-    this.nativeSelection.addRange(this.createRange(currRange))
+    this.nativeSelection.addRange(this.createNativeRange(currRange))
   }
   move(direction, drawCaret = true, shiftKey) {
     // 支持多光标但是目前还不支持多选区；这里禁止多光标拖蓝
@@ -171,7 +171,7 @@ export default class Selection {
     })
     this.distinct()
     this.inputor.focus()
-    // 按住shit时同步到真实原生range绘制拖蓝 this.nativeSelection.removeAllRanges()
+    // 按住shit时同步到真实原生range绘制拖蓝
     if (shiftKey) {
       this._drawRangeBg()
     }

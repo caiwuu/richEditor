@@ -1,4 +1,4 @@
-export const bodyVnode = {
+const data1 = {
   type: 'div',
   childrens: [
     {
@@ -101,7 +101,8 @@ export const bodyVnode = {
         },
         {
           type: 'text',
-          context: 'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
+          context:
+            'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
         },
       ],
     },
@@ -122,7 +123,7 @@ export const bodyVnode = {
       type: 'p',
       style: { background: 'rgb(255 234 206)' },
       childrens: [
-        { type: 'text', context: '' },
+        // { type: 'text', context: '' },
         { type: 'br', virtual: true },
       ],
     },
@@ -132,3 +133,93 @@ export const bodyVnode = {
   },
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }
+
+const data2 = {
+  type: 'div',
+  childrens: [
+    {
+      type: 'p',
+      childrens: [
+        { type: 'text', context: '普通文字1' },
+        { type: 'text', context: '普通文字1' },
+        // { type: 'br' },
+        {
+          type: 'span',
+          childrens: [
+            { type: 'text', context: '普通文字1' },
+            // { type: 'br', virtual: true },
+          ],
+        },
+      ],
+      style: { color: '#888' },
+    },
+    {
+      type: 'p',
+      childrens: [{ type: 'text', context: '普通文字2' }],
+      style: { color: '#888' },
+    },
+  ],
+  attr: {
+    id: 'editor-body',
+  },
+  style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
+}
+
+const data3 = {
+  type: 'div',
+  childrens: [
+    {
+      type: 'div',
+      childrens: [
+        {
+          type: 'p',
+          childrens: [
+            { type: 'text', context: '普通文字1' },
+            {
+              type: 'div',
+              childrens: [
+                {
+                  type: 'p',
+                  childrens: [
+                    { type: 'text', context: '普通文字2' },
+                    { type: 'text', context: '普通文字3' },
+                  ],
+                },
+                {
+                  type: 'p',
+                  childrens: [{ type: 'text', context: '普通文字4' }],
+                },
+              ],
+            },
+            // {
+            //   type: 'img',
+            //   attr: {
+            //     width: '300px',
+            //     height: '100px',
+            //     src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
+            //   },
+            // },
+            // {
+            //   type: 'img',
+            //   attr: {
+            //     width: '50px',
+            //     height: '50px',
+            //     src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
+            //   },
+            // },
+          ],
+        },
+        {
+          type: 'p',
+          childrens: [{ type: 'text', context: '普通文字6' }],
+        },
+      ],
+    },
+  ],
+  attr: {
+    id: 'editor-body',
+  },
+  style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
+}
+
+export default data3
