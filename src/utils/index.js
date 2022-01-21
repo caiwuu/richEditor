@@ -2,7 +2,7 @@
 import { leafTag, blockTag } from '../type'
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
-export function compare(l, r) {
+export function comparePosition(l, r) {
   const arrL = l.split('-'),
     arrR = r.split('-'),
     minLen = Math.min(arrL.length, arrR.length)
@@ -16,39 +16,6 @@ export function compare(l, r) {
     }
   }
   return flag
-}
-function compareStart(vnode, start, end, samebranch = false) {
-  const compareRes = compare(vnode.position, start.position)
-  if (compareRes === 0 && vnode.position !== start.position) {
-    for (let index = vnode.childrens.length - 1; index >= 0; index--) {
-      const element = vnode.childrens[index]
-      compareStart(element, start, end, true)
-    }
-  } else if (compareRes == -1) {
-    if (samebranch) {
-      deleteEmptyNode(vnode)
-    } else {
-      compareEnd(vnode, end, false)
-    }
-  }
-}
-function compareEnd(vnode, end) {
-  const compareRes = compare(vnode.position, end.position)
-  if (compareRes === 0 && vnode.position !== end.position) {
-    for (let index = vnode.childrens.length - 1; index >= 0; index--) {
-      const element = vnode.childrens[index]
-      compareEnd(element, end)
-    }
-  } else if (compareRes == 1) {
-    deleteEmptyNode(vnode)
-  }
-}
-// 选区删除，删除两个节点之间的节点
-export function rangeDel(commonAncestorContainer, startContainer, endContainer) {
-  for (let index = commonAncestorContainer.childrens.length - 1; index >= 0; index--) {
-    const element = commonAncestorContainer.childrens[index]
-    compareStart(element, startContainer, endContainer)
-  }
 }
 // 通过position获取vnode
 export function getNode(rootTree, position) {
@@ -88,16 +55,16 @@ export function clonePureVnode(vnode) {
   vnode.childrens && (cloneVnode.childrens = vnode.childrens.map((i) => clonePureVnode(i)))
   return cloneVnode
 }
-// 节点删除
-export function deleteEmptyNode(vnode) {
+// 空节点递归删除 最多删除到块级
+export function deleteNode(vnode) {
   const parent = vnode.parent || vnode
   // 如果父级只有一个子集，则递归删除父级
   if (isEmptyNode(parent)) {
-    if (parent.isRoot) {
-      console.log(`parent isRoot,${vnode.position} is deleted`)
+    if (parent.isRoot || blockTag.includes(vnode.type)) {
+      console.log(`${vnode.position} is deleted`)
       vnode.remove()
     } else {
-      deleteEmptyNode(parent)
+      deleteNode(parent)
     }
   } else {
     vnode.remove()
@@ -199,6 +166,7 @@ export function getLeafL(vnode, layer) {
 }
 // 获取内容属于的第一层块级元素
 export function getLayer(vnode) {
+  console.log(vnode)
   if (blockTag.includes(vnode.type)) {
     return vnode
   } else {
@@ -279,10 +247,11 @@ export function isSameLine(initialRect, prevRect, currRect, result, editor) {
 }
 export function recoverRangePoint(points) {
   points.forEach((point) => {
-    if (point.container.vnode.childrens) {
-      const { vnode: leaf } = getLeafR(point.container.vnode.childrens[(point.offset || 1) - 1])
+    const { container, offset } = point
+    if (container.vnode.childrens) {
+      const { vnode: leaf } = getLeafR(container.vnode.childrens[(offset || 1) - 1])
+      console.log(leaf)
       if (!leaf.atom && !leaf.virtual) {
-        console.log(leaf)
         point.container = leaf.ele
         point.offset = leaf.length
       }

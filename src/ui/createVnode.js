@@ -68,10 +68,12 @@ const handle = {
       case 'isEmpty':
         return isEmptyNode(target)
       case 'length':
-        try {
-          return target.type === 'text' ? target.context.length : target.childrens.filter((ele) => !ele.virtual).length
-        } catch (error) {
-          throw new Error('atom node is no length attribute')
+        if (target.atom) {
+          return -1
+        } else if (target.type === 'text') {
+          return target.context.length
+        } else {
+          return target.childrens.filter((ele) => !ele.virtual).length
         }
       case 'reArrangement':
         return function () {

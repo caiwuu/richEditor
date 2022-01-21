@@ -21,7 +21,9 @@ export default class Measure {
         container.parentNode.insertBefore(this.dom, temp)
       }
     } else {
-      if (container.childNodes[offset]) {
+      if (container.childNodes[offset - 1] && container.childNodes[offset - 1].nodeName === 'BR') {
+        container.parentNode.insertBefore(this.dom, container)
+      } else if (container.childNodes[offset]) {
         container.insertBefore(this.dom, container.childNodes[offset])
       } else {
         container.appendChild(this.dom)
