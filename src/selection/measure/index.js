@@ -22,7 +22,8 @@ export default class Measure {
       }
     } else {
       if (container.childNodes[offset - 1] && container.childNodes[offset - 1].nodeName === 'BR') {
-        container.parentNode.insertBefore(this.dom, container)
+        // container.parentNode.insertBefore(this.dom, container)
+        container.insertBefore(this.dom, container.childNodes[offset - 1])
       } else if (container.childNodes[offset]) {
         container.insertBefore(this.dom, container.childNodes[offset])
       } else {

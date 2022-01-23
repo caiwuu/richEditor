@@ -1,5 +1,5 @@
 // import render from '../ui/render'
-import { leafTag, blockTag } from '../type'
+import { leafTag, blockTag, inlineTag } from '../type'
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
 export function comparePosition(l, r) {
@@ -150,6 +150,9 @@ export function getPrevLeafNode(vnode, layer, direction = 'R') {
 }
 // 获取右叶子
 export function getLeafR(vnode, layer) {
+  if (!layer || !blockTag.includes(layer.type)) {
+    layer = vnode
+  }
   if (vnode.childrens && vnode.childrens.length !== 0) {
     return getLeafR(vnode.childrens[vnode.childrens.length - 1], layer)
   } else {
@@ -158,6 +161,9 @@ export function getLeafR(vnode, layer) {
 }
 // 获取左叶子
 export function getLeafL(vnode, layer) {
+  if (!layer || !blockTag.includes(layer.type)) {
+    layer = vnode
+  }
   if (vnode.childrens && vnode.childrens.length !== 0) {
     return getLeafL(vnode.childrens[0], layer)
   } else {
@@ -166,7 +172,6 @@ export function getLeafL(vnode, layer) {
 }
 // 获取内容属于的第一层块级元素
 export function getLayer(vnode) {
-  console.log(vnode)
   if (blockTag.includes(vnode.type)) {
     return vnode
   } else {
@@ -243,14 +248,14 @@ export function isSameLine(initialRect, prevRect, currRect, result, editor) {
   if (currRect.y === initialRect.y) {
     flag = true
   }
+  console.log(flag)
   return flag
 }
 export function recoverRangePoint(points) {
   points.forEach((point) => {
     const { container, offset } = point
     if (container.vnode.childrens) {
-      const { vnode: leaf } = getLeafR(container.vnode.childrens[(offset || 1) - 1])
-      console.log(leaf)
+      const { vnode: leaf } = getLeafR(container.vnode.childrens[(offset || 1) - 1] || container.vnode)
       if (!leaf.atom && !leaf.virtual) {
         point.container = leaf.ele
         point.offset = leaf.length
@@ -267,5 +272,81 @@ export function times(n, fn, context = undefined, ...args) {
   let i = 0
   while (i++ < n) {
     fn.call(context, ...args)
+  }
+}
+// 2.0 向后光标位点算法
+// flag 跨越标识
+// 0 节点内移动
+// -1 不需要向后矫正的跨节点标识
+// 1 需要向后校正的跨节点标识
+// 2 跨行标识
+export function getNextPoint(vnode, pos, flag = 0) {
+  // debugger
+  const len = vnode.type === 'text' ? vnode.length : vnode.childrens.length
+  if (pos + 1 > len) {
+    const index = getIndex(vnode)
+    flag = blockTag.includes(vnode.type) ? 2 : 1
+    return getNextPoint(vnode.parent, index + 1, flag)
+  } else if (pos + 1 === len) {
+    return flag > 0 ? getHead(vnode, pos, flag) : { vnode, pos: pos + 1, flag }
+  } else {
+    return getHead(vnode, flag > 0 ? pos : pos + 1, flag)
+  }
+}
+function getHead(parent, pos, flag) {
+  // debugger
+  if (parent.type === 'text') {
+    return { vnode: parent, pos: pos, flag }
+  }
+  const node = parent.childrens[pos]
+  if (blockTag.includes(node.type)) {
+    flag = 2
+  } else if (inlineTag.includes(node.type) && flag === 0) {
+    flag = -1
+  }
+
+  if (node.childrens && node.childrens.length > 0) {
+    return getHead(node, 0, flag)
+  } else if (node.type === 'text') {
+    return { vnode: node, pos: flag === 1 ? 1 : 0, flag }
+  } else {
+    return { vnode: parent, pos: flag === 1 ? pos + 1 : pos, flag }
+  }
+}
+// 2.0 向前光标位点算法
+// flag 跨越标识
+// 0 节点内移动
+// -1 不需要向前矫正的跨节点标识
+// 1 需要向前校正的跨节点标识
+// 2 跨行标识
+export function getPrevPoint(vnode, pos, flag = 0) {
+  // debugger
+  if (pos - 1 < 0) {
+    const index = getIndex(vnode)
+    flag = blockTag.includes(vnode.type) ? 2 : 1
+    return getPrevPoint(vnode.parent, index, flag)
+  } else if (pos - 1 === 0) {
+    return flag > 0 ? getTail(vnode, pos, flag) : { vnode, pos: pos - 1, flag }
+  } else {
+    return getTail(vnode, flag > 0 ? pos : pos - 1, flag)
+  }
+}
+function getTail(parent, pos, flag) {
+  // debugger
+  if (parent.type === 'text') {
+    return { vnode: parent, pos: pos, flag }
+  }
+  const node = parent.childrens[pos - 1]
+  if (blockTag.includes(node.type)) {
+    flag = 2
+  } else if (inlineTag.includes(node.type) && flag === 0) {
+    flag = -1
+  }
+  if (node.childrens && node.childrens.length > 0) {
+    return getTail(node, node.childrens.length, flag)
+  } else if (node.type === 'text') {
+    return { vnode: node, pos: flag === 1 ? node.length - 1 : node.length, flag }
+  } else {
+    return { vnode: parent, pos: flag === 1 ? pos - 1 : pos, flag }
   }
 }

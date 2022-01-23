@@ -19,18 +19,8 @@ export default function left(shiftKey) {
     container = this.startContainer
     offset = this.startOffset
   }
-  const { vnode, pos, flag } = getPrevPoint(container.vnode, offset)
-  // console.log(vnode.ele, pos)
-  this.setStart(vnode.ele, pos)
-  this.collapse(true)
-  if (flag === 1 || flag === -1) {
-    console.log('跨节点')
-  }
-  if (flag === 2) {
-    console.log('跨行')
-  }
-
-  return
+  const { vnode, pos } = getPrevPoint(container.vnode, offset)
+  console.log(vnode.ele, pos)
   const isEnd = !offset || isEmptyBlock(container.vnode)
   if (isEnd) {
     // 向上寻找

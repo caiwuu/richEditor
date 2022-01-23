@@ -148,12 +148,12 @@ export default class Selection {
     if (shiftKey && this.ranges.length > 1) {
       return
     }
-    const nativeRange = this.nativeSelection.getRangeAt(0)
+    const nativeRange = this.nativeSelection.rangeCount > 0 ? this.nativeSelection.getRangeAt(0) : null
     this.ranges.forEach((range) => {
       // 没按shift 并且 存在选区,取消选区，左右不移动光标，上下可移动光标
       if (!shiftKey && !range.collapsed) {
         const collapseToStart = range._d === 1
-        nativeRange.collapse(collapseToStart)
+        nativeRange && nativeRange.collapse(collapseToStart)
         range.collapse(collapseToStart)
         range._d = 0
         range.updateCaret()

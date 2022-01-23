@@ -42,6 +42,7 @@ export default class Command {
     this.editor.selection.ranges.forEach((range) => {
       range.enter()
     })
+    // this.editor.selection.move('right')
     this._updateCaret_()
   }
   _bold(pos) {

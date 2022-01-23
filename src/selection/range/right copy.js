@@ -1,4 +1,4 @@
-import { getNextLeafNode, getIndex, getLeafL, isEmptyBlock, getNextPoint } from '../../utils'
+import { getNextLeafNode, getIndex, getLeafL, isEmptyBlock } from '../../utils'
 import { blockTag } from '../../type'
 export default function right(shiftKey) {
   let container, offset
@@ -28,18 +28,6 @@ export default function right(shiftKey) {
   } else {
     isEnd = container.vnode.length === offset
   }
-
-  const { vnode, pos, flag } = getNextPoint(container.vnode, offset)
-  // console.log(vnode.ele, pos)
-  this.setEnd(vnode.ele, pos)
-  this.collapse(false)
-  if (flag === 1 || flag === -1) {
-    console.log('跨节点')
-  }
-  if (flag === 2) {
-    console.log('跨行')
-  }
-  return
   if (isEnd) {
     // 向下寻找
     const { vnode, layer } = getNextLeafNode(container.vnode)

@@ -1,4 +1,4 @@
-import { recoverRangePoint, getIndex } from '../utils'
+import { getIndex, recoverRangePoint } from '../utils'
 import createVnode from '../ui/createVnode'
 import { blockTag } from '../type'
 /**
@@ -12,6 +12,8 @@ function splitNode(vnode, pos, caches) {
     case 'text':
       if (!pos) {
         return { parent: vnode.parent, pos: getIndex(vnode) }
+      } else if (pos === vnode.length) {
+        return { parent: vnode.parent, pos: getIndex(vnode) + 1 }
       } else {
         const restText = vnode.context.slice(0, pos)
         const splitedText = vnode.context.slice(pos)
@@ -52,16 +54,23 @@ function splitNode(vnode, pos, caches) {
       const index = getIndex(vnode)
       const ops = { type: vnode.type, childrens: [] }
       const newVnode = createVnode(ops, vnode.parent)
-      const needMoveNodes = vnode.childrens.slice(pos)
+      const needMoveNodes = vnode.length ? vnode.childrens.slice(pos) : []
+      console.log(needMoveNodes)
       this.selection
         .getRangePoints()
         .filter((point) => point.container === vnode.ele && point.offset >= pos)
         .forEach((ele) => {
           caches.push({ container: newVnode.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
         })
-      needMoveNodes.forEach((node) => {
-        node.moveTo(newVnode)
-      })
+      if (needMoveNodes.length > 0) {
+        needMoveNodes.forEach((node) => {
+          node.moveTo(newVnode)
+        })
+      } else {
+        const br = createVnode({ type: 'br', virtual: true })
+        newVnode.insert(br)
+      }
+
       vnode.parent.insert(newVnode, index + 1)
       return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
     }
@@ -71,6 +80,7 @@ export default function lineFeed(args) {
   const [from] = args
   from.caches = from.caches || []
   const { parent, pos } = splitNode.call(this, from.node, from.pos, from.caches)
+  console.log(parent, pos)
   if (!blockTag.includes(from.node.type)) {
     lineFeed.call(this, [{ node: parent, pos, caches: from.caches }])
   } else {
@@ -78,3 +88,6 @@ export default function lineFeed(args) {
     recoverRangePoint(from.caches)
   }
 }
+
+function startLine(vnode, pos) {}
+function endLine(vnode, pos) {}

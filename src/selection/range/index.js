@@ -16,6 +16,7 @@ export default class Range {
   _d = 0
   collapsed = true
   constructor(ops, editor) {
+    console.log(ops)
     this.endContainer = ops.endContainer
     this.startContainer = ops.startContainer
     this.endOffset = ops.endOffset
@@ -67,6 +68,7 @@ export default class Range {
     this.editor.selection.ranges.splice(index, 1)
   }
   _loop(direct, initialRect, prevRect, lineChanged = false, shiftKey) {
+    // debugger
     const flag = this.endContainer === this.startContainer && this.endOffset === this.startOffset
     if (flag) {
       this._d = 0
