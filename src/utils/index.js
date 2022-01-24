@@ -1,5 +1,6 @@
-// import render from '../ui/render'
 import { leafTag, blockTag, inlineTag } from '../type'
+import emojiRegexCreater from 'emoji-regex'
+
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
 export function comparePosition(l, r) {
@@ -303,6 +304,13 @@ export function getNextPoint(vnode, pos, flag = 0) {
 }
 function getHead(parent, pos, flag) {
   if (parent.type === 'text') {
+    const emojiRegex = emojiRegexCreater()
+    for (const match of parent.context.matchAll(emojiRegex)) {
+      if (pos === match.index + 1) {
+        pos = pos + 1
+        flag = -2
+      }
+    }
     return { vnode: parent, pos: pos, flag }
   }
   const node = parent.childrens[pos]
@@ -348,12 +356,19 @@ export function getPrevPoint(vnode, pos, flag = 0) {
 }
 function getTail(parent, pos, flag) {
   if (parent.type === 'text') {
+    const emojiRegex = emojiRegexCreater()
+    for (const match of parent.context.matchAll(emojiRegex)) {
+      if (pos === match.index + 1) {
+        pos = pos - 1
+        flag = -2
+      }
+    }
     return { vnode: parent, pos: pos, flag }
   }
   const node = parent.childrens[pos - 1]
   if (node.belong('block')) {
     flag = 2
-  } else if (node.belong('inline') && flag === 0) {
+  } else if ((node.belong('inline') && flag === 0) || (flag === 1 && node.isEmpty)) {
     flag = -1
   }
   if (node.childrens && node.childrens.length > 0) {

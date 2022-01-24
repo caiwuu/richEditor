@@ -101,8 +101,7 @@ const data1 = {
         },
         {
           type: 'text',
-          context:
-            'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
+          context: 'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
         },
       ],
     },
@@ -274,8 +273,7 @@ const data4 = {
       childrens: [
         {
           type: 'text',
-          context: '请输入内容',
-          kind: 'placeholder',
+          context: '请输入内容...',
         },
       ],
     },
@@ -285,4 +283,4 @@ const data4 = {
   },
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }
-export default data4
+export default data3

@@ -1,15 +1,4 @@
-import {
-  getPrevLeafNode,
-  getPrevPoint,
-  deleteNode,
-  getIndex,
-  getNode,
-  getLayer,
-  recoverRangePoint,
-  isEmptyBlock,
-  comparePosition,
-} from '../utils'
-import { blockTag } from '../type'
+import { getPrevPoint, deleteNode, getIndex, getNode, getLayer, recoverRangePoint, isEmptyBlock, comparePosition } from '../utils'
 import createVnode from '../vnode'
 export default function del(args) {
   const [from, to] = transToNode.call(this, args)
@@ -83,10 +72,12 @@ function crossNodeDel(from, to, prev) {
   // 获取上一个光标容器节点和跨越的节点
   // const { vnode: prevVnode, layer } = getPrevLeafNode(from.node)
   // 首行删除
+  console.log(prev.flag)
   if (prev.flag === 404) {
     const block = getLayer(from.node)
     //  清空段落增加br
     if (block.isEmpty) {
+      console.log(2222)
       clearBlock(block)
       const br = createVnode({ type: 'br', kind: 'placeholder' })
       block.insert(br, 1)
@@ -95,7 +86,7 @@ function crossNodeDel(from, to, prev) {
         .filter((point) => point.container === from.node.ele)
         .map((point) => ({
           container: block.ele,
-          offset: 1,
+          offset: 0,
           range: point.range,
           flag: point.flag,
         }))
