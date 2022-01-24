@@ -3,6 +3,7 @@ import { blockTag } from '../type'
 import createVnode from '../ui/createVnode'
 export default function del(args) {
   const [from, to] = transToNode.call(this, args)
+  console.log(from, to)
   if (typeof to === 'number') {
     // 行内操作
     if (from.pos && !from.node.isEmpty) {
@@ -37,6 +38,7 @@ function transToNode(args) {
  */
 // 节点内删除
 function innerDel(from, to) {
+  console.log(from)
   console.log('节点内删除')
   // 重新计算受影响的range端点
   // 先移动range在执行删除
@@ -49,6 +51,7 @@ function innerDel(from, to) {
       range: point.range,
       flag: point.flag,
     }))
+  console.log(points)
   recoverRangePoint(points)
   from.node.delete(from.pos, to, true)
   // 添加br防止行塌陷
@@ -113,6 +116,10 @@ function crossNodeDel(from, to) {
       pos: prevVnode.atom ? getIndex(prevVnode) + 1 : prevVnode.length,
     }
     del.call(this, [from, 1])
+    // 如果当前节点为空则递归向上删除空节点
+    from.node.isEmpty && deleteNode(from.node)
+  } else if (isEmptyBlock(from.node)) {
+    from.node.isEmpty && deleteNode(from.node)
   } else {
     // 合并块
     console.log('合并块', to)
@@ -122,11 +129,9 @@ function crossNodeDel(from, to) {
       console.log(getIndex(prevVnode), index)
       node.moveTo(toBlock, getIndex(prevVnode) + 1 + index)
     })
+    fromBlock.remove()
   }
-  // 如果当前节点为空则递归向上删除空节点
-  if (from.node.isEmpty) {
-    deleteNode(from.node)
-  }
+  this.selection.nativeSelection.removeAllRanges()
 }
 /**
  * 区间删除
