@@ -1,20 +1,32 @@
-import { getPrevLeafNode, deleteNode, getIndex, getNode, getLayer, recoverRangePoint, isEmptyBlock, comparePosition } from '../utils'
+import {
+  getPrevLeafNode,
+  getPrevPoint,
+  deleteNode,
+  getIndex,
+  getNode,
+  getLayer,
+  recoverRangePoint,
+  isEmptyBlock,
+  comparePosition,
+} from '../utils'
 import { blockTag } from '../type'
-import createVnode from '../ui/createVnode'
+import createVnode from '../vnode'
 export default function del(args) {
   const [from, to] = transToNode.call(this, args)
-  console.log(from, to)
+  const prev = getPrevPoint(from.node, from.pos)
   if (typeof to === 'number') {
     // 行内操作
     if (from.pos && !from.node.isEmpty) {
+      console.log('节点内删除')
       innerDel.call(this, from, to)
       // 需要跨标签操作
     } else {
-      crossNodeDel.call(this, from, to)
+      crossNodeDel.call(this, from, to, prev)
     }
   } else {
     // 区间删除
     if (from.node === to.node) {
+      console.log('节点内删除')
       innerDel.call(this, from, from.pos - to.pos)
     } else {
       const commonAncestorContainer = getCommonAncestorContainer.call(this, from, to)
@@ -38,8 +50,6 @@ function transToNode(args) {
  */
 // 节点内删除
 function innerDel(from, to) {
-  console.log(from)
-  console.log('节点内删除')
   // 重新计算受影响的range端点
   // 先移动range在执行删除
   const points = this.selection
@@ -55,30 +65,30 @@ function innerDel(from, to) {
   recoverRangePoint(points)
   from.node.delete(from.pos, to, true)
   // 添加br防止行塌陷
-  if (isEmptyBlock(from.node) && !from.node.parent.childrens.some((vnode) => vnode.virtual)) {
-    const br = createVnode({ type: 'br', virtual: true })
+  if (isEmptyBlock(from.node) && !from.node.parent.childrens.some((vnode) => vnode.belong('placeholder'))) {
+    const br = createVnode({ type: 'br', kind: 'placeholder' })
     from.node.parent.insert(br, 1)
   }
 }
 function clearBlock(block) {
   console.log(block.childrens.length)
   block.childrens.slice(0).forEach((node) => {
-    console.log(node)
     node.remove()
   })
 }
 // 跨节点
-function crossNodeDel(from, to) {
+function crossNodeDel(from, to, prev) {
+  // const prevNode = prev.vnode.type === 'text' ? prev.vnode : prev.vnode.childrens[pos - 1]
   console.log('跨节点')
   // 获取上一个光标容器节点和跨越的节点
-  const { vnode: prevVnode, layer } = getPrevLeafNode(from.node)
+  // const { vnode: prevVnode, layer } = getPrevLeafNode(from.node)
   // 首行删除
-  if (!prevVnode) {
+  if (prev.flag === 404) {
     const block = getLayer(from.node)
     //  清空段落增加br
     if (block.isEmpty) {
       clearBlock(block)
-      const br = createVnode({ type: 'br', virtual: true })
+      const br = createVnode({ type: 'br', kind: 'placeholder' })
       block.insert(br, 1)
       const points = this.selection
         .getRangePoints()
@@ -95,25 +105,24 @@ function crossNodeDel(from, to) {
   }
   // 重新计算受影响的range端点
   // 先移动range在执行删除
-  console.log(`上一个叶子节点${prevVnode.position}:`, prevVnode)
+  console.log(`上一个叶子节点${prev.vnode.position}:`, prev.vnode)
   const points = this.selection
     .getRangePoints()
     .filter((point) => point.container === from.node.ele && point.offset === from.pos)
     .map((point) => {
-      console.log(prevVnode)
       return {
-        container: prevVnode.atom ? prevVnode.parent.ele : prevVnode.ele,
-        offset: prevVnode.type === 'text' ? prevVnode.length : getIndex(prevVnode) + 1,
+        container: prev.vnode.ele,
+        offset: prev.pos,
         range: point.range,
         flag: point.flag,
       }
     })
   recoverRangePoint(points)
-  // 跨行级节点自动执行一步删除
-  if (!blockTag.includes(layer.type)) {
+  // 跨节点自动执行一步删除
+  if (prev.flag === 1 || prev.flag === -1) {
     const from = {
-      node: prevVnode.atom ? prevVnode.parent : prevVnode,
-      pos: prevVnode.atom ? getIndex(prevVnode) + 1 : prevVnode.length,
+      node: prev.vnode,
+      pos: prev.pos + 1,
     }
     del.call(this, [from, 1])
     // 如果当前节点为空则递归向上删除空节点
@@ -124,10 +133,10 @@ function crossNodeDel(from, to) {
     // 合并块
     console.log('合并块', to)
     const fromBlock = getLayer(from.node)
-    const toBlock = getLayer(prevVnode)
+    const toBlock = getLayer(prev.vnode)
     fromBlock.childrens.slice(0).forEach((node, index) => {
-      console.log(getIndex(prevVnode), index)
-      node.moveTo(toBlock, getIndex(prevVnode) + 1 + index)
+      console.log(getIndex(prev.vnode), index)
+      node.moveTo(toBlock, prev.pos + index)
     })
     fromBlock.remove()
   }

@@ -68,24 +68,20 @@ export default class Range {
     this.editor.selection.ranges.splice(index, 1)
   }
   _loop(direct, initialRect, prevRect, lineChanged = false, shiftKey) {
-    // debugger
-    const flag = this.endContainer === this.startContainer && this.endOffset === this.startOffset
-    if (flag) {
+    if (this.collapsed) {
       this._d = 0
     }
-    let result = true
+    const flag = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)
     if (!lineChanged) {
-      result = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)
-      if (!result) return
+      if (flag === 404) return
       this.updateCaret(false)
     } else {
-      result = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)
-      if (!result) return
+      if (flag === 404) return
       this.updateCaret(false)
       const currRect = { ...this.caret.rect },
         preDistance = Math.abs(prevRect.x - initialRect.x),
         currDistance = Math.abs(currRect.x - initialRect.x),
-        sameLine = isSameLine(initialRect, prevRect, currRect, result, this.editor)
+        sameLine = isSameLine(initialRect, prevRect, currRect, flag, this.editor)
       if (!(currDistance <= preDistance && sameLine)) {
         direct === 'left' ? this.right(shiftKey) : this.left(shiftKey)
         this.updateCaret(false)
@@ -93,7 +89,7 @@ export default class Range {
       }
     }
     const currRect = { ...this.caret.rect },
-      sameLine = isSameLine(initialRect, prevRect, currRect, result, this.editor)
+      sameLine = isSameLine(initialRect, prevRect, currRect, flag, this.editor)
     if (!sameLine) {
       lineChanged = true
     }

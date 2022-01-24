@@ -1,5 +1,4 @@
-import { getPrevLeafNode, getIndex, getLeafR, isEmptyBlock, getPrevPoint } from '../../utils'
-import { blockTag } from '../../type'
+import { isEmptyBlock, getPrevPoint } from '../../utils'
 export default function left(shiftKey) {
   let container, offset
   if (shiftKey) {
@@ -20,96 +19,26 @@ export default function left(shiftKey) {
     offset = this.startOffset
   }
   const { vnode, pos, flag } = getPrevPoint(container.vnode, offset)
-  // console.log(vnode.ele, pos)
-  this.setStart(vnode.ele, pos)
-  this.collapse(true)
-  if (flag === 1 || flag === -1) {
-    console.log('跨节点')
-  }
-  if (flag === 2) {
-    console.log('跨行')
-  }
-
-  return
-  const isEnd = !offset || isEmptyBlock(container.vnode)
-  if (isEnd) {
-    // 向上寻找
-    const { vnode, layer } = getPrevLeafNode(container.vnode)
-    // 到头了
-    if (!vnode) return false
-    if (vnode.type === 'text') {
-      container = vnode.ele
-      offset = vnode.length
-    } else {
-      container = vnode.parent.ele
-      offset = getIndex(vnode) + 1
+  console.log(flag)
+  if (flag === 404) return flag
+  if (shiftKey) {
+    switch (this._d) {
+      case 0:
+      case 1:
+        this.setStart(vnode.ele, pos)
+        this._d = 1
+        break
+      case 2:
+        this.setEnd(vnode.ele, pos)
+        break
     }
-    if (shiftKey) {
-      switch (this._d) {
-        case 0:
-        case 1:
-          this.setStart(container, offset)
-          this._d = 1
-          break
-        case 2:
-          this.setEnd(container, offset)
-          break
-      }
-    } else {
-      this.setStart(container, offset)
-      this.collapse(true)
-      this._d = 0
-    }
-    if (!blockTag.includes(layer.type)) {
-      return this.left(shiftKey)
-    }
-    return vnode.type === 'br' ? 'br' : layer
   } else {
-    let vnode
-    if (container.vnode.childrens) {
-      vnode = getLeafR(container.vnode.childrens[offset - 1]).vnode
-    } else {
-      vnode = container.vnode
-    }
-    if (container.vnode.type !== 'text' && vnode.type === 'text') {
-      const index = vnode.isEmpty ? 0 : vnode.length - 1
-      if (shiftKey) {
-        switch (this._d) {
-          case 0:
-          case 1:
-            this.setStart(vnode.ele, index)
-            this._d = 1
-            break
-          case 2:
-            this.setEnd(vnode.ele, index)
-            break
-        }
-      } else {
-        this.setStart(vnode.ele, index)
-        this.collapse(true)
-        this._d = 0
-      }
-      if (vnode.isEmpty) {
-        return this.left()
-      }
-    } else {
-      if (shiftKey) {
-        switch (this._d) {
-          case 0:
-          case 1:
-            this.setStart(container, offset - 1)
-            this._d = 1
-            break
-          case 2:
-            this.setEnd(container, offset - 1)
-            break
-        }
-      } else {
-        this.setStart(container, offset - 1)
-        this.collapse(true)
-        this._d = 0
-      }
-    }
-    return vnode.type === 'br' ? 'br' : true
+    this.setStart(vnode.ele, pos)
+    this.collapse(true)
+    this._d = 0
   }
+  if (isEmptyBlock(container.vnode) && flag !== 2) {
+    return this.left(shiftKey)
+  }
+  return flag
 }

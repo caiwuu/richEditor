@@ -1,5 +1,5 @@
 // import render from './render'
-import createVnode from './createVnode'
+import createVnode from '../vnode'
 import initStyle from './style'
 import defaultBar from './defaultBar'
 import mitt from 'mitt'

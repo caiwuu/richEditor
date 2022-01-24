@@ -1,6 +1,6 @@
 import { getIndex, recoverRangePoint } from '../utils'
-import createVnode from '../ui/createVnode'
-import { blockTag } from '../type'
+import createVnode from '../vnode'
+import { blockTag, inlineTag } from '../type'
 /**
  * // 节点分裂算法
  * @param {*} vnode
@@ -8,72 +8,66 @@ import { blockTag } from '../type'
  * @returns
  */
 function splitNode(vnode, pos, caches) {
-  switch (vnode.type) {
-    case 'text':
-      if (!pos) {
-        return { parent: vnode.parent, pos: getIndex(vnode) }
-      } else if (pos === vnode.length) {
-        return { parent: vnode.parent, pos: getIndex(vnode) + 1 }
-      } else {
-        const restText = vnode.context.slice(0, pos)
-        const splitedText = vnode.context.slice(pos)
-        const index = getIndex(vnode)
-        const ops = { type: 'text', context: splitedText }
-        const newVnode = createVnode(ops, vnode.parent)
-        this.selection
-          .getRangePoints()
-          .filter((point) => point.container === vnode.ele && point.offset >= pos)
-          .forEach((ele) => {
-            caches.push({ container: newVnode.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
-          })
-        vnode.context = restText
-        vnode.parent.insert(newVnode, index + 1)
-        return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
-      }
-    case 'span':
-    case 'a': {
+  if (vnode.type === 'text') {
+    if (!pos) {
+      return { parent: vnode.parent, pos: getIndex(vnode) }
+    } else if (pos === vnode.length) {
+      return { parent: vnode.parent, pos: getIndex(vnode) + 1 }
+    } else {
+      const restText = vnode.context.slice(0, pos)
+      const splitedText = vnode.context.slice(pos)
       const index = getIndex(vnode)
-      const ops = { type: vnode.type, childrens: [], style: vnode.style, attr: vnode.attr, event: vnode.event }
+      const ops = { type: 'text', context: splitedText }
       const newVnode = createVnode(ops, vnode.parent)
-      const needMoveNodes = vnode.childrens.slice(pos)
       this.selection
         .getRangePoints()
         .filter((point) => point.container === vnode.ele && point.offset >= pos)
         .forEach((ele) => {
           caches.push({ container: newVnode.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
         })
+      vnode.context = restText
+      vnode.parent.insert(newVnode, index + 1)
+      return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
+    }
+  } else if (inlineTag.includes(vnode.type)) {
+    const index = getIndex(vnode)
+    const ops = { type: vnode.type, childrens: [], style: vnode.style, attr: vnode.attr, event: vnode.event }
+    const newVnode = createVnode(ops, vnode.parent)
+    const needMoveNodes = vnode.childrens.slice(pos)
+    this.selection
+      .getRangePoints()
+      .filter((point) => point.container === vnode.ele && point.offset >= pos)
+      .forEach((ele) => {
+        caches.push({ container: newVnode.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
+      })
+    needMoveNodes.forEach((node) => {
+      node.moveTo(newVnode)
+    })
+    vnode.parent.insert(newVnode, index + 1)
+    return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
+  } else if (blockTag.includes(vnode.type)) {
+    const index = getIndex(vnode)
+    const ops = { type: vnode.type, childrens: [] }
+    const newVnode = createVnode(ops, vnode.parent)
+    const needMoveNodes = vnode.length ? vnode.childrens.slice(pos) : []
+    console.log(needMoveNodes)
+    this.selection
+      .getRangePoints()
+      .filter((point) => point.container === vnode.ele && point.offset >= pos)
+      .forEach((ele) => {
+        caches.push({ container: newVnode.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
+      })
+    if (needMoveNodes.length > 0) {
       needMoveNodes.forEach((node) => {
         node.moveTo(newVnode)
       })
-      vnode.parent.insert(newVnode, index + 1)
-      return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
+    } else {
+      const br = createVnode({ type: 'br', kind: 'placeholder' })
+      newVnode.insert(br)
     }
-    case 'li':
-    case 'p':
-    case 'div': {
-      const index = getIndex(vnode)
-      const ops = { type: vnode.type, childrens: [] }
-      const newVnode = createVnode(ops, vnode.parent)
-      const needMoveNodes = vnode.length ? vnode.childrens.slice(pos) : []
-      console.log(needMoveNodes)
-      this.selection
-        .getRangePoints()
-        .filter((point) => point.container === vnode.ele && point.offset >= pos)
-        .forEach((ele) => {
-          caches.push({ container: newVnode.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
-        })
-      if (needMoveNodes.length > 0) {
-        needMoveNodes.forEach((node) => {
-          node.moveTo(newVnode)
-        })
-      } else {
-        const br = createVnode({ type: 'br', virtual: true })
-        newVnode.insert(br)
-      }
 
-      vnode.parent.insert(newVnode, index + 1)
-      return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
-    }
+    vnode.parent.insert(newVnode, index + 1)
+    return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
   }
 }
 export default function lineFeed(args) {
@@ -88,6 +82,3 @@ export default function lineFeed(args) {
     recoverRangePoint(from.caches)
   }
 }
-
-function startLine(vnode, pos) {}
-function endLine(vnode, pos) {}

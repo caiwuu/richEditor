@@ -171,8 +171,10 @@ export function getLeafL(vnode, layer) {
   }
 }
 // 获取内容属于的第一层块级元素
-export function getLayer(vnode) {
-  if (blockTag.includes(vnode.type)) {
+export function getLayer(vnode, ceil) {
+  if (vnode.parent === ceil) {
+    return vnode
+  } else if (blockTag.includes(vnode.type)) {
     return vnode
   } else {
     return getLayer(vnode.parent)
@@ -218,7 +220,7 @@ export function isEmptyNode(vnode) {
   } else {
     if (vnode.type === 'text' && vnode.context === '') {
       return true
-    } else if (vnode.virtual) {
+    } else if (vnode.belong('placeholder')) {
       return true
     } else if (leafTag.includes(vnode.type)) {
       return false
@@ -233,30 +235,30 @@ export function isEmptyBlock(vnode) {
   const block = getLayer(vnode)
   return isEmptyNode(block)
 }
-// 判断是否在同一行，由于浏览器的排版原因不能保证百分之百准确，准确率99%
-export function isSameLine(initialRect, prevRect, currRect, result, editor) {
+// 判断是否在同一行
+export function isSameLine(initialRect, prevRect, currRect, flag, editor) {
   // 标识光标是否在同一行移动
-  let flag = true
+  let sameLine = true
+  // 判断自动折行 非vnode层面的换行 这里存在判断失误的概率 但是绝大部分情况都能判断
+  // 这里通过判断前后两个光标位置距离是否大于一定的值来判断
   if (Math.abs(currRect.x - prevRect.x) > editor.ui.editableArea.offsetWidth - 2 * currRect.h) {
-    flag = false
+    sameLine = false
   }
-  // 光标移动触发块级检测说明光标必然跨行
-  if ((typeof result === 'object' && blockTag.includes(result.type)) || result === 'br') {
-    flag = false
+  if (flag === 2) {
+    sameLine = false
   }
   //光标Y坐标和参考点相同说明光标还在本行，最理想的情况放在最后判断
   if (currRect.y === initialRect.y) {
-    flag = true
+    sameLine = true
   }
-  console.log(flag)
-  return flag
+  return sameLine
 }
 export function recoverRangePoint(points) {
   points.forEach((point) => {
     const { container, offset } = point
     if (container.vnode.childrens) {
       const { vnode: leaf } = getLeafR(container.vnode.childrens[(offset || 1) - 1] || container.vnode)
-      if (!leaf.atom && !leaf.virtual) {
+      if (!leaf.belong('atom') && !leaf.belong('placeholder')) {
         point.container = leaf.ele
         point.offset = leaf.length
       }
@@ -274,18 +276,24 @@ export function times(n, fn, context = undefined, ...args) {
     fn.call(context, ...args)
   }
 }
-// 2.0 向后光标位点算法
-// flag 跨越标识
-// 0 节点内移动
-// -1 不需要向后矫正的跨节点标识
-// 1 需要向后校正的跨节点标识
-// 2 跨行标识
+
+/**
+ * 2.0 向后光标位点算法
+ * @param {*} vnode
+ * @param {*} pos
+ * @param {*} flag 跨越标识
+ * 0 节点内移动
+ * -1 不需要向后矫正的跨节点标识
+ * 1 需要向后校正的跨节点标识
+ * 2 跨行标识
+ * @returns
+ */
 export function getNextPoint(vnode, pos, flag = 0) {
-  // debugger
+  if (vnode.isRoot && pos === vnode.length) return { vnode: null, pos: null, flag: 404 }
   const len = vnode.type === 'text' ? vnode.length : vnode.childrens.length
   if (pos + 1 > len) {
     const index = getIndex(vnode)
-    flag = blockTag.includes(vnode.type) ? 2 : 1
+    flag = vnode.belong('block') ? 2 : 1
     return getNextPoint(vnode.parent, index + 1, flag)
   } else if (pos + 1 === len) {
     return flag > 0 ? getHead(vnode, pos, flag) : { vnode, pos: pos + 1, flag }
@@ -294,14 +302,13 @@ export function getNextPoint(vnode, pos, flag = 0) {
   }
 }
 function getHead(parent, pos, flag) {
-  // debugger
   if (parent.type === 'text') {
     return { vnode: parent, pos: pos, flag }
   }
   const node = parent.childrens[pos]
-  if (blockTag.includes(node.type)) {
+  if (node.belong('block')) {
     flag = 2
-  } else if (inlineTag.includes(node.type) && flag === 0) {
+  } else if (node.belong('inline') && flag === 0) {
     flag = -1
   }
 
@@ -313,18 +320,26 @@ function getHead(parent, pos, flag) {
     return { vnode: parent, pos: flag === 1 ? pos + 1 : pos, flag }
   }
 }
-// 2.0 向前光标位点算法
-// flag 跨越标识
-// 0 节点内移动
-// -1 不需要向前矫正的跨节点标识
-// 1 需要向前校正的跨节点标识
-// 2 跨行标识
+/**
+ * 2.0 向前光标位点算法
+ * @param {*} vnode
+ * @param {*} pos
+ * @param {*} flag 跨越标识
+ * 0 节点内移动
+ * -1 不需要向前矫正的跨节点标识
+ * 1 需要向前校正的跨节点标识
+ * 2 跨行标识
+ * @returns
+ */
 export function getPrevPoint(vnode, pos, flag = 0) {
-  // debugger
   if (pos - 1 < 0) {
-    const index = getIndex(vnode)
-    flag = blockTag.includes(vnode.type) ? 2 : 1
-    return getPrevPoint(vnode.parent, index, flag)
+    if (vnode.isRoot) {
+      return { vnode: null, pos: null, flag: 404 }
+    } else {
+      const index = getIndex(vnode)
+      flag = vnode.belong('block') ? 2 : 1
+      return getPrevPoint(vnode.parent, index, flag)
+    }
   } else if (pos - 1 === 0) {
     return flag > 0 ? getTail(vnode, pos, flag) : { vnode, pos: pos - 1, flag }
   } else {
@@ -332,14 +347,13 @@ export function getPrevPoint(vnode, pos, flag = 0) {
   }
 }
 function getTail(parent, pos, flag) {
-  // debugger
   if (parent.type === 'text') {
     return { vnode: parent, pos: pos, flag }
   }
   const node = parent.childrens[pos - 1]
-  if (blockTag.includes(node.type)) {
+  if (node.belong('block')) {
     flag = 2
-  } else if (inlineTag.includes(node.type) && flag === 0) {
+  } else if (node.belong('inline') && flag === 0) {
     flag = -1
   }
   if (node.childrens && node.childrens.length > 0) {
