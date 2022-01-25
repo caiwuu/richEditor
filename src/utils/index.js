@@ -1,4 +1,4 @@
-import { leafTag, blockTag, inlineTag } from '../type'
+import { leafTag } from '../type'
 import emojiRegexCreater from 'emoji-regex'
 
 // position位置比较 l < r 表示 r节点在 l 之后
@@ -61,7 +61,7 @@ export function deleteNode(vnode) {
   const parent = vnode.parent || vnode
   // 如果父级只有一个子集，则递归删除父级
   if (isEmptyNode(parent)) {
-    if (parent.isRoot || blockTag.includes(vnode.type)) {
+    if (parent.isRoot || (vnode.belong('block') && vnode.childrens.length > 1)) {
       console.log(`${vnode.position} is deleted`)
       vnode.remove()
     } else {
@@ -117,65 +117,11 @@ export function setRange(editor, startcontainer, start, endcontainer, end, notFo
 export function getIndex(vnode) {
   return vnode.position.split('-').pop() / 1
 }
-// 获取下一个叶子节点
-export function getNextLeafNode(vnode, layer, direction = 'L') {
-  if (vnode.isRoot) {
-    return { vnode: null, layer: null }
-  }
-  if (!layer || !blockTag.includes(layer.type)) {
-    layer = vnode
-  }
-  const index = getIndex(vnode)
-  const len = vnode.parent.childrens.length
-  if (len !== 1 && index != len - 1) {
-    return direction === 'R' ? getLeafR(vnode.parent.childrens[index + 1], layer) : getLeafL(vnode.parent.childrens[index + 1], layer)
-  } else {
-    return getNextLeafNode(vnode.parent, layer, direction)
-  }
-}
-// 获取前一个叶子节点
-export function getPrevLeafNode(vnode, layer, direction = 'R') {
-  if (!layer || !blockTag.includes(layer.type)) {
-    layer = vnode
-  }
-  if (vnode.isRoot) {
-    log('isRoot')
-    return { vnode: null, layer: null }
-  }
-  const index = getIndex(vnode)
-  if (vnode.parent.childrens.length !== 1 && index !== 0) {
-    return direction === 'R' ? getLeafR(vnode.parent.childrens[index - 1], layer) : getLeafL(vnode.parent.childrens[index - 1], layer)
-  } else {
-    return getPrevLeafNode(vnode.parent, layer, direction)
-  }
-}
-// 获取右叶子
-export function getLeafR(vnode, layer) {
-  if (!layer || !blockTag.includes(layer.type)) {
-    layer = vnode
-  }
-  if (vnode.childrens && vnode.childrens.length !== 0) {
-    return getLeafR(vnode.childrens[vnode.childrens.length - 1], layer)
-  } else {
-    return { vnode, layer }
-  }
-}
-// 获取左叶子
-export function getLeafL(vnode, layer) {
-  if (!layer || !blockTag.includes(layer.type)) {
-    layer = vnode
-  }
-  if (vnode.childrens && vnode.childrens.length !== 0) {
-    return getLeafL(vnode.childrens[0], layer)
-  } else {
-    return { vnode, layer }
-  }
-}
 // 获取内容属于的第一层块级元素
 export function getLayer(vnode, ceil) {
   if (vnode.parent === ceil) {
     return vnode
-  } else if (blockTag.includes(vnode.type)) {
+  } else if (vnode.belong('block')) {
     return vnode
   } else {
     return getLayer(vnode.parent)
@@ -223,11 +169,25 @@ export function isEmptyNode(vnode) {
       return true
     } else if (vnode.belong('placeholder')) {
       return true
-    } else if (leafTag.includes(vnode.type)) {
+      // TODO
+    } else if (vnode.belong('atom')) {
       return false
     } else {
       return true
     }
+  }
+}
+// 向上查找行内空节点
+export function lookUpEmptyInline(emptyNode) {
+  const parent = emptyNode.parent
+  if (parent.isRoot) {
+    return emptyNode
+  } else if (parent.belong('block')) {
+    return emptyNode
+  } else if (parent.isEmpty) {
+    return lookUpEmptyInline(parent)
+  } else {
+    return emptyNode
   }
 }
 // 块级检测 检查vnode所属块级是否为空
@@ -254,6 +214,7 @@ export function isSameLine(initialRect, prevRect, currRect, flag, editor) {
   }
   return sameLine
 }
+// 位点恢复
 export function recoverRangePoint(points) {
   points.forEach((point) => {
     const { container, offset } = point
@@ -271,6 +232,7 @@ export function recoverRangePoint(points) {
     }
   })
 }
+// 多次函数执行器
 export function times(n, fn, context = undefined, ...args) {
   let i = 0
   while (i++ < n) {
@@ -287,17 +249,18 @@ export function times(n, fn, context = undefined, ...args) {
  * -1 不需要向后矫正的跨节点标识
  * 1 需要向后校正的跨节点标识
  * 2 跨行标识
+ * -2 emoji 两个字符
  * @returns
  */
 export function getNextPoint(vnode, pos, flag = 0) {
-  if (vnode.isRoot && pos === vnode.length) return { vnode: null, pos: null, flag: 404 }
+  if (vnode.isRoot && pos === vnode.length) return { node: null, pos: null, flag: 404 }
   const len = vnode.type === 'text' ? vnode.length : vnode.childrens.length
   if (pos + 1 > len) {
     const index = getIndex(vnode)
     flag = vnode.belong('block') ? 2 : 1
     return getNextPoint(vnode.parent, index + 1, flag)
   } else if (pos + 1 === len) {
-    return flag > 0 ? getHead(vnode, pos, flag) : { vnode, pos: pos + 1, flag }
+    return flag > 0 ? getHead(vnode, pos, flag) : { node: vnode, pos: pos + 1, flag }
   } else {
     return getHead(vnode, flag > 0 ? pos : pos + 1, flag)
   }
@@ -311,21 +274,21 @@ function getHead(parent, pos, flag) {
         flag = -2
       }
     }
-    return { vnode: parent, pos: pos, flag }
+    return { node: parent, pos: pos, flag }
   }
   const node = parent.childrens[pos]
   if (node.belong('block')) {
     flag = 2
-  } else if (node.belong('inline') && flag === 0) {
+  } else if ((node.belong('inline') && flag === 0) || (flag === 1 && node.isEmpty)) {
     flag = -1
   }
 
   if (node.childrens && node.childrens.length > 0) {
     return getHead(node, 0, flag)
   } else if (node.type === 'text') {
-    return { vnode: node, pos: flag === 1 ? 1 : 0, flag }
+    return { node, pos: flag === 1 ? 1 : 0, flag }
   } else {
-    return { vnode: parent, pos: flag === 1 ? pos + 1 : pos, flag }
+    return { node: parent, pos: flag === 1 ? pos + 1 : pos, flag }
   }
 }
 /**
@@ -337,19 +300,20 @@ function getHead(parent, pos, flag) {
  * -1 不需要向前矫正的跨节点标识
  * 1 需要向前校正的跨节点标识
  * 2 跨行标识
+ * -2 emoji 两个字符
  * @returns
  */
 export function getPrevPoint(vnode, pos, flag = 0) {
   if (pos - 1 < 0) {
     if (vnode.isRoot) {
-      return { vnode: null, pos: null, flag: 404 }
+      return { node: null, pos: null, flag: 404 }
     } else {
       const index = getIndex(vnode)
       flag = vnode.belong('block') ? 2 : 1
       return getPrevPoint(vnode.parent, index, flag)
     }
   } else if (pos - 1 === 0) {
-    return flag > 0 ? getTail(vnode, pos, flag) : { vnode, pos: pos - 1, flag }
+    return flag > 0 ? getTail(vnode, pos, flag) : { node: vnode, pos: pos - 1, flag }
   } else {
     return getTail(vnode, flag > 0 ? pos : pos - 1, flag)
   }
@@ -363,19 +327,19 @@ function getTail(parent, pos, flag) {
         flag = -2
       }
     }
-    return { vnode: parent, pos: pos, flag }
+    return { node: parent, pos: pos, flag }
   }
   const node = parent.childrens[pos - 1]
   if (node.belong('block')) {
     flag = 2
-  } else if ((node.belong('inline') && flag === 0) || (flag === 1 && node.isEmpty)) {
+  } else if (node.belong('inline') && flag === 0) {
     flag = -1
   }
   if (node.childrens && node.childrens.length > 0) {
     return getTail(node, node.childrens.length, flag)
   } else if (node.type === 'text') {
-    return { vnode: node, pos: flag === 1 ? node.length - 1 : node.length, flag }
+    return { node, pos: node.length, flag }
   } else {
-    return { vnode: parent, pos: flag === 1 ? pos - 1 : pos, flag }
+    return { node: parent, pos: pos, flag }
   }
 }

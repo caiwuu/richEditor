@@ -1,28 +1,21 @@
 const data1 = {
   type: 'div',
   childrens: [
+    { type: 'p', childrens: [{ type: 'span', attr: { class: 'h4' }, childrens: [{ type: 'text', context: '段落测试：' }] }] },
     {
       type: 'p',
       childrens: [
-        { type: 'text', context: '普通文字1' },
-        { type: 'text', context: '普通文字2' },
+        { type: 'text', context: '普通文本' },
         {
           type: 'span',
-          childrens: [{ type: 'text', context: '大号文字大号文字大号文字大号文字大' }],
-          style: { color: '#bbb', fontSize: '16px' },
+          childrens: [{ type: 'text', context: 'span包裹带样式的文本' }],
+          style: { color: '#aa7700', fontSize: '18px' },
         },
         {
-          type: 'span',
-          childrens: [
-            {
-              type: 'text',
-              context:
-                '小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字小号的文字的文字小号的文字小号的文字小号的文字的文字小号的文字小号的文字',
-            },
-          ],
-          style: { color: '#bbb', fontSize: '10px' },
+          type: 'text',
+          context:
+            '长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本长文本',
         },
-        // { type: 'br' },
       ],
       style: { color: '#888' },
     },
@@ -34,22 +27,17 @@ const data1 = {
           childrens: [
             {
               type: 'span',
-              childrens: [{ type: 'text', context: '加了样式的文字1' }],
-            },
-            {
-              type: 'span',
-              childrens: [{ type: 'text', context: '加了样式的文字2' }],
+              childrens: [{ type: 'text', context: 'span列表内容1' }],
             },
           ],
         },
-        { type: 'li', childrens: [{ type: 'text', context: '12333333' }] },
-        { type: 'li', childrens: [{ type: 'text', context: '456' }] },
+        { type: 'li', childrens: [{ type: 'text', context: '列表内容2' }] },
         {
           type: 'li',
           childrens: [
             {
               type: 'span',
-              childrens: [{ type: 'text', context: '这是一个pan' }],
+              childrens: [{ type: 'text', context: 'span列表内容3' }],
             },
           ],
         },
@@ -59,20 +47,18 @@ const data1 = {
       type: 'p',
       childrens: [
         {
-          type: 'text',
-          context: 'text after image',
+          type: 'img',
+          attr: {
+            width: '300px',
+            height: '100px',
+            src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
+          },
         },
-        {
-          type: 'span',
-          childrens: [
-            {
-              type: 'text',
-              context: 'span after image',
-            },
-            // { type: 'br' },
-          ],
-        },
-        // { type: 'text', context: 'caiwu11' },
+      ],
+    },
+    {
+      type: 'p',
+      childrens: [
         {
           type: 'img',
           attr: {
@@ -89,20 +75,62 @@ const data1 = {
             src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
           },
         },
-        { type: 'text', context: 'caiwu' },
+      ],
+    },
+    {
+      type: 'p',
+      childrens: [
+        { type: 'text', context: '图片之前的普通文本' },
         {
-          type: 'span',
-          childrens: [
-            {
-              type: 'text',
-              context: 'span after image',
-            },
-          ],
+          type: 'img',
+          attr: {
+            width: '50px',
+            height: '50px',
+            src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
+          },
         },
+      ],
+    },
+    {
+      type: 'p',
+      childrens: [
+        { type: 'span', childrens: [{ type: 'text', context: '图片之前的span文本' }] },
         {
-          type: 'text',
-          context: 'text after imagetext after imagetext after imagetext after imagetext after imagetext after wwwwww wwwwsssssssimwwwwwwwwwwwwwwmagetext after imagetext after image',
+          type: 'img',
+          attr: {
+            width: '50px',
+            height: '50px',
+            src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
+          },
         },
+      ],
+    },
+    {
+      type: 'p',
+      childrens: [
+        {
+          type: 'img',
+          attr: {
+            width: '50px',
+            height: '50px',
+            src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
+          },
+        },
+        { type: 'text', context: '图片之后的普通文本' },
+      ],
+    },
+    {
+      type: 'p',
+      childrens: [
+        {
+          type: 'img',
+          attr: {
+            width: '50px',
+            height: '50px',
+            src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fyouimg1.c-ctrip.com%2Ftarget%2F01057120008iz023cA34F_R_230_160.jpg%3Fproc%3Dautoorient&refer=http%3A%2F%2Fyouimg1.c-ctrip.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640885960&t=a5002259f8e1e98beeb841eed0fddd3f',
+          },
+        },
+        // { type: 'span', childrens: [{ type: 'text', context: '图片之后的span文本' }] },
       ],
     },
     {
@@ -114,17 +142,24 @@ const data1 = {
             href: 'https://www.baidu.com',
             class: 'italic',
           },
-          childrens: [{ type: 'text', context: '百度链接' }],
+          childrens: [{ type: 'text', context: '百度链接2' }],
         },
+        { type: 'text', context: '普通文本' },
+        {
+          type: 'a',
+          attr: {
+            href: 'https://www.baidu.com',
+            class: 'italic',
+          },
+          childrens: [{ type: 'text', context: '百度链接2' }],
+        },
+        { type: 'text', context: '普通文本' },
       ],
     },
     {
       type: 'p',
       style: { background: 'rgb(255 234 206)' },
-      childrens: [
-        // { type: 'text', context: '' },
-        { type: 'br', kind: 'placeholder' },
-      ],
+      childrens: [{ type: 'br', kind: 'placeholder' }],
     },
   ],
   attr: {
@@ -176,8 +211,8 @@ const data3 = {
             {
               type: 'p',
               childrens: [
-                { type: 'text', context: '普通文字2' },
-                { type: 'text', context: '普通文字3' },
+                { type: 'text', context: '111' },
+                { type: 'text', context: '' },
               ],
             },
             // {
@@ -272,8 +307,31 @@ const data4 = {
       type: 'p',
       childrens: [
         {
-          type: 'text',
-          context: '请输入内容...',
+          type: 'span',
+          childrens: [
+            {
+              type: 'text',
+              context: '内容1',
+            },
+          ],
+        },
+        {
+          type: 'span',
+          childrens: [
+            {
+              type: 'text',
+              context: '内容2',
+            },
+          ],
+        },
+        {
+          type: 'span',
+          childrens: [
+            {
+              type: 'text',
+              context: '内容3',
+            },
+          ],
         },
       ],
     },
@@ -283,4 +341,23 @@ const data4 = {
   },
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }
-export default data3
+
+const data5 = {
+  type: 'div',
+  childrens: [
+    {
+      type: 'p',
+      childrens: [
+        {
+          type: 'span',
+          childrens: [],
+        },
+      ],
+    },
+  ],
+  attr: {
+    id: 'editor-body',
+  },
+  style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
+}
+export default data1

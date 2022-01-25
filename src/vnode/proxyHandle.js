@@ -64,7 +64,10 @@ export default {
       case 'remove':
         return function (isNormalize = true) {
           const index = getIndex(target)
-          target.parent.childrens.splice(index, 1).forEach((i) => i.ele.remove())
+          target.parent.childrens.splice(index, 1).forEach((i) => {
+            i.removed = true
+            i.ele.remove()
+          })
           isNormalize && target.parent.normalize()
           reArrangement(target.parent)
         }

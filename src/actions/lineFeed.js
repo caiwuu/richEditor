@@ -1,6 +1,5 @@
 import { getIndex, recoverRangePoint } from '../utils'
 import createVnode from '../vnode'
-import { blockTag, inlineTag } from '../type'
 /**
  * // 节点分裂算法
  * @param {*} vnode
@@ -29,7 +28,7 @@ function splitNode(vnode, pos, caches) {
       vnode.parent.insert(newVnode, index + 1)
       return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
     }
-  } else if (inlineTag.includes(vnode.type)) {
+  } else if (vnode.belong('inline')) {
     const index = getIndex(vnode)
     const ops = { type: vnode.type, childrens: [], style: vnode.style, attr: vnode.attr, event: vnode.event }
     const newVnode = createVnode(ops, vnode.parent)
@@ -45,7 +44,7 @@ function splitNode(vnode, pos, caches) {
     })
     vnode.parent.insert(newVnode, index + 1)
     return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
-  } else if (blockTag.includes(vnode.type)) {
+  } else if (vnode.belong('block')) {
     const index = getIndex(vnode)
     const ops = { type: vnode.type, childrens: [] }
     const newVnode = createVnode(ops, vnode.parent)
@@ -74,8 +73,7 @@ export default function lineFeed(args) {
   const [from] = args
   from.caches = from.caches || []
   const { parent, pos } = splitNode.call(this, from.node, from.pos, from.caches)
-  console.log(parent, pos)
-  if (!blockTag.includes(from.node.type)) {
+  if (!from.node.belong('block')) {
     lineFeed.call(this, [{ node: parent, pos, caches: from.caches }])
   } else {
     console.log(from.caches)

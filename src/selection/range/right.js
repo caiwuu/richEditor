@@ -18,21 +18,21 @@ export default function right(shiftKey) {
     container = this.endContainer
     offset = this.endOffset
   }
-  const { vnode, pos, flag } = getNextPoint(container.vnode, offset)
+  const { node, pos, flag } = getNextPoint(container.vnode, offset)
   if (flag === 404) return flag
   if (shiftKey) {
     switch (this._d) {
       case 0:
       case 2:
-        this.setEnd(vnode.ele, pos)
+        this.setEnd(node.ele, pos)
         this._d = 2
         break
       case 1:
-        this.setStart(vnode.ele, pos)
+        this.setStart(node.ele, pos)
         break
     }
   } else {
-    this.setEnd(vnode.ele, pos)
+    this.setEnd(node.ele, pos)
     this.collapse(false)
     this._d = 0
   }
