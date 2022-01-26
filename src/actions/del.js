@@ -15,22 +15,22 @@ export default function del(args) {
   const prev = getPrevPoint(from.node, from.pos)
   if (typeof to === 'number') {
     // 行内操作
+    console.log(prev)
     if (prev.flag <= 0) {
       console.log('节点内删除')
-      innerDel.call(this, from, to)
+      innerDel.call(this, from, to, prev)
       // 需要跨标签操作
     } else {
+      console.log('跨节点删除')
       crossNodeDel.call(this, from, to, prev)
     }
   } else {
     // 区间删除
     if (from.node === to.node) {
-      console.log('节点内删除')
-      innerDel.call(this, from, from.pos - to.pos)
+      innerDel.call(this, from, from.pos - to.pos, { node: from.node, pos: to.pos })
     } else {
       const commonAncestorContainer = getCommonAncestorContainer.call(this, from, to)
-      console.log(commonAncestorContainer)
-      rangeDel(commonAncestorContainer, to.node, from.node)
+      rangeDel.call(this, commonAncestorContainer, to, from, prev)
     }
   }
 }
@@ -48,21 +48,21 @@ function transToNode(args) {
  * 单点删除
  */
 // 节点内删除
-function innerDel(from, to) {
+function innerDel(from, to, prev) {
   // 重新计算受影响的range端点
   // 先移动range在执行删除
   const points = this.selection
     .getRangePoints()
     .filter((point) => point.container === from.node.ele && point.offset >= from.pos)
     .map((point) => ({
-      container: point.container,
-      offset: point.offset - to,
+      container: point.offset === from.pos ? prev.node.ele : point.container,
+      offset: point.offset === from.pos ? prev.pos : point.offset - to,
       range: point.range,
       flag: point.flag,
     }))
-  console.log(points)
   recoverRangePoint(points)
   from.node.delete(from.pos, to, true)
+  console.log('添加br')
   // 添加br防止行塌陷
   if (isEmptyBlock(from.node)) {
     const brContainer = from.node.type === 'text' ? from.node.parent : from.node
@@ -81,7 +81,6 @@ function clearBlock(block) {
 }
 // 跨节点
 function crossNodeDel(from, to, prev) {
-  console.log('跨节点')
   // 首行删除
   // 404 没有找到前位点
   if (prev.flag === 404) {
@@ -126,19 +125,19 @@ function crossNodeDel(from, to, prev) {
         flag: point.flag,
       }
     })
-  console.log(points)
   recoverRangePoint(points)
   // 跨节点自动执行一步删除
-  if (prev.flag === 1 || prev.flag === -1) {
+  console.log(prev.flag)
+  if (prev.flag === 1) {
     console.log('自动执行一步删除')
     // debugger
     const from = {
       node: prev.node,
-      pos: prev.flag === 1 ? prev.pos + 1 : prev.pos,
+      pos: prev.pos,
     }
     del.call(this, [prev, 1])
     // 如果当前节点为空则递归向上删除空节点
-    from.node.isEmpty && prev.flag === 1 && deleteNode(from.node)
+    from.node.isEmpty && prev.flag === 2 && deleteNode(from.node)
   } else if (isEmptyBlock(from.node)) {
     deleteNode(from.node)
   } else {
@@ -169,36 +168,46 @@ function getCommonAncestorContainer(from, to) {
   }
 }
 
-function compareStart(vnode, start, end, samebranch = false) {
-  const compareRes = comparePosition(vnode.position, start.position)
-  if (compareRes === 0 && vnode.position !== start.position) {
+function compareStart(vnode, startPos, endPos, samebranch = false) {
+  const compareRes = comparePosition(vnode.position, startPos)
+  if (compareRes === 0 && vnode.position !== startPos) {
     for (let index = vnode.childrens.length - 1; index >= 0; index--) {
       const element = vnode.childrens[index]
-      compareStart(element, start, end, true)
+      compareStart(element, startPos, endPos, true)
     }
   } else if (compareRes == -1) {
     if (samebranch) {
       deleteNode(vnode)
     } else {
-      compareEnd(vnode, end, false)
+      compareEnd(vnode, endPos, false)
     }
   }
 }
-function compareEnd(vnode, end) {
-  const compareRes = comparePosition(vnode.position, end.position)
-  if (compareRes === 0 && vnode.position !== end.position) {
+function compareEnd(vnode, endPos) {
+  const compareRes = comparePosition(vnode.position, endPos)
+  if (compareRes === 0 && vnode.position !== endPos) {
     for (let index = vnode.childrens.length - 1; index >= 0; index--) {
       const element = vnode.childrens[index]
-      compareEnd(element, end)
+      compareEnd(element, endPos)
     }
   } else if (compareRes == 1) {
     deleteNode(vnode)
   }
 }
 // 选区删除，删除两个节点之间的节点
-export function rangeDel(commonAncestorContainer, startContainer, endContainer) {
+export function rangeDel(commonAncestorContainer, to, from) {
+  const startPos = to.node.position
+  const endPos = from.node.position
+  // 先删除开始到结束之间的节点
   for (let index = commonAncestorContainer.childrens.length - 1; index >= 0; index--) {
     const element = commonAncestorContainer.childrens[index]
-    compareStart(element, startContainer, endContainer)
+    compareStart(element, startPos, endPos)
+  }
+  // 再删除开始节点和结束节点选中的内容
+  let curr = { node: from.node, pos: from.pos }
+  while (curr.node !== to.node || curr.pos !== to.pos) {
+    const prev = getPrevPoint(curr.node, curr.pos)
+    del.call(this, [curr, 1])
+    curr = prev
   }
 }

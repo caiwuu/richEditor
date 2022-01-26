@@ -19,7 +19,6 @@ export default function left(shiftKey) {
     offset = this.startOffset
   }
   const { node, pos, flag } = getPrevPoint(container.vnode, offset)
-  console.log(node)
   if (flag === 404) return flag
   if (shiftKey) {
     switch (this._d) {

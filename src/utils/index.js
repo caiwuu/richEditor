@@ -1,4 +1,3 @@
-import { leafTag } from '../type'
 import emojiRegexCreater from 'emoji-regex'
 
 // position位置比较 l < r 表示 r节点在 l 之后
@@ -165,11 +164,11 @@ export function isEmptyNode(vnode) {
   if (vnode.childrens && vnode.childrens.length) {
     return vnode.childrens.every((item) => isEmptyNode(item))
   } else {
-    if (vnode.type === 'text' && vnode.context === '') {
-      return true
-    } else if (vnode.belong('placeholder')) {
+    if (vnode.belong('placeholder')) {
       return true
       // TODO
+    } else if (vnode.type === 'text') {
+      return vnode.context === ''
     } else if (vnode.belong('atom')) {
       return false
     } else {
@@ -217,14 +216,6 @@ export function isSameLine(initialRect, prevRect, currRect, flag, editor) {
 // 位点恢复
 export function recoverRangePoint(points) {
   points.forEach((point) => {
-    const { container, offset } = point
-    if (container.vnode.childrens) {
-      const { vnode: leaf } = getLeafR(container.vnode.childrens[(offset || 1) - 1] || container.vnode)
-      if (!leaf.belong('atom') && !leaf.belong('placeholder')) {
-        point.container = leaf.ele
-        point.offset = leaf.length
-      }
-    }
     if (point.flag === 'end') {
       point.range.setEnd(point.container, point.offset)
     } else {
@@ -279,16 +270,16 @@ function getHead(parent, pos, flag) {
   const node = parent.childrens[pos]
   if (node.belong('block')) {
     flag = 2
-  } else if ((node.belong('inline') && flag === 0) || (flag === 1 && node.isEmpty)) {
+  } else if (node.belong('inline') && flag === 0) {
     flag = -1
   }
 
   if (node.childrens && node.childrens.length > 0) {
     return getHead(node, 0, flag)
   } else if (node.type === 'text') {
-    return { node, pos: flag === 1 ? 1 : 0, flag }
+    return { node, pos: 0, flag }
   } else {
-    return { node: parent, pos: flag === 1 ? pos + 1 : pos, flag }
+    return { node: parent, pos: pos, flag }
   }
 }
 /**

@@ -2,15 +2,13 @@ import { lookUpEmptyInline, isEmptyBlock } from '../utils'
 import Range from './range'
 import inputor from './inputor'
 function removeEmpty(container) {
-  console.log(container)
   if (!container.vnode.isEmpty) return
-  if (isEmptyBlock(container.vnode)) {
-    // 块格式化 暂不处理 del中已经格式化
-  } else {
+  if (!isEmptyBlock(container.vnode)) {
     const emptyInlineNode = lookUpEmptyInline(container.vnode)
     if (emptyInlineNode.removed) return
     emptyInlineNode.remove()
   }
+  // 块格式化 无需处理 del中已经格式化
 }
 export default class Selection {
   nativeSelection = document.getSelection()

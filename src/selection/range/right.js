@@ -39,5 +39,8 @@ export default function right(shiftKey) {
   if (isEmptyBlock(container.vnode) && flag !== 2) {
     return this.right(shiftKey)
   }
+  if (flag === 1) {
+    return this.right(shiftKey)
+  }
   return flag
 }

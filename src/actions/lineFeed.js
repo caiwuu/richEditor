@@ -7,27 +7,46 @@ import createVnode from '../vnode'
  * @returns
  */
 function splitNode(vnode, pos, caches) {
+  if (!pos) {
+    return { parent: vnode.parent, pos: getIndex(vnode) }
+  } else if (pos === vnode.length) {
+    return { parent: vnode.parent, pos: getIndex(vnode) + 1 }
+  }
   if (vnode.type === 'text') {
-    if (!pos) {
-      return { parent: vnode.parent, pos: getIndex(vnode) }
-    } else if (pos === vnode.length) {
-      return { parent: vnode.parent, pos: getIndex(vnode) + 1 }
-    } else {
-      const restText = vnode.context.slice(0, pos)
-      const splitedText = vnode.context.slice(pos)
-      const index = getIndex(vnode)
-      const ops = { type: 'text', context: splitedText }
-      const newVnode = createVnode(ops, vnode.parent)
-      this.selection
-        .getRangePoints()
-        .filter((point) => point.container === vnode.ele && point.offset >= pos)
-        .forEach((ele) => {
-          caches.push({ container: newVnode.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
-        })
-      vnode.context = restText
-      vnode.parent.insert(newVnode, index + 1)
-      return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
-    }
+    // if (!pos) {
+    //   return { parent: vnode.parent, pos: getIndex(vnode) }
+    // } else if (pos === vnode.length) {
+    //   return { parent: vnode.parent, pos: getIndex(vnode) + 1 }
+    // } else {
+    //   const restText = vnode.context.slice(0, pos)
+    //   const splitedText = vnode.context.slice(pos)
+    //   const index = getIndex(vnode)
+    //   const ops = { type: 'text', context: splitedText }
+    //   const newVnode = createVnode(ops, vnode.parent)
+    //   this.selection
+    //     .getRangePoints()
+    //     .filter((point) => point.container === vnode.ele && point.offset >= pos)
+    //     .forEach((ele) => {
+    //       caches.push({ container: newVnode.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
+    //     })
+    //   vnode.context = restText
+    //   vnode.parent.insert(newVnode, index + 1)
+    //   return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
+    // }
+    const restText = vnode.context.slice(0, pos)
+    const splitedText = vnode.context.slice(pos)
+    const index = getIndex(vnode)
+    const ops = { type: 'text', context: splitedText }
+    const newVnode = createVnode(ops, vnode.parent)
+    this.selection
+      .getRangePoints()
+      .filter((point) => point.container === vnode.ele && point.offset >= pos)
+      .forEach((ele) => {
+        caches.push({ container: newVnode.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
+      })
+    vnode.context = restText
+    vnode.parent.insert(newVnode, index + 1)
+    return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
   } else if (vnode.belong('inline')) {
     const index = getIndex(vnode)
     const ops = { type: vnode.type, childrens: [], style: vnode.style, attr: vnode.attr, event: vnode.event }
@@ -64,7 +83,10 @@ function splitNode(vnode, pos, caches) {
       const br = createVnode({ type: 'br', kind: 'placeholder' })
       newVnode.insert(br)
     }
-
+    if (pos === 0) {
+      const br = createVnode({ type: 'br', kind: 'placeholder' })
+      vnode.insert(br)
+    }
     vnode.parent.insert(newVnode, index + 1)
     return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
   }

@@ -117,6 +117,7 @@ const data1 = {
           },
         },
         { type: 'text', context: '图片之后的普通文本' },
+        // { type: 'text', context: '图' },
       ],
     },
     {
@@ -360,4 +361,4 @@ const data5 = {
   },
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }
-export default data1
+export default data3
