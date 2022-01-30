@@ -256,7 +256,7 @@ export function getNextPoint(vnode, pos, flag = 0) {
     return getHead(vnode, flag > 0 ? pos : pos + 1, flag)
   }
 }
-function getHead(parent, pos, flag) {
+export function getHead(parent, pos, flag) {
   if (parent.type === 'text') {
     const emojiRegex = emojiRegexCreater()
     for (const match of parent.context.matchAll(emojiRegex)) {
@@ -309,7 +309,7 @@ export function getPrevPoint(vnode, pos, flag = 0) {
     return getTail(vnode, flag > 0 ? pos : pos - 1, flag)
   }
 }
-function getTail(parent, pos, flag) {
+export function getTail(parent, pos, flag) {
   if (parent.type === 'text') {
     const emojiRegex = emojiRegexCreater()
     for (const match of parent.context.matchAll(emojiRegex)) {
