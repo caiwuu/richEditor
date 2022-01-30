@@ -1,5 +1,5 @@
-// import render from '../ui/render'
-import { leafTag, blockTag, inlineTag } from '../type'
+import emojiRegexCreater from 'emoji-regex'
+
 // position位置比较 l < r 表示 r节点在 l 之后
 // l>r -1,r=l 0,l<r 1
 export function comparePosition(l, r) {
@@ -60,7 +60,7 @@ export function deleteNode(vnode) {
   const parent = vnode.parent || vnode
   // 如果父级只有一个子集，则递归删除父级
   if (isEmptyNode(parent)) {
-    if (parent.isRoot || blockTag.includes(vnode.type)) {
+    if (parent.isRoot || (vnode.belong('block') && vnode.childrens.length > 1)) {
       console.log(`${vnode.position} is deleted`)
       vnode.remove()
     } else {
@@ -116,63 +116,11 @@ export function setRange(editor, startcontainer, start, endcontainer, end, notFo
 export function getIndex(vnode) {
   return vnode.position.split('-').pop() / 1
 }
-// 获取下一个叶子节点
-export function getNextLeafNode(vnode, layer, direction = 'L') {
-  if (vnode.isRoot) {
-    return { vnode: null, layer: null }
-  }
-  if (!layer || !blockTag.includes(layer.type)) {
-    layer = vnode
-  }
-  const index = getIndex(vnode)
-  const len = vnode.parent.childrens.length
-  if (len !== 1 && index != len - 1) {
-    return direction === 'R' ? getLeafR(vnode.parent.childrens[index + 1], layer) : getLeafL(vnode.parent.childrens[index + 1], layer)
-  } else {
-    return getNextLeafNode(vnode.parent, layer, direction)
-  }
-}
-// 获取前一个叶子节点
-export function getPrevLeafNode(vnode, layer, direction = 'R') {
-  if (!layer || !blockTag.includes(layer.type)) {
-    layer = vnode
-  }
-  if (vnode.isRoot) {
-    log('isRoot')
-    return { vnode: null, layer: null }
-  }
-  const index = getIndex(vnode)
-  if (vnode.parent.childrens.length !== 1 && index !== 0) {
-    return direction === 'R' ? getLeafR(vnode.parent.childrens[index - 1], layer) : getLeafL(vnode.parent.childrens[index - 1], layer)
-  } else {
-    return getPrevLeafNode(vnode.parent, layer, direction)
-  }
-}
-// 获取右叶子
-export function getLeafR(vnode, layer) {
-  if (!layer || !blockTag.includes(layer.type)) {
-    layer = vnode
-  }
-  if (vnode.childrens && vnode.childrens.length !== 0) {
-    return getLeafR(vnode.childrens[vnode.childrens.length - 1], layer)
-  } else {
-    return { vnode, layer }
-  }
-}
-// 获取左叶子
-export function getLeafL(vnode, layer) {
-  if (!layer || !blockTag.includes(layer.type)) {
-    layer = vnode
-  }
-  if (vnode.childrens && vnode.childrens.length !== 0) {
-    return getLeafL(vnode.childrens[0], layer)
-  } else {
-    return { vnode, layer }
-  }
-}
 // 获取内容属于的第一层块级元素
-export function getLayer(vnode) {
-  if (blockTag.includes(vnode.type)) {
+export function getLayer(vnode, ceil) {
+  if (vnode.parent === ceil) {
+    return vnode
+  } else if (vnode.belong('block')) {
     return vnode
   } else {
     return getLayer(vnode.parent)
@@ -216,15 +164,29 @@ export function isEmptyNode(vnode) {
   if (vnode.childrens && vnode.childrens.length) {
     return vnode.childrens.every((item) => isEmptyNode(item))
   } else {
-    if (vnode.type === 'text' && vnode.context === '') {
+    if (vnode.belong('placeholder')) {
       return true
-    } else if (vnode.virtual) {
-      return true
-    } else if (leafTag.includes(vnode.type)) {
+      // TODO
+    } else if (vnode.type === 'text') {
+      return vnode.context === ''
+    } else if (vnode.belong('atom')) {
       return false
     } else {
       return true
     }
+  }
+}
+// 向上查找行内空节点
+export function lookUpEmptyInline(emptyNode) {
+  const parent = emptyNode.parent
+  if (parent.isRoot) {
+    return emptyNode
+  } else if (parent.belong('block')) {
+    return emptyNode
+  } else if (parent.isEmpty) {
+    return lookUpEmptyInline(parent)
+  } else {
+    return emptyNode
   }
 }
 // 块级检测 检查vnode所属块级是否为空
@@ -233,34 +195,27 @@ export function isEmptyBlock(vnode) {
   const block = getLayer(vnode)
   return isEmptyNode(block)
 }
-// 判断是否在同一行，由于浏览器的排版原因不能保证百分之百准确，准确率99%
-export function isSameLine(initialRect, prevRect, currRect, result, editor) {
+// 判断是否在同一行
+export function isSameLine(initialRect, prevRect, currRect, flag, editor) {
   // 标识光标是否在同一行移动
-  let flag = true
+  let sameLine = true
+  // 判断自动折行 非vnode层面的换行 这里存在判断失误的概率 但是绝大部分情况都能判断
+  // 这里通过判断前后两个光标位置距离是否大于一定的值来判断
   if (Math.abs(currRect.x - prevRect.x) > editor.ui.editableArea.offsetWidth - 2 * currRect.h) {
-    flag = false
+    sameLine = false
   }
-  // 光标移动触发块级检测说明光标必然跨行
-  if ((typeof result === 'object' && blockTag.includes(result.type)) || result === 'br') {
-    flag = false
+  if (flag === 2) {
+    sameLine = false
   }
   //光标Y坐标和参考点相同说明光标还在本行，最理想的情况放在最后判断
   if (currRect.y === initialRect.y) {
-    flag = true
+    sameLine = true
   }
-  console.log(flag)
-  return flag
+  return sameLine
 }
+// 位点恢复
 export function recoverRangePoint(points) {
   points.forEach((point) => {
-    const { container, offset } = point
-    if (container.vnode.childrens) {
-      const { vnode: leaf } = getLeafR(container.vnode.childrens[(offset || 1) - 1] || container.vnode)
-      if (!leaf.atom && !leaf.virtual) {
-        point.container = leaf.ele
-        point.offset = leaf.length
-      }
-    }
     if (point.flag === 'end') {
       point.range.setEnd(point.container, point.offset)
     } else {
@@ -268,85 +223,114 @@ export function recoverRangePoint(points) {
     }
   })
 }
+// 多次函数执行器
 export function times(n, fn, context = undefined, ...args) {
   let i = 0
   while (i++ < n) {
     fn.call(context, ...args)
   }
 }
-// 2.0 向后光标位点算法
-// flag 跨越标识
-// 0 节点内移动
-// -1 不需要向后矫正的跨节点标识
-// 1 需要向后校正的跨节点标识
-// 2 跨行标识
+
+/**
+ * 2.0 向后光标位点算法
+ * @param {*} vnode
+ * @param {*} pos
+ * @param {*} flag 跨越标识
+ * 0 节点内移动
+ * -1 不需要向后矫正的跨节点标识
+ * 1 需要向后校正的跨节点标识
+ * 2 跨行标识
+ * -2 emoji 两个字符
+ * @returns
+ */
 export function getNextPoint(vnode, pos, flag = 0) {
-  // debugger
+  if (vnode.isRoot && pos === vnode.length) return { node: null, pos: null, flag: 404 }
   const len = vnode.type === 'text' ? vnode.length : vnode.childrens.length
   if (pos + 1 > len) {
     const index = getIndex(vnode)
-    flag = blockTag.includes(vnode.type) ? 2 : 1
+    flag = vnode.belong('block') ? 2 : 1
     return getNextPoint(vnode.parent, index + 1, flag)
   } else if (pos + 1 === len) {
-    return flag > 0 ? getHead(vnode, pos, flag) : { vnode, pos: pos + 1, flag }
+    return flag > 0 ? getHead(vnode, pos, flag) : { node: vnode, pos: pos + 1, flag }
   } else {
     return getHead(vnode, flag > 0 ? pos : pos + 1, flag)
   }
 }
 function getHead(parent, pos, flag) {
-  // debugger
   if (parent.type === 'text') {
-    return { vnode: parent, pos: pos, flag }
+    const emojiRegex = emojiRegexCreater()
+    for (const match of parent.context.matchAll(emojiRegex)) {
+      if (pos === match.index + 1) {
+        pos = pos + 1
+        flag = -2
+      }
+    }
+    return { node: parent, pos: pos, flag }
   }
   const node = parent.childrens[pos]
-  if (blockTag.includes(node.type)) {
+  if (node.belong('block')) {
     flag = 2
-  } else if (inlineTag.includes(node.type) && flag === 0) {
+  } else if (node.belong('inline') && flag === 0) {
     flag = -1
   }
 
   if (node.childrens && node.childrens.length > 0) {
     return getHead(node, 0, flag)
   } else if (node.type === 'text') {
-    return { vnode: node, pos: flag === 1 ? 1 : 0, flag }
+    return { node, pos: 0, flag }
   } else {
-    return { vnode: parent, pos: flag === 1 ? pos + 1 : pos, flag }
+    return { node: parent, pos: pos, flag }
   }
 }
-// 2.0 向前光标位点算法
-// flag 跨越标识
-// 0 节点内移动
-// -1 不需要向前矫正的跨节点标识
-// 1 需要向前校正的跨节点标识
-// 2 跨行标识
+/**
+ * 2.0 向前光标位点算法
+ * @param {*} vnode
+ * @param {*} pos
+ * @param {*} flag 跨越标识
+ * 0 节点内移动
+ * -1 不需要向前矫正的跨节点标识
+ * 1 需要向前校正的跨节点标识
+ * 2 跨行标识
+ * -2 emoji 两个字符
+ * @returns
+ */
 export function getPrevPoint(vnode, pos, flag = 0) {
-  // debugger
   if (pos - 1 < 0) {
-    const index = getIndex(vnode)
-    flag = blockTag.includes(vnode.type) ? 2 : 1
-    return getPrevPoint(vnode.parent, index, flag)
+    if (vnode.isRoot) {
+      return { node: null, pos: null, flag: 404 }
+    } else {
+      const index = getIndex(vnode)
+      flag = vnode.belong('block') ? 2 : 1
+      return getPrevPoint(vnode.parent, index, flag)
+    }
   } else if (pos - 1 === 0) {
-    return flag > 0 ? getTail(vnode, pos, flag) : { vnode, pos: pos - 1, flag }
+    return flag > 0 ? getTail(vnode, pos, flag) : { node: vnode, pos: pos - 1, flag }
   } else {
     return getTail(vnode, flag > 0 ? pos : pos - 1, flag)
   }
 }
 function getTail(parent, pos, flag) {
-  // debugger
   if (parent.type === 'text') {
-    return { vnode: parent, pos: pos, flag }
+    const emojiRegex = emojiRegexCreater()
+    for (const match of parent.context.matchAll(emojiRegex)) {
+      if (pos === match.index + 1) {
+        pos = pos - 1
+        flag = -2
+      }
+    }
+    return { node: parent, pos: pos, flag }
   }
   const node = parent.childrens[pos - 1]
-  if (blockTag.includes(node.type)) {
+  if (node.belong('block')) {
     flag = 2
-  } else if (inlineTag.includes(node.type) && flag === 0) {
+  } else if (node.belong('inline') && flag === 0) {
     flag = -1
   }
   if (node.childrens && node.childrens.length > 0) {
     return getTail(node, node.childrens.length, flag)
   } else if (node.type === 'text') {
-    return { vnode: node, pos: flag === 1 ? node.length - 1 : node.length, flag }
+    return { node, pos: node.length, flag }
   } else {
-    return { vnode: parent, pos: flag === 1 ? pos - 1 : pos, flag }
+    return { node: parent, pos: pos, flag }
   }
 }

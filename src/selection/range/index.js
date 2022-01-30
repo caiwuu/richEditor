@@ -1,4 +1,4 @@
-import { isSameLine, getNode } from '../../utils'
+import { isSameLine, lookUpEmptyInline, isEmptyBlock } from '../../utils'
 import Caret from '../caret'
 import del from './del'
 import input from './input'
@@ -7,6 +7,16 @@ import left from './left'
 import right from './right'
 import up from './up'
 import down from './down'
+function removeEmpty(container) {
+  if (!container.vnode.isEmpty) return
+  if (isEmptyBlock(container.vnode)) {
+    // 块格式化 暂不处理 del中已经格式化
+  } else {
+    const emptyInlineNode = lookUpEmptyInline(container.vnode)
+    if (emptyInlineNode.removed) return
+    emptyInlineNode.remove()
+  }
+}
 export default class Range {
   inputState = {
     // 输入框状态
@@ -39,21 +49,25 @@ export default class Range {
     this.collapsed = this.endContainer === this.startContainer && this.endOffset === this.startOffset
   }
   setEnd(endNode, endOffset) {
+    removeEmpty(this.endContainer)
     this.endContainer = endNode
     this.endOffset = endOffset
     this._updateStatus()
   }
   setStart(startNode, startOffset) {
+    removeEmpty(this.startContainer)
     this.startContainer = startNode
     this.startOffset = startOffset
     this._updateStatus()
   }
   collapse(toStart) {
     if (toStart) {
+      removeEmpty(this.endContainer)
       this.endContainer = this.startContainer
       this.endOffset = this.startOffset
       this.collapsed = true
     } else {
+      removeEmpty(this.startContainer)
       this.startOffset = this.endOffset
       this.startContainer = this.endContainer
       this.collapsed = true
@@ -68,24 +82,20 @@ export default class Range {
     this.editor.selection.ranges.splice(index, 1)
   }
   _loop(direct, initialRect, prevRect, lineChanged = false, shiftKey) {
-    // debugger
-    const flag = this.endContainer === this.startContainer && this.endOffset === this.startOffset
-    if (flag) {
+    if (this.collapsed) {
       this._d = 0
     }
-    let result = true
+    const flag = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)
     if (!lineChanged) {
-      result = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)
-      if (!result) return
+      if (flag === 404) return
       this.updateCaret(false)
     } else {
-      result = direct === 'left' ? this.left(shiftKey) : this.right(shiftKey)
-      if (!result) return
+      if (flag === 404) return
       this.updateCaret(false)
       const currRect = { ...this.caret.rect },
         preDistance = Math.abs(prevRect.x - initialRect.x),
         currDistance = Math.abs(currRect.x - initialRect.x),
-        sameLine = isSameLine(initialRect, prevRect, currRect, result, this.editor)
+        sameLine = isSameLine(initialRect, prevRect, currRect, flag, this.editor)
       if (!(currDistance <= preDistance && sameLine)) {
         direct === 'left' ? this.right(shiftKey) : this.left(shiftKey)
         this.updateCaret(false)
@@ -93,7 +103,7 @@ export default class Range {
       }
     }
     const currRect = { ...this.caret.rect },
-      sameLine = isSameLine(initialRect, prevRect, currRect, result, this.editor)
+      sameLine = isSameLine(initialRect, prevRect, currRect, flag, this.editor)
     if (!sameLine) {
       lineChanged = true
     }

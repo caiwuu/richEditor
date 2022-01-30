@@ -1,5 +1,15 @@
+import { lookUpEmptyInline, isEmptyBlock } from '../utils'
 import Range from './range'
 import inputor from './inputor'
+function removeEmpty(container) {
+  if (!container.vnode.isEmpty) return
+  if (!isEmptyBlock(container.vnode)) {
+    const emptyInlineNode = lookUpEmptyInline(container.vnode)
+    if (emptyInlineNode.removed) return
+    emptyInlineNode.remove()
+  }
+  // 块格式化 无需处理 del中已经格式化
+}
 export default class Selection {
   nativeSelection = document.getSelection()
   ranges = []
@@ -48,7 +58,10 @@ export default class Selection {
   }
   clearRanges() {
     while (this.ranges.length) {
-      this.ranges.pop().caret.remove()
+      const range = this.ranges.pop()
+      removeEmpty(range.endContainer)
+      removeEmpty(range.startContainer)
+      range.caret.remove()
     }
   }
   // 多选区支持
@@ -60,6 +73,8 @@ export default class Selection {
       this.ranges.forEach((i) => {
         if (i.endContainer === nativeRange.endContainer && i.startOffset === nativeRange.startOffset) {
           flag = true
+          removeEmpty(i.endContainer)
+          removeEmpty(i.startContainer)
           i.remove()
         }
       })

@@ -1,5 +1,5 @@
 import { recoverRangePoint } from '../utils'
-import createVnode from '../ui/createVnode'
+import createVnode from '../vnode'
 function removeVirtual(from, insertType) {
   let vnode
   if (insertType === 'betweenTextAndText') {
@@ -7,7 +7,7 @@ function removeVirtual(from, insertType) {
   } else {
     vnode = from.node
   }
-  vnode.childrens.filter((vnode) => vnode.virtual).forEach((vnode) => vnode.remove())
+  vnode.childrens.filter((vnode) => vnode.belong('placeholder')).forEach((vnode) => vnode.remove())
 }
 const handleInsert = {
   betweenTextAndEle: (from, inputData, newRangePos) => {

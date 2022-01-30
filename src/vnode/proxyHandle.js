@@ -1,9 +1,8 @@
-import { setStyle, setAttr, setEvent, getIndex, isEmptyNode, normalize, reArrangement } from '../utils/index'
-import { leafTag } from '../type/index'
+import { getIndex, isEmptyNode, normalize, reArrangement } from '../utils/index'
 /**
  * 节点操作代理 vnode update ----> dom update
  */
-const handle = {
+export default {
   set(target, key, newValue) {
     // ui 更新
     switch (key) {
@@ -58,22 +57,29 @@ const handle = {
         return function () {
           receiver.childrens && normalize(receiver)
         }
+      case 'belong':
+        return function (kindName) {
+          return target.kind === kindName
+        }
       case 'remove':
         return function (isNormalize = true) {
           const index = getIndex(target)
-          target.parent.childrens.splice(index, 1).forEach((i) => i.ele.remove())
+          target.parent.childrens.splice(index, 1).forEach((i) => {
+            i.removed = true
+            i.ele.remove()
+          })
           isNormalize && target.parent.normalize()
           reArrangement(target.parent)
         }
       case 'isEmpty':
-        return isEmptyNode(target)
+        return isEmptyNode(receiver)
       case 'length':
-        if (target.atom) {
+        if (target.kind === 'atom') {
           return -1
         } else if (target.type === 'text') {
           return target.context.length
         } else {
-          return target.childrens.filter((ele) => !ele.virtual).length
+          return target.childrens.filter((ele) => !ele.belong('placeholder')).length
         }
       case 'reArrangement':
         return function () {
@@ -83,58 +89,4 @@ const handle = {
         return Reflect.get(target, key, receiver)
     }
   },
-}
-/**
- * 节点字段说明：
- * position 标识节点的位置层级信息
- * isRoot 是否根节点
- * virtual 非实体节点，不描述具体内容，充当支撑文档结构的作用
- * style 样式
- * attr 属性
- * event dom事件
- * type 节点类型
- * ele 真实dom
- * atom 原子节点 无子集，内容不可分割
- */
-export default function createVnode(ops, parent = null, position = '0') {
-  if (ops.type) {
-    ops.parent = parent
-    ops._isVnode = true
-    ops.isRoot = !parent
-    if (!ops.position) ops.position = parent ? (parent.position ? parent.position + '-' + position : position) : position
-    if (!leafTag.includes(ops.type)) {
-      ops.ele = document.createElement(ops.type)
-    } else {
-      ops.ele = ops.type === 'text' ? document.createTextNode(ops.context) : document.createElement(ops.type)
-    }
-    if (ops.style) setStyle(ops.ele, ops.style)
-    if (ops.attr) setAttr(ops.ele, ops.attr)
-    if (ops.event) setEvent(ops.ele, ops.event)
-    // if (ops.type === 'img') {
-    if (['br', 'img'].includes(ops.type)) {
-      ops.atom = true
-    }
-  }
-  const vnode = new Proxy(ops, handle)
-  if (ops.listen) {
-    const fn =
-      ops.listen.onMessage ||
-      ((vnode, args) => {
-        // TODO
-        console.log('这里写默认行为', vnode, args)
-      })
-    ops.listen.emitter.on(ops.listen.key, (args) => {
-      fn(vnode, args)
-    })
-  }
-  vnode.root = parent ? parent.root : vnode
-  if (vnode.ele) vnode.ele.vnode = vnode
-  if (vnode.childrens) {
-    vnode.childrens = vnode.childrens.map((element, index) => {
-      const itemVnode = createVnode(element, vnode, index)
-      vnode.ele.appendChild(itemVnode.ele)
-      return itemVnode
-    })
-  }
-  return vnode
 }
