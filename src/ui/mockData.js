@@ -361,4 +361,4 @@ const data5 = {
   },
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }
-export default data3
+export default data1

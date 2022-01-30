@@ -1,4 +1,4 @@
-import { getIndex, recoverRangePoint } from '../utils'
+import { getIndex, recoverRangePoint, getNextPoint } from '../utils'
 import createVnode from '../vnode'
 /**
  * // 节点分裂算法
@@ -7,9 +7,20 @@ import createVnode from '../vnode'
  * @returns
  */
 function splitNode(vnode, pos, caches) {
-  if (!pos) {
+  console.log(pos, vnode.length)
+  if (!pos && !vnode.belong('block')) {
+    console.log('s')
     return { parent: vnode.parent, pos: getIndex(vnode) }
-  } else if (pos === vnode.length) {
+  } else if (pos === vnode.length && !vnode.belong('block')) {
+    console.log('e')
+    console.log(vnode.parent, getIndex(vnode) + 1)
+    // this.selection
+    //   .getRangePoints()
+    //   .filter((point) => point.container === vnode.ele && point.offset >= pos)
+    //   .forEach((ele) => {
+    //     // caches.push({ container: newVnode.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
+    //     caches.push({ container: newVnode.ele, offset: ele.offset, flag: ele.flag, range: ele.range })
+    //   })
     return { parent: vnode.parent, pos: getIndex(vnode) + 1 }
   }
   if (vnode.type === 'text') {
@@ -73,7 +84,8 @@ function splitNode(vnode, pos, caches) {
       .getRangePoints()
       .filter((point) => point.container === vnode.ele && point.offset >= pos)
       .forEach((ele) => {
-        caches.push({ container: newVnode.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
+        // caches.push({ container: newVnode.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
+        caches.push({ container: newVnode.ele, offset: ele.offset, flag: ele.flag, range: ele.range })
       })
     if (needMoveNodes.length > 0) {
       needMoveNodes.forEach((node) => {

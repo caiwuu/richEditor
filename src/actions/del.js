@@ -1,21 +1,10 @@
-import {
-  getPrevPoint,
-  getNextPoint,
-  deleteNode,
-  getIndex,
-  getNode,
-  getLayer,
-  recoverRangePoint,
-  isEmptyBlock,
-  comparePosition,
-} from '../utils'
+import { getPrevPoint, getNextPoint, deleteNode, getIndex, getNode, getLayer, recoverRangePoint, isEmptyBlock, comparePosition } from '../utils'
 import createVnode from '../vnode'
 export default function del(args) {
   const [from, to] = transToNode.call(this, args)
   const prev = getPrevPoint(from.node, from.pos)
   if (typeof to === 'number') {
     // 行内操作
-    console.log(prev)
     if (prev.flag <= 0) {
       console.log('节点内删除')
       innerDel.call(this, from, to, prev)
@@ -62,19 +51,18 @@ function innerDel(from, to, prev) {
     }))
   recoverRangePoint(points)
   from.node.delete(from.pos, to, true)
-  console.log('添加br')
   // 添加br防止行塌陷
   if (isEmptyBlock(from.node)) {
     const brContainer = from.node.type === 'text' ? from.node.parent : from.node
     const brPos = from.node.type === 'text' ? getIndex(from.node) + 1 : from.pos
     if (!brContainer.childrens.some((vnode) => vnode.belong('placeholder'))) {
+      console.log('添加br')
       const br = createVnode({ type: 'br', kind: 'placeholder' })
       brContainer.insert(br, brPos)
     }
   }
 }
 function clearBlock(block) {
-  console.log(block.childrens.length)
   block.childrens.slice(0).forEach((node) => {
     node.remove()
   })
@@ -87,7 +75,7 @@ function crossNodeDel(from, to, prev) {
     console.log('404')
     const block = getLayer(from.node)
     let points = this.selection.getRangePoints().filter((point) => point.container === from.node.ele)
-    //  段落为空则初始化段落
+    // 段落为空则初始化段落
     if (block.isEmpty) {
       clearBlock(block)
       const br = createVnode({ type: 'br', kind: 'placeholder' })
@@ -113,7 +101,6 @@ function crossNodeDel(from, to, prev) {
   }
   // 重新计算受影响的range端点
   // 先移动range在执行删除
-  console.log(`上一个叶子节点${prev.node.position}:`, prev.node)
   const points = this.selection
     .getRangePoints()
     .filter((point) => point.container === from.node.ele && point.offset === from.pos)
@@ -127,7 +114,6 @@ function crossNodeDel(from, to, prev) {
     })
   recoverRangePoint(points)
   // 跨节点自动执行一步删除
-  console.log(prev.flag)
   if (prev.flag === 1) {
     console.log('自动执行一步删除')
     // debugger
@@ -146,7 +132,6 @@ function crossNodeDel(from, to, prev) {
     const fromBlock = getLayer(from.node)
     const toBlock = getLayer(prev.node)
     fromBlock.childrens.slice(0).forEach((node, index) => {
-      console.log(getIndex(prev.node), index)
       node.moveTo(toBlock, prev.pos + index)
     })
     fromBlock.remove()
