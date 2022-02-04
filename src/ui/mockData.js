@@ -377,8 +377,31 @@ const data5 = {
       type: 'p',
       childrens: [
         {
+          type: 'text',
+          context: 'c',
+        },
+      ],
+    },
+  ],
+  attr: {
+    id: 'editor-body',
+  },
+  style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
+}
+const data6 = {
+  type: 'div',
+  childrens: [
+    {
+      type: 'p',
+      childrens: [
+        {
           type: 'span',
-          childrens: [],
+          childrens: [
+            {
+              type: 'text',
+              context: 'cccccc',
+            },
+          ],
         },
       ],
     },

@@ -45,15 +45,19 @@ function innerDel(from, to, prev) {
     .filter((point) => point.container === from.node.ele && point.offset >= from.pos)
     .map((point) => ({
       container: point.offset === from.pos ? prev.node.ele : point.container,
-      offset: point.offset === from.pos ? prev.pos : point.offset - to,
+      offset: point.offset === from.pos ? prev.pos : prev.flag === -2 ? point.offset - to - 1 : point.offset - to,
       range: point.range,
       flag: point.flag,
     }))
+  const isEmpty = isEmptyBlock(from.node)
   recoverRangePoint(points)
-  from.node.delete(from.pos, to, true)
+  from.node.delete(from.pos, prev.flag === -2 ? to + 1 : to, true)
+  isEmpty && del.call(this, [prev, 1])
   // 添加br防止行塌陷
   if (isEmptyBlock(from.node)) {
     const brContainer = from.node.type === 'text' ? from.node.parent : from.node
+    console.log(brContainer.childrens)
+    console.log(brContainer.childrens.some((vnode) => vnode.belong('placeholder')))
     const brPos = from.node.type === 'text' ? getIndex(from.node) + 1 : from.pos
     if (!brContainer.childrens.some((vnode) => vnode.belong('placeholder'))) {
       console.log('添加br')
@@ -101,13 +105,14 @@ function crossNodeDel(from, to, prev) {
   }
   // 重新计算受影响的range端点
   // 先移动range在执行删除
+  const prevIsEmpty = isEmptyBlock(prev.node)
   const points = this.selection
     .getRangePoints()
     .filter((point) => point.container === from.node.ele && point.offset === from.pos)
     .map((point) => {
       return {
-        container: prev.node.ele,
-        offset: prev.pos,
+        container: prevIsEmpty ? point.container : prev.node.ele,
+        offset: prevIsEmpty ? point.offset : prev.pos,
         range: point.range,
         flag: point.flag,
       }
@@ -129,12 +134,16 @@ function crossNodeDel(from, to, prev) {
   } else {
     // 合并块
     console.log('合并块', to)
-    const fromBlock = getLayer(from.node)
     const toBlock = getLayer(prev.node)
-    fromBlock.childrens.slice(0).forEach((node, index) => {
-      node.moveTo(toBlock, prev.pos + index)
-    })
-    fromBlock.remove()
+    if (prevIsEmpty) {
+      toBlock.remove()
+    } else {
+      const fromBlock = getLayer(from.node)
+      fromBlock.childrens.slice(0).forEach((node, index) => {
+        node.moveTo(toBlock, prev.pos + index)
+      })
+      fromBlock.remove()
+    }
   }
   this.selection.nativeSelection.removeAllRanges()
 }
