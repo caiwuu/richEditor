@@ -1,15 +1,15 @@
-import { lookUpEmptyInline, isEmptyBlock } from '../utils'
+import { removeEmpty } from '../utils'
 import Range from './range'
 import inputor from './inputor'
-function removeEmpty(container) {
-  if (!container.vnode.isEmpty) return
-  if (!isEmptyBlock(container.vnode)) {
-    const emptyInlineNode = lookUpEmptyInline(container.vnode)
-    if (emptyInlineNode.removed) return
-    emptyInlineNode.remove()
-  }
-  // 块格式化 无需处理 del中已经格式化
-}
+// function removeEmpty(container) {
+//   if (!container.vnode.isEmpty) return
+//   if (!isEmptyBlock(container.vnode)) {
+//     const emptyInlineNode = lookUpEmptyInline(container.vnode)
+//     if (emptyInlineNode.removed) return
+//     emptyInlineNode.remove()
+//   }
+//   // 块格式化 无需处理 del中已经格式化
+// }
 export default class Selection {
   nativeSelection = document.getSelection()
   ranges = []
@@ -167,7 +167,7 @@ export default class Selection {
     this.ranges.forEach((range) => {
       // 没按shift 并且 存在选区,取消选区，左右不移动光标，上下可移动光标
       if (!shiftKey && !range.collapsed) {
-        const collapseToStart = range._d === 1
+        const collapseToStart = direction === 'left'
         nativeRange && nativeRange.collapse(collapseToStart)
         range.collapse(collapseToStart)
         range._d = 0
@@ -194,13 +194,16 @@ export default class Selection {
   del() {
     this.editor.execCommand('delete')
     this.distinct()
+    this.inputor.focus()
   }
   input(event) {
     this.editor.execCommand('input', null, event)
     this.distinct()
+    this.inputor.focus()
   }
   enter() {
     this.editor.execCommand('enter')
+    this.inputor.focus()
   }
   destroy() {
     this.inputor.destroy()

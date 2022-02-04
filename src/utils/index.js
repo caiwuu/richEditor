@@ -309,6 +309,7 @@ export function getPrevPoint(vnode, pos, flag = 0) {
     return getTail(vnode, flag > 0 ? pos : pos - 1, flag)
   }
 }
+// R位点
 export function getTail(parent, pos, flag) {
   if (parent.type === 'text') {
     const emojiRegex = emojiRegexCreater()
@@ -333,4 +334,13 @@ export function getTail(parent, pos, flag) {
   } else {
     return { node: parent, pos: pos, flag }
   }
+}
+export function removeEmpty(container) {
+  if (!container.vnode.isEmpty) return
+  if (!isEmptyBlock(container.vnode)) {
+    const emptyInlineNode = lookUpEmptyInline(container.vnode)
+    if (emptyInlineNode.removed) return
+    emptyInlineNode.remove()
+  }
+  // 块格式化 无需处理 del中已经格式化
 }
