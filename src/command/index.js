@@ -4,11 +4,11 @@ export default class Command {
       console.log('this is customCommand:test')
     },
   }
-  constructor(editor) {
-    this.editor = editor
+  constructor(vm) {
+    this.vm = vm
   }
   _updateCaret_() {
-    this.editor.selection.ranges.forEach((range) => {
+    this.vm.selection.ranges.forEach((range) => {
       range.updateCaret()
     })
   }
@@ -17,14 +17,14 @@ export default class Command {
     if (pos) {
     } else {
       // 内部驱动
-      this.editor.selection.ranges.forEach((range) => {
+      this.vm.selection.ranges.forEach((range) => {
         range.del()
       })
       this._updateCaret_()
     }
   }
   _input(data, event) {
-    this.editor.selection.ranges.forEach((range) => {
+    this.vm.selection.ranges.forEach((range) => {
       // 外部驱动
       if (data) {
         range.input({
@@ -39,18 +39,18 @@ export default class Command {
     this._updateCaret_()
   }
   _enter() {
-    this.editor.selection.ranges.forEach((range) => {
+    this.vm.selection.ranges.forEach((range) => {
       range.enter()
     })
-    // this.editor.selection.move('right')
+    // this.vm.selection.move('right')
     this._updateCaret_()
   }
   _bold(pos) {
     if (pos) {
     } else {
-      this.editor.selection.ranges.forEach((range) => {
+      this.vm.selection.ranges.forEach((range) => {
         if (!range.collapsed) {
-          this.editor.dispatch('bold')
+          this.vm.dispatch('bold')
         }
       })
     }

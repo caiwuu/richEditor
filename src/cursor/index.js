@@ -3,7 +3,7 @@ import { multiplication } from '../utils/index'
 import Selection from '../selection'
 import action from '../actions'
 export default class Cursor {
-  editor = null
+  vm = null
   root = null
   isShow = true // 显示状态
   input = null // 虚拟输入框
@@ -23,16 +23,16 @@ export default class Cursor {
     end: 0,
     range: null,
   }
-  constructor(editor) {
-    this.editor = editor
+  constructor(vm) {
+    this.vm = vm
     this.input = document.createElement('input')
     this.caret = document.createElement('span')
     this.caretMarker = document.createElement('span')
     this.initEvent()
     this.input.id = 'custom-input'
     this.caret.id = 'custom-caret'
-    this.editor.root.appendChild(this.input)
-    this.editor.root.appendChild(this.caret)
+    this.vm.root.appendChild(this.input)
+    this.vm.root.appendChild(this.caret)
     this.selection = new Selection()
   }
   initEvent() {
@@ -44,7 +44,7 @@ export default class Cursor {
     log(`--->${event.type}: ${event.data}--${event.isComposing}--${event.target.value}\n`)
     // selected时释放掉一次输入，因为不能调起中文输入法 折中做法 暂时没有好的解决办法
     if (!this.meta.range.collapsed) {
-      action.emit('del', this.editor)
+      action.emit('del', this.vm)
       this.meta.range.collapse(true)
     } else if (event.type === 'input') {
       // 键盘字符输入
@@ -52,7 +52,7 @@ export default class Cursor {
       if (!this.inputState.isComposing && event.data) {
         const inputData = event.data === ' ' ? '\u00A0' : event.data
         // mvc
-        action.emit('input', { editor: this.editor, inputData })
+        action.emit('input', { vm: this.vm, inputData })
       } else {
         // 聚合输入， 非键盘输入，如中文输入，ui变化但不会同步vnode
         this.inputState.value = event.data || ''
@@ -78,7 +78,7 @@ export default class Cursor {
         this.meta.range.endContainer.parentNode.normalize()
       }
 
-      action.emit('input', { editor: this.editor, inputData: event.data })
+      action.emit('input', { vm: this.vm, inputData: event.data })
       // 等待dom更新
       setTimeout(() => {
         event.target.value = ''
@@ -109,8 +109,8 @@ export default class Cursor {
     this.input.focus()
     this.show()
     // 恢复滚动条
-    document.documentElement.scrollTop = this.editor.scrollTop
-    document.body.scrollTop = this.editor.scrollTop
+    document.documentElement.scrollTop = this.vm.scrollTop
+    document.body.scrollTop = this.vm.scrollTop
   }
   // 自定义光标跟随系统光标
   followSysCaret() {

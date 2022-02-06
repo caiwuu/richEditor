@@ -58,6 +58,8 @@ export default function createVnode(ops, parent = null, position = '0') {
       vnode.ele.appendChild(itemVnode.ele)
       return itemVnode
     })
+  } else if (vnode.belong('block')) {
+    vnode.childrens = []
   }
   return vnode
 }

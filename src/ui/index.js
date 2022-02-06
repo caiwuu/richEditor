@@ -5,11 +5,11 @@ import defaultBar from './defaultBar'
 import mitt from 'mitt'
 
 export default class UI {
-  constructor(editableAreaOps, editor) {
-    this.editor = editor
+  constructor(editableAreaOps, vm) {
+    this.vm = vm
     this.emitter = mitt()
     this.editableArea = createVnode(editableAreaOps, null).ele
-    this.editableArea.vnode.editor = editor
+    this.editableArea.vnode.vm = vm
     this.actionBar = createVnode(this.genActionBarOps(defaultBar), null).ele
     this.editorContainer = document.createElement('div')
     this.editorContainer.style['border'] = '2px solid #eee'
@@ -57,9 +57,9 @@ export default class UI {
             event: {
               onclick: function () {
                 if (typeof ele.command === 'function') {
-                  ele.command(self.vnode, self.editor)
+                  ele.command(self.vnode, self.vm)
                 } else {
-                  self.editor.execCommand(ele.command)
+                  self.vm.execCommand(ele.command)
                   self.notice('bold', 1, 2, 3)
                 }
               },

@@ -25,14 +25,14 @@ export default class Range {
   }
   _d = 0
   collapsed = true
-  constructor(ops, editor) {
+  constructor(ops, vm) {
     console.log(ops)
     this.endContainer = ops.endContainer
     this.startContainer = ops.startContainer
     this.endOffset = ops.endOffset
     this.startOffset = ops.startOffset
     this.collapsed = ops.collapsed
-    this.editor = editor
+    this.vm = vm
     this._init()
   }
   _init() {
@@ -77,9 +77,9 @@ export default class Range {
     this.caret.update(this, drawCaret)
   }
   remove() {
-    const index = this.editor.selection.ranges.findIndex((i) => i === this)
+    const index = this.vm.selection.ranges.findIndex((i) => i === this)
     this.caret.remove()
-    this.editor.selection.ranges.splice(index, 1)
+    this.vm.selection.ranges.splice(index, 1)
   }
   _loop(direct, initialRect, prevRect, lineChanged = false, shiftKey) {
     if (this.collapsed) {
@@ -95,7 +95,7 @@ export default class Range {
       const currRect = { ...this.caret.rect },
         preDistance = Math.abs(prevRect.x - initialRect.x),
         currDistance = Math.abs(currRect.x - initialRect.x),
-        sameLine = isSameLine(initialRect, prevRect, currRect, flag, this.editor)
+        sameLine = isSameLine(initialRect, prevRect, currRect, flag, this.vm)
       if (!(currDistance <= preDistance && sameLine)) {
         direct === 'left' ? this.right(shiftKey) : this.left(shiftKey)
         this.updateCaret(false)
@@ -103,7 +103,7 @@ export default class Range {
       }
     }
     const currRect = { ...this.caret.rect },
-      sameLine = isSameLine(initialRect, prevRect, currRect, flag, this.editor)
+      sameLine = isSameLine(initialRect, prevRect, currRect, flag, this.vm)
     if (!sameLine) {
       lineChanged = true
     }

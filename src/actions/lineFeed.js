@@ -49,29 +49,39 @@ function splitNode(vnode, pos, caches, isEnd = false) {
     return { parent: vnode.parent, pos: index + 1, vnode: newVnode, isEnd: false }
   } else if (vnode.belong('block')) {
     const index = getIndex(vnode)
-    const ops = { type: vnode.type, childrens: [] }
-    const newVnode = createVnode(ops, vnode.parent)
-    const needMoveNodes = vnode.length ? vnode.childrens.slice(pos) : []
+    const parent = vnode.parent
+    let newBlock = null
     let fn = (ele) => {
-      caches.push({ container: newVnode.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
+      caches.push({ container: newBlock.ele, offset: ele.offset - pos, flag: ele.flag, range: ele.range })
     }
-    console.log(index)
-    if (isEmptyBlock(vnode) || pos === 0) {
+    if (vnode.isRoot) {
+      const parent = createVnode({ type: 'p' }, vnode)
+      newBlock = parent
+      vnode.insert(parent)
       const br = createVnode({ type: 'br', kind: 'placeholder' })
-      newVnode.insert(br)
-      vnode.parent.insert(newVnode, index)
-      fn = () => null
-    } else if (needMoveNodes.length > 0) {
-      needMoveNodes.forEach((node) => {
-        node.moveTo(newVnode)
-      })
-      vnode.parent.insert(newVnode, index + 1)
+      parent.insert(br)
     } else {
-      const br = createVnode({ type: 'br', kind: 'placeholder' })
-      newVnode.insert(br)
-      vnode.parent.insert(newVnode, index + 1)
-      fn = (ele) => {
-        caches.push({ container: newVnode.ele, offset: 0, flag: ele.flag, range: ele.range })
+      const ops = { type: vnode.type, childrens: [] }
+      newBlock = createVnode(ops, parent)
+      const needMoveNodes = vnode.length ? vnode.childrens.slice(pos) : []
+      if (isEmptyBlock(vnode) || pos === 0) {
+        const br = createVnode({ type: 'br', kind: 'placeholder' })
+        newBlock.insert(br)
+        parent.insert(newBlock, index)
+        fn = () => null
+      } else if (needMoveNodes.length > 0) {
+        needMoveNodes.forEach((node) => {
+          node.moveTo(newBlock)
+        })
+        parent.insert(newBlock, index + 1)
+      } else {
+        const br = createVnode({ type: 'br', kind: 'placeholder' })
+        newBlock.insert(br)
+        console.log(vnode)
+        parent.insert(newBlock, index + 1)
+        fn = (ele) => {
+          caches.push({ container: newBlock.ele, offset: 0, flag: ele.flag, range: ele.range })
+        }
       }
     }
 
@@ -79,29 +89,17 @@ function splitNode(vnode, pos, caches, isEnd = false) {
       .getRangePoints()
       .filter((point) => point.container === vnode.ele && point.offset >= pos)
       .forEach(fn)
-    // if (needMoveNodes.length > 0) {
-    //   needMoveNodes.forEach((node) => {
-    //     node.moveTo(newVnode)
-    //   })
-    // } else if (!isEmptyBlock(vnode)) {
-    //   const br = createVnode({ type: 'br', kind: 'placeholder' })
-    //   newVnode.insert(br)
-    // }
-    // if (pos === 0 && needMoveNodes.length) {
-    //   const br = createVnode({ type: 'br', kind: 'placeholder' })
-    //   vnode.insert(br)
-    // }
-    // vnode.parent.insert(newVnode, index + 1)
     isEnd &&
       caches.forEach((ele) => {
-        ele.container = getHead(newVnode, 0, 0).node.ele
+        ele.container = getHead(newBlock, 0, 0).node.ele
         ele.offset = 0
       })
-    return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
+    return { parent: parent, pos: index + 1, vnode: newBlock }
   }
 }
 export default function lineFeed(args) {
   const [from] = args
+  // if (from.node.isRoot) return
   from.caches = from.caches || []
   const { parent, pos, isEnd } = splitNode.call(this, from.node, from.pos, from.caches, from.isEnd)
   if (!from.node.belong('block')) {

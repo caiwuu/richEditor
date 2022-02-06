@@ -4,10 +4,10 @@ export default class History {
   queue = []
   current = -1
   range = null
-  editor = null
-  constructor(size, editor) {
+  vm = null
+  constructor(size, vm) {
     this.size = size
-    this.editor = editor
+    this.vm = vm
   }
   push(vnode, range) {
     if (this.queue.length === this.size) {
@@ -21,7 +21,7 @@ export default class History {
       return false
     } else {
       this.current++
-      this.editor.vnode.update(this.queue[this.current]['vnode'])
+      this.vm.vnode.update(this.queue[this.current]['vnode'])
     }
   }
   back() {
@@ -29,7 +29,7 @@ export default class History {
       return false
     } else {
       this.current--
-      this.editor.vnode.update(this.queue[this.current]['vnode'])
+      this.vm.vnode.update(this.queue[this.current]['vnode'])
     }
   }
 }

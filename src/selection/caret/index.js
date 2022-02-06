@@ -36,7 +36,7 @@ export default class Caret {
   update(range, drawCaret = true) {
     this.rect = this.getRect(range)
     if (!drawCaret) return
-    range.editor.ui.root.appendChild(this.dom)
+    range.vm.ui.root.appendChild(this.dom)
     let container = range.startContainer
     if (!container) return
     if (!(container instanceof Element)) {
