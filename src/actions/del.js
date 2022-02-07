@@ -19,6 +19,7 @@ export default function del(args) {
       innerDel.call(this, from, from.pos - to.pos, { node: from.node, pos: to.pos })
     } else {
       const commonAncestorContainer = getCommonAncestorContainer.call(this, from, to)
+      console.log(commonAncestorContainer)
       rangeDel.call(this, commonAncestorContainer, to, from, prev)
     }
   }
@@ -106,6 +107,7 @@ function crossNodeDel(from, to, prev) {
   // 重新计算受影响的range端点
   // 先移动range在执行删除
   const prevIsEmpty = isEmptyBlock(prev.node)
+  console.log(prevIsEmpty)
   const points = this.selection
     .getRangePoints()
     .filter((point) => point.container === from.node.ele && point.offset === from.pos)
@@ -119,9 +121,9 @@ function crossNodeDel(from, to, prev) {
     })
   recoverRangePoint(points)
   // 跨节点自动执行一步删除
+  const toBlock = getLayer(prev.node)
   if (prev.flag === 1) {
     console.log('自动执行一步删除')
-    // debugger
     const from = {
       node: prev.node,
       pos: prev.pos,
@@ -129,21 +131,18 @@ function crossNodeDel(from, to, prev) {
     del.call(this, [prev, 1])
     // 如果当前节点为空则递归向上删除空节点
     from.node.isEmpty && prev.flag === 2 && deleteNode(from.node)
+  } else if (prevIsEmpty) {
+    toBlock.remove()
   } else if (isEmptyBlock(from.node)) {
     deleteNode(from.node)
   } else {
     // 合并块
     console.log('合并块', to)
-    const toBlock = getLayer(prev.node)
-    if (prevIsEmpty) {
-      toBlock.remove()
-    } else {
-      const fromBlock = getLayer(from.node)
-      fromBlock.childrens.slice(0).forEach((node, index) => {
-        node.moveTo(toBlock, prev.pos + index)
-      })
-      fromBlock.remove()
-    }
+    const fromBlock = getLayer(from.node)
+    fromBlock.childrens.slice(0).forEach((node, index) => {
+      node.moveTo(toBlock, prev.pos + index)
+    })
+    fromBlock.remove()
   }
   this.selection.nativeSelection.removeAllRanges()
 }
@@ -151,13 +150,13 @@ function crossNodeDel(from, to, prev) {
  * 区间删除
  */
 function getCommonAncestorContainer(from, to) {
-  const toPos = to.node.position
-  const fromPos = from.node.position
+  const toPos = to.node.position.split('-')
+  const fromPos = from.node.position.split('-')
   for (let index = 0; index < toPos.length; index++) {
     const toLetter = toPos[index]
     const fromLetter = fromPos[index]
     if (toLetter !== fromLetter) {
-      return getNode(this.ui.editableArea.vnode, toPos.slice(0, [(index || 1) - 1]))
+      return getNode(this.ui.editableArea.vnode, toPos.slice(0, index).join('-'))
     }
   }
 }

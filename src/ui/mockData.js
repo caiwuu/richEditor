@@ -411,4 +411,27 @@ const data6 = {
   },
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }
-export default data1
+const data7 = {
+  type: 'div',
+  // childrens: [
+  // {
+  //   type: 'p',
+  //   childrens: [
+  //     {
+  //       type: 'span',
+  //       childrens: [
+  //         {
+  //           type: 'text',
+  //           context: 'cccccc',
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
+  // ],
+  attr: {
+    id: 'editor-body',
+  },
+  style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
+}
+export default data7

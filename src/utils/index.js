@@ -99,8 +99,8 @@ export function updateNode(vnode) {
   return dom
 }
 // 重新设置选区
-export function setRange(editor, startcontainer, start, endcontainer, end, notFocus = false) {
-  const { range, selection } = editor.cursor.meta
+export function setRange(vm, startcontainer, start, endcontainer, end, notFocus = false) {
+  const { range, selection } = vm.cursor.meta
   endcontainer = endcontainer === undefined ? startcontainer : endcontainer
   end = end === undefined ? start : end
   range.setStart(startcontainer, start)
@@ -109,8 +109,8 @@ export function setRange(editor, startcontainer, start, endcontainer, end, notFo
   selection.addRange(range)
   // TODO
   if (!notFocus) {
-    editor.cursor.followSysCaret()
-    editor.cursor.focus()
+    vm.cursor.followSysCaret()
+    vm.cursor.focus()
   }
 }
 export function getIndex(vnode) {
@@ -139,7 +139,7 @@ export function normalize(vnode) {
     if (curr.type === 'text' && next.type === 'text') {
       console.log('合并相邻的text节点')
       // 重新计算光标
-      const points = vnode.root.editor.selection
+      const points = vnode.root.vm.selection
         .getRangePoints()
         .filter((point) => {
           console.log(point.container, curr, next)
@@ -196,12 +196,12 @@ export function isEmptyBlock(vnode) {
   return isEmptyNode(block)
 }
 // 判断是否在同一行
-export function isSameLine(initialRect, prevRect, currRect, flag, editor) {
+export function isSameLine(initialRect, prevRect, currRect, flag, vm) {
   // 标识光标是否在同一行移动
   let sameLine = true
   // 判断自动折行 非vnode层面的换行 这里存在判断失误的概率 但是绝大部分情况都能判断
   // 这里通过判断前后两个光标位置距离是否大于一定的值来判断
-  if (Math.abs(currRect.x - prevRect.x) > editor.ui.editableArea.offsetWidth - 2 * currRect.h) {
+  if (Math.abs(currRect.x - prevRect.x) > vm.ui.editableArea.offsetWidth - 2 * currRect.h) {
     sameLine = false
   }
   if (flag === 2) {

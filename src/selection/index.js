@@ -13,8 +13,8 @@ import inputor from './inputor'
 export default class Selection {
   nativeSelection = document.getSelection()
   ranges = []
-  constructor(editor) {
-    this.editor = editor
+  constructor(vm) {
+    this.vm = vm
     this.inputor = new inputor(this)
     this._addListeners()
   }
@@ -90,7 +90,7 @@ export default class Selection {
   }
   pushRange(nativeRange) {
     const { focusNode, focusOffset } = this.nativeSelection
-    const cloneRange = new Range(nativeRange, this.editor)
+    const cloneRange = new Range(nativeRange, this.vm)
     if (cloneRange.collapsed) {
       cloneRange._d = 0
     } else if (focusNode === cloneRange.endContainer && focusOffset === cloneRange.endOffset) {
@@ -192,27 +192,27 @@ export default class Selection {
     }
   }
   del() {
-    this.editor.execCommand('delete')
+    this.vm.execCommand('delete')
     this.distinct()
     this.inputor.focus()
   }
   input(event) {
-    this.editor.execCommand('input', null, event)
+    this.vm.execCommand('input', null, event)
     this.distinct()
     this.inputor.focus()
   }
   enter() {
-    this.editor.execCommand('enter')
+    this.vm.execCommand('enter')
     this.inputor.focus()
   }
   destroy() {
     this.inputor.destroy()
-    this.editor.ui.editorContainer.removeEventListener('mouseup', this._handMouseup.bind(this))
-    this.editor.ui.editorContainer.removeEventListener('mousedown', this._handMousedown.bind(this))
+    this.vm.ui.editorContainer.removeEventListener('mouseup', this._handMouseup.bind(this))
+    this.vm.ui.editorContainer.removeEventListener('mousedown', this._handMousedown.bind(this))
   }
   _addListeners() {
-    this.editor.ui.editorContainer.addEventListener('mouseup', this._handMouseup.bind(this))
-    this.editor.ui.editorContainer.addEventListener('mousedown', this._handMousedown.bind(this))
+    this.vm.ui.editorContainer.addEventListener('mouseup', this._handMouseup.bind(this))
+    this.vm.ui.editorContainer.addEventListener('mousedown', this._handMousedown.bind(this))
   }
   _handMousedown(event) {
     if (!event.shiftKey) {

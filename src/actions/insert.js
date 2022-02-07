@@ -71,8 +71,8 @@ const cacheRanges = {
         ]
       : []
   },
-  betweenEleAndText: (from, inputData, newRangePos, editor) => {
-    const caches = editor.selection
+  betweenEleAndText: (from, inputData, newRangePos, vm) => {
+    const caches = vm.selection
       .getRangePoints()
       .filter((point) => point.container === newRangePos.targetVnode.ele)
       .map((point) => ({
@@ -116,8 +116,8 @@ const cacheRanges = {
         ]
       : []
   },
-  betweenTextAndText: (from, inputData, newRangePos, editor) => {
-    const caches = editor.selection
+  betweenTextAndText: (from, inputData, newRangePos, vm) => {
+    const caches = vm.selection
       .getRangePoints()
       .filter((point) => point.container === from.node.ele && point.offset >= from.pos)
       .map((point) => ({
