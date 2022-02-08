@@ -21,6 +21,7 @@ function getKind(ops) {
  */
 export default function createVnode(ops, parent = null, position = '0') {
   if (ops.type) {
+    ops.h = createVnode
     ops.parent = parent
     ops._isVnode = true
     ops.isRoot = !parent
