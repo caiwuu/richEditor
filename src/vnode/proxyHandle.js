@@ -75,7 +75,12 @@ export default {
             receiver.context = receiver.context.slice(0, pos)
             const splited = receiver.h({ type: 'text', context: splitedText }, receiver.parent)
             receiver.parent.insert(splited, index + 1)
+            return splited
           } else {
+            const splited = receiver.h({ type: receiver.type, style: receiver.style, attr: receiver.attr, event: receiver.event }, receiver.parent)
+            receiver.childrens.slice(pos).forEach((ele) => ele.moveTo(splited))
+            splited.insert(receiver.parent, index)
+            return splited
           }
         }
       case 'remove':
