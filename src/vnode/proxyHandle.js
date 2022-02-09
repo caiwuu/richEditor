@@ -67,7 +67,7 @@ export default {
           if (pos === 0) {
             return index
           }
-          if (pos === receiver.length) {
+          if (pos === receiver.length + 1) {
             return index + 1
           }
           if (receiver.type === 'text') {
@@ -77,9 +77,12 @@ export default {
             receiver.parent.insert(splited, index + 1)
             return splited
           } else {
-            const splited = receiver.h({ type: receiver.type, style: receiver.style, attr: receiver.attr, event: receiver.event }, receiver.parent)
+            const splited = receiver.h(
+              { type: receiver.type, childrens: [], style: receiver.style, attr: receiver.attr, event: receiver.event },
+              receiver.parent
+            )
             receiver.childrens.slice(pos).forEach((ele) => ele.moveTo(splited))
-            splited.insert(receiver.parent, index)
+            receiver.parent.insert(splited, index + 1)
             return splited
           }
         }

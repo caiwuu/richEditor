@@ -434,4 +434,4 @@ const data7 = {
   },
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }
-export default data7
+export default data1
