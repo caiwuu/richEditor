@@ -61,6 +61,31 @@ export default {
         return function (kindName) {
           return target.kind === kindName
         }
+      case 'split':
+        return function (pos) {
+          const index = getIndex(receiver)
+          if (pos === 0) {
+            return index
+          }
+          if (pos === receiver.length + 1) {
+            return index + 1
+          }
+          if (receiver.type === 'text') {
+            const splitedText = receiver.context.slice(pos)
+            receiver.context = receiver.context.slice(0, pos)
+            const splited = receiver.h({ type: 'text', context: splitedText }, receiver.parent)
+            receiver.parent.insert(splited, index + 1)
+            return splited
+          } else {
+            const splited = receiver.h(
+              { type: receiver.type, childrens: [], style: receiver.style, attr: receiver.attr, event: receiver.event },
+              receiver.parent
+            )
+            receiver.childrens.slice(pos).forEach((ele) => ele.moveTo(splited))
+            receiver.parent.insert(splited, index + 1)
+            return splited
+          }
+        }
       case 'remove':
         return function (isNormalize = true) {
           const index = getIndex(target)
