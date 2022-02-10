@@ -118,7 +118,7 @@ export default class Selection {
         this._resetRanges()
       }
       this.ranges.forEach((range) => range.updateCaret())
-      this._drawRangeBg()
+      this.drawRangeBg()
     })
   }
   _isCoverd(rectA, rectB) {
@@ -153,7 +153,7 @@ export default class Selection {
     }
     tempObj = null
   }
-  _drawRangeBg() {
+  drawRangeBg() {
     const currRange = this.ranges[0]
     this.nativeSelection.removeAllRanges()
     this.nativeSelection.addRange(this.createNativeRange(currRange))
@@ -188,7 +188,7 @@ export default class Selection {
     this.inputor.focus()
     // 按住shit时同步到真实原生range绘制拖蓝
     if (shiftKey) {
-      this._drawRangeBg()
+      this.drawRangeBg()
     }
   }
   del() {

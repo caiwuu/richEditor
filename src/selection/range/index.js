@@ -3,6 +3,7 @@ import Caret from '../caret'
 import del from './del'
 import input from './input'
 import enter from './enter'
+import bold from './bold'
 import left from './left'
 import right from './right'
 import up from './up'
@@ -44,6 +45,7 @@ export default class Range {
     this.del = del.bind(this)
     this.input = input.bind(this)
     this.enter = enter.bind(this)
+    this.bold = bold.bind(this)
   }
   _updateStatus() {
     this.collapsed = this.endContainer === this.startContainer && this.endOffset === this.startOffset

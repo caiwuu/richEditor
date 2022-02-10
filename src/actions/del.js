@@ -1,4 +1,4 @@
-import { getPrevPoint, getNextPoint, deleteNode, getIndex, getNode, getLayer, recoverRangePoint, isEmptyBlock, comparePosition } from '../utils'
+import { getCommonAncestorNode, transToNode, getPrevPoint, getNextPoint, deleteNode, getLayer, recoverRangePoint, isEmptyBlock, comparePosition } from '../utils'
 import createVnode from '../vnode'
 export default function del(args) {
   const [from, to] = transToNode.call(this, args)
@@ -18,21 +18,11 @@ export default function del(args) {
     if (from.node === to.node) {
       innerDel.call(this, from, from.pos - to.pos, { node: from.node, pos: to.pos })
     } else {
-      const commonAncestorContainer = getCommonAncestorContainer.call(this, from, to)
+      const commonAncestorContainer = getCommonAncestorNode(this.ui.editableArea.vnode, from, to)
       console.log(commonAncestorContainer)
       rangeDel.call(this, commonAncestorContainer, to, from, prev)
     }
   }
-}
-
-// position类型节点转化
-function transToNode(args) {
-  args.forEach((ele) => {
-    if (typeof ele.node === 'string') {
-      ele.node = getNode(this.ui.editableArea.vnode, ele.node)
-    }
-  })
-  return args
 }
 /**
  * 单点删除
@@ -59,7 +49,7 @@ function innerDel(from, to, prev) {
     const brContainer = from.node.type === 'text' ? from.node.parent : from.node
     console.log(brContainer.childrens)
     console.log(brContainer.childrens.some((vnode) => vnode.belong('placeholder')))
-    const brPos = from.node.type === 'text' ? getIndex(from.node) + 1 : from.pos
+    const brPos = from.node.type === 'text' ? from.node.index + 1 : from.pos
     if (!brContainer.childrens.some((vnode) => vnode.belong('placeholder'))) {
       console.log('添加br')
       const br = createVnode({ type: 'br', kind: 'placeholder' })
@@ -145,20 +135,6 @@ function crossNodeDel(from, to, prev) {
     fromBlock.remove()
   }
   this.selection.nativeSelection.removeAllRanges()
-}
-/**
- * 区间删除
- */
-function getCommonAncestorContainer(from, to) {
-  const toPos = to.node.position.split('-')
-  const fromPos = from.node.position.split('-')
-  for (let index = 0; index < toPos.length; index++) {
-    const toLetter = toPos[index]
-    const fromLetter = fromPos[index]
-    if (toLetter !== fromLetter) {
-      return getNode(this.ui.editableArea.vnode, toPos.slice(0, index).join('-'))
-    }
-  }
 }
 
 function compareStart(vnode, startPos, endPos, samebranch = false) {

@@ -7,7 +7,7 @@ const data1 = {
       childrens: [
         { type: 'text', context: '普通文本' },
         {
-          type: 'span',
+          type: 'i',
           childrens: [{ type: 'text', context: 'span包裹带样式的文本' }],
           style: { color: '#aa7700', fontSize: '18px' },
         },
@@ -434,4 +434,4 @@ const data7 = {
   },
   style: { minHeight: '200px', whiteSpace: 'normal', wordBreak: 'break-all' },
 }
-export default data7
+export default data1

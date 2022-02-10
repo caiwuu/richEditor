@@ -75,6 +75,7 @@ export function reArrangement(parent) {
   if (parent.childrens) {
     parent.childrens.forEach((item, index) => {
       const old = item.position
+      item.index = index
       item.parent = parent
       item.position = parent.position + '-' + index
       if (old !== item.position) reArrangement(item)
@@ -247,9 +248,8 @@ export function getNextPoint(vnode, pos, flag = 0) {
   if (vnode.isRoot && pos === vnode.length) return { node: null, pos: null, flag: 404 }
   const len = vnode.type === 'text' ? vnode.length : vnode.childrens.length
   if (pos + 1 > len) {
-    const index = getIndex(vnode)
     flag = vnode.belong('block') ? 2 : 1
-    return getNextPoint(vnode.parent, index + 1, flag)
+    return getNextPoint(vnode.parent, vnode.index + 1, flag)
   } else if (pos + 1 === len) {
     return flag > 0 ? getHead(vnode, pos, flag) : { node: vnode, pos: pos + 1, flag }
   } else {
@@ -299,9 +299,8 @@ export function getPrevPoint(vnode, pos, flag = 0) {
     if (vnode.isRoot) {
       return { node: null, pos: null, flag: 404 }
     } else {
-      const index = getIndex(vnode)
       flag = vnode.belong('block') ? 2 : 1
-      return getPrevPoint(vnode.parent, index, flag)
+      return getPrevPoint(vnode.parent, vnode.index, flag)
     }
   } else if (pos - 1 === 0) {
     return flag > 0 ? getTail(vnode, pos, flag) : { node: vnode, pos: pos - 1, flag }
@@ -343,4 +342,29 @@ export function removeEmpty(container) {
     emptyInlineNode.remove()
   }
   // 块格式化 无需处理 del中已经格式化
+}
+// position类型节点转化
+export function transToNode(args) {
+  args.forEach((ele) => {
+    if (typeof ele.node === 'string') {
+      ele.node = getNode(this.ui.editableArea.vnode, ele.node)
+    }
+  })
+  return args
+}
+/**
+ * 获取最近的共同父级节点
+ */
+export function getCommonAncestorNode(rootTree, from, to) {
+  console.log(from.node, to.node)
+  if (from.node === to.node) return from.node.parent
+  const toPos = to.node.position.split('-')
+  const fromPos = from.node.position.split('-')
+  for (let index = 0; index < toPos.length; index++) {
+    const toLetter = toPos[index]
+    const fromLetter = fromPos[index]
+    if (toLetter !== fromLetter) {
+      return getNode(rootTree, toPos.slice(0, index).join('-'))
+    }
+  }
 }

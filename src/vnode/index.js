@@ -4,7 +4,7 @@ function getKind(ops) {
   // placeholder 类型需要手动指定
   if (ops.kind) return ops.kind
   if (['p', 'div', 'li', 'ul', 'ol'].includes(ops.type)) return 'block'
-  if (['span', 'a', 'text', 'sub', 'sup', 'code'].includes(ops.type)) return 'inline'
+  if (['span', 'a', 'text', 'sub', 'sup', 'code', 'strong', 'u', 'del', 'em'].includes(ops.type)) return 'inline'
   if (['img', 'br'].includes(ops.type)) return 'atom'
 }
 
@@ -22,6 +22,7 @@ function getKind(ops) {
 export default function createVnode(ops, parent = null, position = '0') {
   if (ops.type) {
     ops.h = createVnode
+    ops.index = position / 1
     ops.parent = parent
     ops._isVnode = true
     ops.isRoot = !parent

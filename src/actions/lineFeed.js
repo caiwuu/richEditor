@@ -1,4 +1,4 @@
-import { getIndex, recoverRangePoint, getHead, isEmptyBlock } from '../utils'
+import { recoverRangePoint, getHead, isEmptyBlock } from '../utils'
 import createVnode from '../vnode'
 /**
  * // 节点分裂算法
@@ -8,18 +8,18 @@ import createVnode from '../vnode'
  */
 function splitNode(vnode, pos, caches, isEnd = false) {
   if (!pos && !vnode.belong('block')) {
-    return { parent: vnode.parent, pos: getIndex(vnode), isEnd: false }
+    return { parent: vnode.parent, pos: vnode.index, isEnd: false }
   } else if (pos === vnode.length && !vnode.belong('block')) {
     this.selection
       .getRangePoints()
       .filter((point) => point.container === vnode.ele && point.offset >= pos)
       .forEach((ele) => caches.push(ele))
-    return { parent: vnode.parent, pos: getIndex(vnode) + 1, isEnd: true }
+    return { parent: vnode.parent, pos: vnode.index + 1, isEnd: true }
   }
   if (vnode.type === 'text') {
     const restText = vnode.context.slice(0, pos)
     const splitedText = vnode.context.slice(pos)
-    const index = getIndex(vnode)
+    const index = vnode.index
     const ops = { type: 'text', context: splitedText }
     const newVnode = createVnode(ops, vnode.parent)
     this.selection
@@ -32,7 +32,7 @@ function splitNode(vnode, pos, caches, isEnd = false) {
     vnode.parent.insert(newVnode, index + 1)
     return { parent: vnode.parent, pos: index + 1, vnode: newVnode }
   } else if (vnode.belong('inline')) {
-    const index = getIndex(vnode)
+    const index = vnode.index
     const ops = { type: vnode.type, childrens: [], style: vnode.style, attr: vnode.attr, event: vnode.event }
     const newVnode = createVnode(ops, vnode.parent)
     const needMoveNodes = vnode.childrens.slice(pos)
@@ -48,7 +48,7 @@ function splitNode(vnode, pos, caches, isEnd = false) {
     vnode.parent.insert(newVnode, index + 1)
     return { parent: vnode.parent, pos: index + 1, vnode: newVnode, isEnd: false }
   } else if (vnode.belong('block')) {
-    const index = getIndex(vnode)
+    const index = vnode.index
     const parent = vnode.parent
     let newBlock = null
     let fn = (ele) => {

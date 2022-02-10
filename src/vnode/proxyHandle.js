@@ -1,4 +1,4 @@
-import { getIndex, isEmptyNode, normalize, reArrangement } from '../utils/index'
+import { isEmptyNode, normalize, reArrangement } from '../utils/index'
 /**
  * 节点操作代理 vnode update ----> dom update
  */
@@ -45,7 +45,7 @@ export default {
       case 'moveTo':
         log('moveTo')
         return function (T, pos) {
-          const index = getIndex(target)
+          const index = target.index
           // removeNodes reArrangement必须在执行insert之前，因为inset之后会改变parent
           const removeNodes = target.parent.childrens.splice(index, 1)
           receiver.parent.reArrangement()
@@ -63,7 +63,7 @@ export default {
         }
       case 'split':
         return function (pos) {
-          const index = getIndex(receiver)
+          const index = receiver.index
           if (pos === 0) {
             return index
           }
@@ -77,10 +77,7 @@ export default {
             receiver.parent.insert(splited, index + 1)
             return splited
           } else {
-            const splited = receiver.h(
-              { type: receiver.type, childrens: [], style: receiver.style, attr: receiver.attr, event: receiver.event },
-              receiver.parent
-            )
+            const splited = receiver.h({ type: receiver.type, childrens: [], style: receiver.style, attr: receiver.attr, event: receiver.event }, receiver.parent)
             receiver.childrens.slice(pos).forEach((ele) => ele.moveTo(splited))
             receiver.parent.insert(splited, index + 1)
             return splited
@@ -88,7 +85,7 @@ export default {
         }
       case 'remove':
         return function (isNormalize = true) {
-          const index = getIndex(target)
+          const index = target.index
           target.parent.childrens.splice(index, 1).forEach((i) => {
             i.removed = true
             i.ele.remove()

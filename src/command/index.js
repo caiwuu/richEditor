@@ -49,9 +49,7 @@ export default class Command {
     if (pos) {
     } else {
       this.vm.selection.ranges.forEach((range) => {
-        if (!range.collapsed) {
-          this.vm.dispatch('bold')
-        }
+        range.bold()
       })
     }
   }
